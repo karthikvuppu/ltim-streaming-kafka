@@ -11,12 +11,12 @@ spec:
   dataVolumeCapacity: 30Gi
   logVolumeCapacity: 10Gi
   oneReplicaPerNode: true
-  storageClass:
-    properties:
-      name: gp2
-    volumeBindingMode: WaitForFirstConsumer
-    type: gp2
-    allowVolumeExpansion: true
+  storageClassName: gp2
+  storage:
+    provisioner: kubernetes.io/aws-ebs
+    allowVolumeExpansion:
+    parameters:
+      type: gp2
 
   podTemplate:
     podSecurityContext:
