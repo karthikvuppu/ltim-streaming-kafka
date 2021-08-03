@@ -1,0 +1,43 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server-operator:6.1.0.0
+    init: confluentinc/cp-init-container-operator:6.1.0.0
+  storageClass:
+    properties:
+      name: gp2
+    volumeBindingMode: WaitForFirstConsumer
+    type: gp2
+    allowVolumeExpansion: true
+  dataVolumeCapacity: 30Gi
+  listeners:
+    external:
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: iris-streaming-devtest.aws.scania.com
+          bootstrapPrefix: kafka
+          brokerPrefix: s
+
+  metricReporter:
+    enabled: true
+  oneReplicaPerNode: true
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - kafka
