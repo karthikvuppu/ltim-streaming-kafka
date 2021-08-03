@@ -4,13 +4,13 @@ variables:
 
   CRD :  'helm/confluent-for-kubernetes/resources/crds/v1'
   CRB : 'helm/confluent-for-kubernetes/resources/crds/v1/platform.confluent.io_confluentrolebindings.yaml'
-  ZK  : 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-dev-zookeeper.yaml'
-  KAFKA: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-dev-kafka.yaml'
-  SR: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-dev-schemaregistry.yaml'
-  REPLICATOR: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-dev-replicator.yaml'
-  KSQLDB: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-dev-ksqldb.yaml'
-  CC: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-dev-controlcenter.yaml'
-  CONNECT: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-dev-connect.yaml'
+  ZK  : 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-zookeeper.yaml'
+  KAFKA: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-kafka.yaml'
+  SR: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-schemaregistry.yaml'
+  REPLICATOR: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-replicator.yaml'
+  KSQLDB: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-ksqldb.yaml'
+  CC: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-controlcenter.yaml'
+  CONNECT: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-connect.yaml'
   GIT_SUBMODULE_STRATEGY: recursive
 
 
