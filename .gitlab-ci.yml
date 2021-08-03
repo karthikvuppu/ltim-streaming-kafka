@@ -1,0 +1,258 @@
+---
+
+variables:
+
+  CRD :  'helm/confluent-for-kubernetes/resources/crds/v1'
+  CRB : 'helm/confluent-for-kubernetes/resources/crds/v1/platform.confluent.io_confluentrolebindings.yaml'
+  ZK  : 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-dev-zookeeper.yaml'
+  KAFKA: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-dev-kafka.yaml'
+  SR: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-dev-schemaregistry.yaml'
+  REPLICATOR: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-dev-replicator.yaml'
+  KSQLDB: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-dev-ksqldb.yaml'
+  CC: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-dev-controlcenter.yaml'
+  CONNECT: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-dev-connect.yaml'
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+  - confluent_operator
+  - confluent_components_deployment
+  - confluent_components_destroy
+#  - confluent_zookeeper
+#  - confluent_kafka
+#  - confluent_schemaregistry
+#  - confluent_ksqldb
+#  - confluent_replicator
+#  - confluent_controlcenter
+
+image: dtzar/helm-kubectl
+before_script:
+  - chmod 700 /builds/streaming-iris/devtest/confluent-for-kubernetes
+  - apk update
+  - apk add zip jq python3 python3-dev py3-pip gcc linux-headers libffi-dev openssl-dev make musl-dev curl
+  - pip install --upgrade pip awscli
+  - mkdir ~/.aws
+  - touch ~/.aws/config
+  - echo "[default]" > ~/.aws/config
+  - echo "region = eu-north-1" >> ~/.aws/config
+  - echo "$role_arn" >> ~/.aws/config
+  - echo "credential_source=Ec2InstanceMetadata" >> ~/.aws/config
+  - export EC2_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document  | jq  --raw-output '.region')
+  - export AWS_ACCOUNT=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq  --raw-output '.accountId')
+  - export AWS_PROFILE=default
+#  - wget https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
+#  - tar xf kubeval-linux-amd64.tar.gz
+#  - cp kubeval /usr/local/bin
+  - aws sts get-caller-identity
+  - aws eks --region eu-north-1 update-kubeconfig --name "$eks_cluster"
+  - kubectl get nodes
+
+Operator:
+  stage: confluent_operator
+  script:
+    - "kubectl create namespace confluent"
+    - "kubectl apply -f $CRD"
+    - "kubectl apply -f $CRB -n confluent"
+    - "helm upgrade --install confluent-operator helm/confluent-for-kubernetes --namespace confluent"
+
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+Zookeeper:
+  stage: confluent_components_deployment
+  script:
+#    - "kubeval $ZK"
+    - "kubectl apply -f $ZK"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+Kafka:
+  stage: confluent_components_deployment
+  script:
+
+    - "kubectl apply -f $KAFKA"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+connect:
+  stage: confluent_components_deployment
+  script:
+
+    - "kubectl apply -f $CONNECT"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+replicator:
+  stage: confluent_components_deployment
+  script:
+
+    - "kubectl apply -f $REPLICATOR"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+ksqldb:
+  stage: confluent_components_deployment
+  script:
+
+    - "kubectl apply -f $KSQLDB"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+schemaregistry:
+  stage: confluent_components_deployment
+  script:
+
+    - "kubectl apply -f $SR"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+controlcenter:
+  stage: confluent_components_deployment
+  script:
+
+    - "kubectl apply -f $CONTROLCENTER"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+zookeeper-destroy:
+  stage: confluent_components_destroy
+  script:
+
+    - "kubectl delete -f $ZK"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+kafka-destroy:
+  stage: confluent_components_destroy
+  script:
+
+    - "kubectl delete -f $KAFKA"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+connect-destroy:
+  stage: confluent_components_destroy
+  script:
+    - "kubectl delete -f $CONNECT"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+replicator-destroy:
+  stage: confluent_components_destroy
+  script:
+
+    - "kubectl delete -f $REPLICATOR"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+ksqldb-destroy:
+  stage: confluent_components_destroy
+  script:
+
+    - "kubectl delete -f $KSQLDB"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+schemaregistry-destroy:
+  stage: confluent_components_destroy
+  script:
+
+    - "kubectl delete -f $SR"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+controlcenter-destroy:
+  stage: confluent_components_destroy
+  script:
+
+    - "kubectl delete -f $CONTROLCENTER"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
