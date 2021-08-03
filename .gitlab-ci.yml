@@ -36,6 +36,7 @@ before_script:
   - echo "[default]" > ~/.aws/config
   - echo "region = eu-north-1" >> ~/.aws/config
   - echo "$role_arn" >> ~/.aws/config
+  - echo "$role_arn"
   - echo "credential_source=Ec2InstanceMetadata" >> ~/.aws/config
   - export EC2_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document  | jq  --raw-output '.region')
   - export AWS_ACCOUNT=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq  --raw-output '.accountId')
@@ -44,6 +45,7 @@ before_script:
 #  - tar xf kubeval-linux-amd64.tar.gz
 #  - cp kubeval /usr/local/bin
   - aws sts get-caller-identity
+  - echo "$eks_cluster"
   - aws eks --region eu-north-1 update-kubeconfig --name "$eks_cluster"
   - kubectl get nodes
 
