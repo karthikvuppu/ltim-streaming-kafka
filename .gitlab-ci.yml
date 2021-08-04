@@ -58,7 +58,7 @@ Operator:
     - "helm upgrade --install confluent-operator helm/confluent-for-kubernetes --namespace confluent"
 
   environment:
-    name: staging
+    name: dev
   tags:
     - docker
   only:
@@ -86,7 +86,7 @@ Kafka:
     - "kubectl apply -f $KAFKA"
     - "kubectl get pods -n confluent"
   environment:
-    name: staging
+    name: dev
   tags:
     - docker
   only:
@@ -100,7 +100,7 @@ connect:
     - "kubectl apply -f $CONNECT"
     - "kubectl get pods -n confluent"
   environment:
-    name: staging
+    name: dev
   tags:
     - docker
   only:
@@ -114,7 +114,7 @@ replicator:
     - "kubectl apply -f $REPLICATOR"
     - "kubectl get pods -n confluent"
   environment:
-    name: staging
+    name: dev
   tags:
     - docker
   only:
@@ -128,7 +128,7 @@ ksqldb:
     - "kubectl apply -f $KSQLDB"
     - "kubectl get pods -n confluent"
   environment:
-    name: staging
+    name: dev
   tags:
     - docker
   only:
@@ -142,7 +142,7 @@ schemaregistry:
     - "kubectl apply -f $SR"
     - "kubectl get pods -n confluent"
   environment:
-    name: staging
+    name: dev
   tags:
     - docker
   only:
@@ -156,7 +156,7 @@ controlcenter:
     - "kubectl apply -f $CONTROLCENTER"
     - "kubectl get pods -n confluent"
   environment:
-    name: staging
+    name: dev
   tags:
     - docker
   only:
@@ -170,7 +170,7 @@ zookeeper-destroy:
     - "kubectl delete -f $ZK"
     - "kubectl get pods -n confluent"
   environment:
-    name: staging
+    name: dev
   tags:
     - docker
   only:
@@ -184,7 +184,7 @@ kafka-destroy:
     - "kubectl delete -f $KAFKA"
     - "kubectl get pods -n confluent"
   environment:
-    name: staging
+    name: dev
   tags:
     - docker
   only:
@@ -197,7 +197,7 @@ connect-destroy:
     - "kubectl delete -f $CONNECT"
     - "kubectl get pods -n confluent"
   environment:
-    name: staging
+    name: dev
   tags:
     - docker
   only:
@@ -211,7 +211,7 @@ replicator-destroy:
     - "kubectl delete -f $REPLICATOR"
     - "kubectl get pods -n confluent"
   environment:
-    name: staging
+    name: dev
   tags:
     - docker
   only:
@@ -225,7 +225,7 @@ ksqldb-destroy:
     - "kubectl delete -f $KSQLDB"
     - "kubectl get pods -n confluent"
   environment:
-    name: staging
+    name: dev
   tags:
     - docker
   only:
@@ -239,7 +239,7 @@ schemaregistry-destroy:
     - "kubectl delete -f $SR"
     - "kubectl get pods -n confluent"
   environment:
-    name: staging
+    name: dev
   tags:
     - docker
   only:
@@ -253,7 +253,7 @@ controlcenter-destroy:
     - "kubectl delete -f $CONTROLCENTER"
     - "kubectl get pods -n confluent"
   environment:
-    name: staging
+    name: dev
   tags:
     - docker
   only:
