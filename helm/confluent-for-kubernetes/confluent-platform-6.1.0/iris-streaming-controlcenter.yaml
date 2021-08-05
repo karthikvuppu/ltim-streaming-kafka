@@ -19,6 +19,12 @@ spec:
       - name: connect
         url: http://connect.confluent.svc.cluster.local:8083
 
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: iris-streaming.devtest.aws.scania.com
+      prefix: controlcenter
+
   storageClass:
     name: standard
   podTemplate:
