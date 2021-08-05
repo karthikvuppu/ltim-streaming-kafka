@@ -168,7 +168,7 @@ controlcenter:
   stage: confluent_components_deployment
   script:
 
-    - "kubectl apply -f $CONTROLCENTER"
+    - "kubectl apply -f $CC"
     - "kubectl get pods -n confluent"
   environment:
     name: dev
