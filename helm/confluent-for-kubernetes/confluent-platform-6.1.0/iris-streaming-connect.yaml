@@ -11,3 +11,20 @@ spec:
   dependencies:
     kafka:
       bootstrapEndpoint: kafka:9071
+
+  storageClass:
+    name: standard
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - confluent

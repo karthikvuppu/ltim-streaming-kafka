@@ -8,7 +8,7 @@ spec:
   image:
     application: confluentinc/cp-enterprise-control-center-operator:6.1.0.0
     init: confluentinc/cp-init-container-operator:6.1.0.0
-  dataVolumeCapacity: 10Gi
+  dataVolumeCapacity: 20Gi
   dependencies:
     schemaRegistry:
       url: http://schemaregistry.confluent.svc.cluster.local:8081
@@ -18,3 +18,20 @@ spec:
     connect:
       - name: connect
         url: http://connect.confluent.svc.cluster.local:8083
+
+  storageClass:
+    name: standard
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - confluent

@@ -8,4 +8,20 @@ spec:
   image:
     application: confluentinc/cp-ksqldb-server-operator:6.1.0.0
     init: confluentinc/cp-init-container-operator:6.1.0.0
-  dataVolumeCapacity: 10Gi
+  dataVolumeCapacity: 20Gi
+  storageClass:
+    name: standard
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - confluent
