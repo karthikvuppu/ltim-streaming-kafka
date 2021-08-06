@@ -265,7 +265,7 @@ controlcenter-destroy:
   stage: confluent_components_destroy
   script:
 
-    - "kubectl delete -f $CONTROLCENTER"
+    - "kubectl delete -f $CC"
     - "kubectl get pods -n confluent"
   environment:
     name: dev
