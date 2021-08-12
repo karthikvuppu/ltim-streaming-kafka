@@ -16,9 +16,18 @@ spec:
       externalAccess:
         type: loadBalancer
         loadBalancer:
-          domain: iris-streaming-devtest.aws.scania.com
+          annotations:
+            service.beta.kubernetes.io/aws-load-balancer-type: external
+            service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+            service.beta.kubernetes.io/load-balancer-name: iris-streaming-kafka-nlb
+            service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-0e18497ffe09aa1bc, subnet-0a3762c0ef8a83cf0
+            service.beta.kubernetes.io/load-balancer-source-ranges: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
+
+          domain: iris-streaming-sb.devtest.aws.scania.com
           bootstrapPrefix: kafka
           brokerPrefix: s
+
+
 
   metricReporter:
     enabled: true
