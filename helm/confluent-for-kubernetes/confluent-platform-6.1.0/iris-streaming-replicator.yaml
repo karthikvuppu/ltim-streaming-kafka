@@ -10,3 +10,19 @@ spec:
     # Use the `cp-enterprise-replicator-operator` Docker image, that contains the Replicator jars
     application: confluentinc/cp-enterprise-replicator-operator:6.1.1.0
     init: confluentinc/cp-init-container-operator:6.1.1.0
+  storageClass:
+    name: standard
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - confluent
