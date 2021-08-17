@@ -23,10 +23,14 @@ spec:
     type: loadBalancer
     loadBalancer:
       annotations:
+        kubernetes.io/ingress.class: alb
+        alb.ingress.kubernetes.io/scheme: internet-facing
         alb.ingress.kubernetes.io/load-balancer-name: iris-streaming-sb-controlcenter-alb
         alb.ingress.kubernetes.io/target-type: instance
-        alb.ingress.kubernetes.io/subnets: subnet-0e18497ffe09aa1bc, subnet-0869429a688c9e4ad
+        alb.ingress.kubernetes.io/subnets: subnet-0e18497ffe09aa1bc, subnet-0869429a688c9e4ad, subnet-0a3762c0ef8a83cf0
         alb.ingress.kubernetes.io/inbound-cidrs: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
+        external-dns.alpha.kubernetes.io/hostname: controlcenter.iris-streaming-sb.devtest.aws.scania.com
+
       domain: iris-streaming-sb.devtest.aws.scania.com
       prefix: controlcenter
 
