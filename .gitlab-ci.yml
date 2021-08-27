@@ -274,3 +274,19 @@ controlcenter-destroy:
   only:
     - master
   when: manual
+
+Operator-poc:
+  stage: confluent_operator
+  script:
+    - "kubectl create namespace confluent"
+    - "kubectl apply -f $CRD"
+    - "kubectl apply -f $CRB -n confluent"
+    - "helm upgrade --install confluent-operator helm/confluent-for-kubernetes --namespace confluent"
+
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
