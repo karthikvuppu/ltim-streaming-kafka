@@ -290,3 +290,212 @@ Operator-poc:
   only:
     - master
   when: manual
+
+Zookeeper-poc:
+  stage: confluent_components_deployment
+  script:
+    #    - "kubeval $ZK"
+    - "kubectl apply -f $ZK"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+StorageClass-poc:
+  stage: confluent_components_deployment
+  script:
+    #    - "kubeval $ZK"
+    - "kubectl apply -f $SC"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+Kafka-poc:
+  stage: confluent_components_deployment
+  script:
+
+    - "kubectl apply -f $KAFKA"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+connect-poc:
+  stage: confluent_components_deployment
+  script:
+
+    - "kubectl apply -f $CONNECT"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+replicator-poc:
+  stage: confluent_components_deployment
+  script:
+
+    - "kubectl apply -f $REPLICATOR"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+ksqldb-poc:
+  stage: confluent_components_deployment
+  script:
+
+    - "kubectl apply -f $KSQLDB"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+schemaregistry-poc:
+  stage: confluent_components_deployment
+  script:
+
+    - "kubectl apply -f $SR"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+controlcenter-poc:
+  stage: confluent_components_deployment
+  script:
+
+    - "kubectl apply -f $CC"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+zookeeper-destroy-poc:
+  stage: confluent_components_destroy
+  script:
+
+    - "kubectl delete -f $ZK"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+kafka-destroy-poc:
+  stage: confluent_components_destroy
+  script:
+
+    - "kubectl delete -f $KAFKA"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+connect-destroy-poc:
+  stage: confluent_components_destroy
+  script:
+    - "kubectl delete -f $CONNECT"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+replicator-destroy-poc:
+  stage: confluent_components_destroy
+  script:
+
+    - "kubectl delete -f $REPLICATOR"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+ksqldb-destroy-poc:
+  stage: confluent_components_destroy
+  script:
+
+    - "kubectl delete -f $KSQLDB"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+schemaregistry-destroy-poc:
+  stage: confluent_components_destroy
+  script:
+
+    - "kubectl delete -f $SR"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+controlcenter-destroy-poc:
+  stage: confluent_components_destroy
+  script:
+
+    - "kubectl delete -f $CC"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
