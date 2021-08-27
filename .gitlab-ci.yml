@@ -47,7 +47,7 @@ before_script:
 #  - cp kubeval /usr/local/bin
   - aws sts get-caller-identity
   - echo "$eks_cluster"
-  - aws eks --region eu-north-1 update-kubeconfig --name "$eks_cluster"
+  - aws eks --region "$cluster_region" update-kubeconfig --name "$eks_cluster"
   - kubectl get nodes
 
 Operator:
