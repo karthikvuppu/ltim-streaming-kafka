@@ -17,8 +17,11 @@ variables:
 
 stages:
   - confluent_operator
+  - confluent_operator_poc
   - confluent_components_deployment
+  - confluent_components_deployment_poc
   - confluent_components_destroy
+  - confluent_components_destroy_poc
 #  - confluent_zookeeper
 #  - confluent_kafka
 #  - confluent_schemaregistry
@@ -276,7 +279,7 @@ controlcenter-destroy:
   when: manual
 
 Operator-poc:
-  stage: confluent_operator
+  stage: confluent_operator_poc
   script:
     - "kubectl create namespace confluent"
     - "kubectl apply -f $CRD"
@@ -292,7 +295,7 @@ Operator-poc:
   when: manual
 
 Zookeeper-poc:
-  stage: confluent_components_deployment
+  stage: confluent_components_deployment_poc
   script:
     #    - "kubeval $ZK"
     - "kubectl apply -f $ZK"
@@ -306,7 +309,7 @@ Zookeeper-poc:
   when: manual
 
 StorageClass-poc:
-  stage: confluent_components_deployment
+  stage: confluent_components_deployment_poc
   script:
     #    - "kubeval $ZK"
     - "kubectl apply -f $SC"
@@ -320,7 +323,7 @@ StorageClass-poc:
   when: manual
 
 Kafka-poc:
-  stage: confluent_components_deployment
+  stage: confluent_components_deployment_poc
   script:
 
     - "kubectl apply -f $KAFKA"
@@ -334,7 +337,7 @@ Kafka-poc:
   when: manual
 
 connect-poc:
-  stage: confluent_components_deployment
+  stage: confluent_components_deployment_poc
   script:
 
     - "kubectl apply -f $CONNECT"
@@ -348,7 +351,7 @@ connect-poc:
   when: manual
 
 replicator-poc:
-  stage: confluent_components_deployment
+  stage: confluent_components_deployment_poc
   script:
 
     - "kubectl apply -f $REPLICATOR"
@@ -362,7 +365,7 @@ replicator-poc:
   when: manual
 
 ksqldb-poc:
-  stage: confluent_components_deployment
+  stage: confluent_components_deployment_poc
   script:
 
     - "kubectl apply -f $KSQLDB"
@@ -376,7 +379,7 @@ ksqldb-poc:
   when: manual
 
 schemaregistry-poc:
-  stage: confluent_components_deployment
+  stage: confluent_components_deployment_poc
   script:
 
     - "kubectl apply -f $SR"
@@ -390,7 +393,7 @@ schemaregistry-poc:
   when: manual
 
 controlcenter-poc:
-  stage: confluent_components_deployment
+  stage: confluent_components_deployment_poc
   script:
 
     - "kubectl apply -f $CC"
@@ -404,7 +407,7 @@ controlcenter-poc:
   when: manual
 
 zookeeper-destroy-poc:
-  stage: confluent_components_destroy
+  stage: confluent_components_destroy_poc
   script:
 
     - "kubectl delete -f $ZK"
@@ -418,7 +421,7 @@ zookeeper-destroy-poc:
   when: manual
 
 kafka-destroy-poc:
-  stage: confluent_components_destroy
+  stage: confluent_components_destroy_poc
   script:
 
     - "kubectl delete -f $KAFKA"
@@ -432,7 +435,7 @@ kafka-destroy-poc:
   when: manual
 
 connect-destroy-poc:
-  stage: confluent_components_destroy
+  stage: confluent_components_destroy_poc
   script:
     - "kubectl delete -f $CONNECT"
     - "kubectl get pods -n confluent"
@@ -445,7 +448,7 @@ connect-destroy-poc:
   when: manual
 
 replicator-destroy-poc:
-  stage: confluent_components_destroy
+  stage: confluent_components_destroy_poc
   script:
 
     - "kubectl delete -f $REPLICATOR"
@@ -459,7 +462,7 @@ replicator-destroy-poc:
   when: manual
 
 ksqldb-destroy-poc:
-  stage: confluent_components_destroy
+  stage: confluent_components_destroy_poc
   script:
 
     - "kubectl delete -f $KSQLDB"
@@ -473,7 +476,7 @@ ksqldb-destroy-poc:
   when: manual
 
 schemaregistry-destroy-poc:
-  stage: confluent_components_destroy
+  stage: confluent_components_destroy_poc
   script:
 
     - "kubectl delete -f $SR"
@@ -487,7 +490,7 @@ schemaregistry-destroy-poc:
   when: manual
 
 controlcenter-destroy-poc:
-  stage: confluent_components_destroy
+  stage: confluent_components_destroy_poc
   script:
 
     - "kubectl delete -f $CC"
