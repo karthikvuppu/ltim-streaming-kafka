@@ -35,7 +35,7 @@ before_script:
   - mkdir ~/.aws
   - touch ~/.aws/config
   - echo "[default]" > ~/.aws/config
-  - echo "region = eu-north-1" >> ~/.aws/config
+  - echo "$region" >> ~/.aws/config
   - echo "$role_arn" >> ~/.aws/config
   - echo "$role_arn"
   - echo "credential_source=Ec2InstanceMetadata" >> ~/.aws/config
