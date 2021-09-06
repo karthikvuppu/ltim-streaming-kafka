@@ -9,7 +9,7 @@ spec:
   image:
     application: confluentinc/cp-zookeeper-operator:6.1.0.0
     init: confluentinc/cp-init-container-operator:6.1.0.0
-  dataVolumeCapacity: 30Gi
+  dataVolumeCapacity: 40Gi
   logVolumeCapacity: 10Gi
   oneReplicaPerNode: true
   storageClass:
