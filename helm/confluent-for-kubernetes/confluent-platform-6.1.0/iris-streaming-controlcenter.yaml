@@ -8,7 +8,7 @@ spec:
   image:
     application: confluentinc/cp-enterprise-control-center-operator:6.1.0.0
     init: confluentinc/cp-init-container-operator:6.1.0.0
-  dataVolumeCapacity: 40Gi
+  dataVolumeCapacity: 50Gi
   dependencies:
     schemaRegistry:
       url: http://schemaregistry.confluent.svc.cluster.local:8081
