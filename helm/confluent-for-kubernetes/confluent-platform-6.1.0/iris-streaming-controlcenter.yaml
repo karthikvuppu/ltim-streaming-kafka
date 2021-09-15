@@ -53,3 +53,13 @@ spec:
                   operator: In
                   values:
                     - confluent
+    affinity:
+      podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: service
+                operator: In
+                values:
+                - kafka
+                - zookeeper
