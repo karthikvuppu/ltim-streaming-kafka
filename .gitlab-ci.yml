@@ -525,7 +525,7 @@ controlcenter-destroy-poc:
     - master
   when: manual
 
-  components-destroy:
+  components-destroy-poc:
   stage: all_together_poc
   script:
 
