@@ -38,8 +38,6 @@ spec:
      # enabled: true
   storageClass:
     name: standard
-  metricReporter:
-    enabled: true
   oneReplicaPerNode: true
   podTemplate:
     podSecurityContext:
