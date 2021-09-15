@@ -52,11 +52,11 @@ namespaceList: []
 ##
 resources:
   limits:
+    cpu: 1000m
+    memory: 1024Mi
+  requests:
     cpu: 500m
     memory: 512Mi
-  requests:
-    cpu: 100m
-    memory: 256Mi
 ## Pod termination grace-period
 ##
 terminationGracePeriodSeconds: 30
