@@ -53,7 +53,6 @@ spec:
                   operator: In
                   values:
                     - confluent
-    affinity:
       podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:

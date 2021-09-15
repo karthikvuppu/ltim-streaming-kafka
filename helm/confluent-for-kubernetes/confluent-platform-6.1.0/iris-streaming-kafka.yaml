@@ -44,3 +44,12 @@ spec:
                   operator: In
                   values:
                     - kafka
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - confluent
+                    - zookeeper
