@@ -22,6 +22,8 @@ stages:
   - confluent_components_deployment_poc
   - confluent_components_destroy
   - confluent_components_destroy_poc
+  - all_together
+  - all_together_poc
 #  - confluent_zookeeper
 #  - confluent_kafka
 #  - confluent_schemaregistry
@@ -278,6 +280,26 @@ controlcenter-destroy:
     - master
   when: manual
 
+components-destroy:
+  stage: all_together
+  script:
+
+    - "kubectl delete -f $ZK"
+    - "kubectl delete -f $KAFKA"
+    - "kubectl delete -f $CONNECT"
+    - "kubectl delete -f $REPLICATOR"
+    - "kubectl delete -f $KSQLDB"
+    - "kubectl delete -f $SR"
+    - "kubectl delete -f $CC"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
 Operator-poc:
   stage: confluent_operator_poc
   script:
@@ -497,6 +519,26 @@ controlcenter-destroy-poc:
     - "kubectl get pods -n confluent"
   environment:
     name: poc
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+  components-destroy:
+  stage: all_together_poc
+  script:
+
+    - "kubectl delete -f $ZK"
+    - "kubectl delete -f $KAFKA"
+    - "kubectl delete -f $CONNECT"
+    - "kubectl delete -f $REPLICATOR"
+    - "kubectl delete -f $KSQLDB"
+    - "kubectl delete -f $SR"
+    - "kubectl delete -f $CC"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
   tags:
     - docker
   only:
