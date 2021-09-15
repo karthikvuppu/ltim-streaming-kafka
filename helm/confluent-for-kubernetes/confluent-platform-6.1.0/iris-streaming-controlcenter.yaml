@@ -38,7 +38,7 @@ spec:
      # enabled: true
   storageClass:
     name: standard
-   metricReporter:
+  metricReporter:
     enabled: true
   oneReplicaPerNode: true
   podTemplate:
