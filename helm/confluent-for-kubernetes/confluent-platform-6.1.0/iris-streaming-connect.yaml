@@ -20,17 +20,16 @@ spec:
       runAsGroup: 1000
       runAsUser: 1000
     affinity:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-            - matchExpressions:
-                - key: service
-                  operator: In
-                  values:
-                    - confluent
+    #  nodeAffinity:
+     #   requiredDuringSchedulingIgnoredDuringExecution:
+      #    nodeSelectorTerms:
+       #     - matchExpressions:
+        #        - key: service
+         #         operator: In
+          #        values:
+           #         - confluent
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
-          - weight = 100
             podAffinityTerm:
               topologyKey: "kubernetes.io/hostname"
               labelSelector:
@@ -39,4 +38,4 @@ spec:
                     operator: In
                     values:
                       - kafka
-                      #- zookeeper
+                      - zookeeper
