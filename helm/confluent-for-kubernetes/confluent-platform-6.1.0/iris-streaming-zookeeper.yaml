@@ -30,8 +30,8 @@ spec:
                     - zookeeper
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
+           labelSelector:
+             - matchExpressions:
                 - key: service
                   operator: In
                   values:
