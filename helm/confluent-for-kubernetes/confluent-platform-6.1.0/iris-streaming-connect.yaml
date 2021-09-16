@@ -29,13 +29,12 @@ spec:
                   values:
                     - confluent
       podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                  - key: service
-                    operator: In
-                    values:
-                      - kafka
-                      - zookeeper
-              topologyKey: kubernetes.io/hostname
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - zookeeper
+                    - kafka
+            topologyKey: kubernetes.io/hostname

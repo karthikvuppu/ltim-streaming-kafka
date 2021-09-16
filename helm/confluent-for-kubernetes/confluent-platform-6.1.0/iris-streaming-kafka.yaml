@@ -51,6 +51,6 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - confluent
                     - zookeeper
-            topologykey: "kubernetes.io/hostname"
+                    - kafka
+            topologyKey: kubernetes.io/hostname

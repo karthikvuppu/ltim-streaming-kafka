@@ -33,6 +33,6 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - kafka
                     - zookeeper
-            topologykey: "kubernetes.io/hostname"
+                    - kafka
+            topologyKey: kubernetes.io/hostname
