@@ -36,5 +36,5 @@ spec:
                   operator: In
                   values:
                     - confluent
-                   # - kafka
-             topologyKey: "kubernetes.io/hostname"
+                    - kafka
+             topologyKey: kubernetes.io/hostname
