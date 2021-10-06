@@ -25,9 +25,9 @@ spec:
             service.beta.kubernetes.io/load-balancer-source-ranges: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
             service.beta.kubernetes.io/aws-load-balancer-scheme: internal
 
-          domain: iris-streaming-sb.devtest.aws.scania.com
-          bootstrapPrefix: kafka
-          brokerPrefix: s
+            domain: iris-streaming-sb.devtest.aws.scania.com
+            bootstrapPrefix: kafka
+            brokerPrefix: s
   metricReporter:
     enabled: true
   oneReplicaPerNode: true
