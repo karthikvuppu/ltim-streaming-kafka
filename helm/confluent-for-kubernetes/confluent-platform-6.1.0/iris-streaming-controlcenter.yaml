@@ -18,32 +18,31 @@ spec:
     connect:
       - name: connect
         url: http://connect.confluent.svc.cluster.local:8083
-  listeners:
-    external:
-      externalAccess:
+
+  externalAccess:
         type: loadBalancer
         loadBalancer:
          annotations:
-            #kubernetes.io/ingress.class: alb
-            #alb.ingress.kubernetes.io/scheme: internet-facing
-            #alb.ingress.kubernetes.io/load-balancer-name: iris-streaming-sb-controlcenter-alb
-            #alb.ingress.kubernetes.io/target-type: instance
-            #alb.ingress.kubernetes.io/subnets: subnet-0e18497ffe09aa1bc, subnet-0869429a688c9e4ad, subnet-0a3762c0ef8a83cf0
-            #alb.ingress.kubernetes.io/inbound-cidrs: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
-            #alb.ingress.kubernetes.io/security-groups: sg-0c0edde1e615d631b
-            #external-dns.alpha.kubernetes.io/hostname: controlcenter.iris-streaming-sb.devtest.aws.scania.com
-            service.beta.kubernetes.io/aws-load-balancer-type: alb
-            service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
-            service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-kafka-alb
+            kubernetes.io/ingress.class: alb
+            alb.ingress.kubernetes.io/scheme: internet-facing
+            alb.ingress.kubernetes.io/load-balancer-name: iris-streaming-sb-controlcenter-alb
+            alb.ingress.kubernetes.io/target-type: instance
+            alb.ingress.kubernetes.io/subnets: subnet-0e18497ffe09aa1bc, subnet-0869429a688c9e4ad, subnet-0a3762c0ef8a83cf0
+            alb.ingress.kubernetes.io/inbound-cidrs: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
+            alb.ingress.kubernetes.io/security-groups: sg-0c0edde1e615d631b
+            external-dns.alpha.kubernetes.io/hostname: controlcenter.iris-streaming-sb.devtest.aws.scania.com
+            #service.beta.kubernetes.io/aws-load-balancer-type: alb
+            #service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
+            #service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-kafka-alb
               # service.beta.kubernetes.io/aws-load-balancer-target-node-labels: kafka
-            service.beta.kubernetes.io/aws-load-balancer-security-groups: sg-0c0edde1e615d631b
-            service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-0e18497ffe09aa1bc, subnet-0869429a688c9e4ad, subnet-0a3762c0ef8a83cf0
-            service.beta.kubernetes.io/load-balancer-source-ranges: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
-            service.beta.kubernetes.io/aws-load-balancer-scheme: internal
-      domain: iris-streaming-sb.devtest.aws.scania.com
-      prefix: controlcenter
-  metricReporter:
-     enabled: true
+            #service.beta.kubernetes.io/aws-load-balancer-security-groups: sg-0c0edde1e615d631b
+            #service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-0e18497ffe09aa1bc, subnet-0869429a688c9e4ad, subnet-0a3762c0ef8a83cf0
+            #service.beta.kubernetes.io/load-balancer-source-ranges: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
+            #service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+         domain: iris-streaming-sb.devtest.aws.scania.com
+         prefix: controlcenter
+  #metricReporter:
+  #   enabled: true
   storageClass:
     name: standard
   oneReplicaPerNode: true
