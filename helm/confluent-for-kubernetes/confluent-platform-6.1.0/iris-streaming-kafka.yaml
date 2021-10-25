@@ -54,4 +54,5 @@ spec:
                   values:
                     - zookeeper
                     - confluent
+                    - cc
             topologyKey: kubernetes.io/hostname

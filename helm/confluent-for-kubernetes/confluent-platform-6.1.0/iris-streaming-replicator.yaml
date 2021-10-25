@@ -35,4 +35,5 @@ spec:
                   values:
                     - zookeeper
                     - kafka
+                    - cc
             topologyKey: kubernetes.io/hostname
