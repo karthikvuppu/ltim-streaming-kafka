@@ -59,7 +59,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - cc
+                    - confluent
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
@@ -69,5 +69,4 @@ spec:
                   values:
                     - zookeeper
                     - kafka
-                    - confluent
             topologyKey: kubernetes.io/hostname

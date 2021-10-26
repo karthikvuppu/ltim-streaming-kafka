@@ -37,5 +37,4 @@ spec:
                   values:
                     - confluent
                     - kafka
-                    - cc
              topologyKey: kubernetes.io/hostname
