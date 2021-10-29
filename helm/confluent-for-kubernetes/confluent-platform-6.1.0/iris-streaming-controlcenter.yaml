@@ -18,6 +18,9 @@ spec:
     connect:
       - name: connect
         url: http://connect.confluent.svc.cluster.local:8083
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsUser: 0
 
   externalAccess:
         type: loadBalancer
