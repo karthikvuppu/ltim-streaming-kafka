@@ -20,8 +20,6 @@ spec:
             service.beta.kubernetes.io/aws-load-balancer-type: nlb
             #service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
             service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-kafka-nlb
-            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: serivce=kafka
-            service.kubernetes.io/aws-load-balancer-backends-label: key in (kafka)
             #service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-0e18497ffe09aa1bc, subnet-0869429a688c9e4ad, subnet-0a3762c0ef8a83cf0
             #service.beta.kubernetes.io/load-balancer-source-ranges: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
             service.beta.kubernetes.io/aws-load-balancer-scheme: internal
@@ -29,6 +27,8 @@ spec:
           domain: iris-streaming-sb.devtest.aws.scania.com
           bootstrapPrefix: kafka
           brokerPrefix: s
+          selector:
+            app: kafka
   metricReporter:
     enabled: true
   oneReplicaPerNode: true
