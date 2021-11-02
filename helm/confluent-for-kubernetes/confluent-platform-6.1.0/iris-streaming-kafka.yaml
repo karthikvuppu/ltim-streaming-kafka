@@ -11,8 +11,7 @@ spec:
   storageClass:
     name: standard
   dataVolumeCapacity: 50Gi
-  LoadBalancer :
-    name: iris-streaming-sb-kafka-nlb
+  
   #listeners:
    # external:
     #  externalAccess:
