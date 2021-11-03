@@ -68,5 +68,7 @@ spec:
                   operator: In
                   values:
                     - zookeeper
-                    - kafka
+                    - kafka0
+                    - kafka1
+                    - kafka2
             topologyKey: kubernetes.io/hostname
