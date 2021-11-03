@@ -1,7 +1,7 @@
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
-  name: kafka
+  name: kafka0
   namespace: confluent
 spec:
   replicas: 1
@@ -61,7 +61,7 @@ spec:
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
-  name: kafka
+  name: kafka1
   namespace: confluent
 spec:
   replicas: 1
@@ -121,7 +121,7 @@ spec:
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
-  name: kafka
+  name: kafka2
   namespace: confluent
 spec:
   replicas: 1
