@@ -4,7 +4,7 @@ metadata:
   name: kafka
   namespace: confluent
 spec:
-  replicas: 1
+  replicas: 3
   image:
     application: confluentinc/cp-server-operator:6.1.0.0
     init: confluentinc/cp-init-container-operator:6.1.0.0
@@ -45,127 +45,7 @@ spec:
                   operator: In
                   values:
                     - kafka0
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-                - key: service
-                  operator: In
-                  values:
-                    - zookeeper
-                    - confluent
                     - kafka1
-                    - kafka2
-                    - controlcenter
-            topologyKey: kubernetes.io/hostname
----
-apiVersion: platform.confluent.io/v1beta1
-kind: Kafka
-metadata:
-  name: kafka
-  namespace: confluent
-spec:
-  replicas: 1
-  image:
-    application: confluentinc/cp-server-operator:6.1.0.0
-    init: confluentinc/cp-init-container-operator:6.1.0.0
-  storageClass:
-    name: standard
-  dataVolumeCapacity: 50Gi
-
-    #listeners:
-    # external:
-    #  externalAccess:
-    #   type: loadBalancer
-    #loadBalancer:
-    # annotations:
-    #  service.beta.kubernetes.io/aws-load-balancer-type: nlb
-    #service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-    #service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-kafka-nlb
-    #service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-0e18497ffe09aa1bc, subnet-0869429a688c9e4ad, subnet-0a3762c0ef8a83cf0
-    #service.beta.kubernetes.io/load-balancer-source-ranges: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
-    #service.beta.kubernetes.io/aws-load-balancer-scheme: internal
-
-    #domain: iris-streaming-sb.devtest.aws.scania.com
-    #bootstrapPrefix: kafka
-  #brokerPrefix: s
-  metricReporter:
-    enabled: true
-  oneReplicaPerNode: true
-  podTemplate:
-    podSecurityContext:
-      fsGroup: 1000
-      runAsGroup: 1000
-      runAsUser: 1000
-    affinity:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-            - matchExpressions:
-                - key: service
-                  operator: In
-                  values:
-                    - kafka1
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-                - key: service
-                  operator: In
-                  values:
-                    - zookeeper
-                    - confluent
-                    - kafka0
-                    - kafka2
-                    - controlcenter
-            topologyKey: kubernetes.io/hostname
----
-apiVersion: platform.confluent.io/v1beta1
-kind: Kafka
-metadata:
-  name: kafka
-  namespace: confluent
-spec:
-  replicas: 1
-  image:
-    application: confluentinc/cp-server-operator:6.1.0.0
-    init: confluentinc/cp-init-container-operator:6.1.0.0
-  storageClass:
-    name: standard
-  dataVolumeCapacity: 50Gi
-
-    #listeners:
-    # external:
-    #  externalAccess:
-    #   type: loadBalancer
-    #loadBalancer:
-    # annotations:
-    #  service.beta.kubernetes.io/aws-load-balancer-type: nlb
-    #service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-    #service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-kafka-nlb
-    #service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-0e18497ffe09aa1bc, subnet-0869429a688c9e4ad, subnet-0a3762c0ef8a83cf0
-    #service.beta.kubernetes.io/load-balancer-source-ranges: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
-    #service.beta.kubernetes.io/aws-load-balancer-scheme: internal
-
-    #domain: iris-streaming-sb.devtest.aws.scania.com
-    #bootstrapPrefix: kafka
-  #brokerPrefix: s
-  metricReporter:
-    enabled: true
-  oneReplicaPerNode: true
-  podTemplate:
-    podSecurityContext:
-      fsGroup: 1000
-      runAsGroup: 1000
-      runAsUser: 1000
-    affinity:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-            - matchExpressions:
-                - key: service
-                  operator: In
-                  values:
                     - kafka2
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -176,8 +56,5 @@ spec:
                   values:
                     - zookeeper
                     - confluent
-                    - kafka0
-                    - kafka1
                     - controlcenter
             topologyKey: kubernetes.io/hostname
-
