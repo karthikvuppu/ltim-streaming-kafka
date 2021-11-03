@@ -57,6 +57,7 @@ spec:
                     - kafka1
                     - kafka2
             topologyKey: kubernetes.io/hostname
+---
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
@@ -116,6 +117,7 @@ spec:
                     - kafka0
                     - kafka2
             topologyKey: kubernetes.io/hostname
+---
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
