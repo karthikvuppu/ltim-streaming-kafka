@@ -56,6 +56,7 @@ spec:
                     - confluent
                     - kafka1
                     - kafka2
+                    - controlcenter
             topologyKey: kubernetes.io/hostname
 ---
 apiVersion: platform.confluent.io/v1beta1
@@ -116,6 +117,7 @@ spec:
                     - confluent
                     - kafka0
                     - kafka2
+                    - controlcenter
             topologyKey: kubernetes.io/hostname
 ---
 apiVersion: platform.confluent.io/v1beta1
@@ -176,5 +178,6 @@ spec:
                     - confluent
                     - kafka0
                     - kafka1
+                    - controlcenter
             topologyKey: kubernetes.io/hostname
 
