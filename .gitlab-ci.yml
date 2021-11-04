@@ -294,7 +294,7 @@ controlcenter-destroy:
   when: manual
 
 LoadBalancer-destroy:
-  stage: confluent_components_deployment
+  stage: confluent_components_destroy
   script:
     #    - "kubeval $ZK"
     - "kubectl delete -f $LB"
