@@ -3,6 +3,7 @@
 variables:
 
   SC: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-storage-class.yaml'
+  LB: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-loadbalancer.yaml'
   CRD :  'helm/confluent-for-kubernetes/resources/crds/v1'
   CRB : 'helm/confluent-for-kubernetes/resources/crds/v1/platform.confluent.io_confluentrolebindings.yaml'
   ZK  : 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-zookeeper.yaml'
@@ -97,6 +98,20 @@ StorageClass:
     - master
   when: manual
 
+LoadBalancer:
+  stage: confluent_components_deployment
+  script:
+    #    - "kubeval $ZK"
+    - "kubectl apply -f $LB"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+  
 Kafka:
   stage: confluent_components_deployment
   script:
