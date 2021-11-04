@@ -293,6 +293,19 @@ controlcenter-destroy:
     - master
   when: manual
 
+LoadBalancer-destroy:
+  stage: confluent_components_deployment
+  script:
+    #    - "kubeval $ZK"
+    - "kubectl delete -f $LB"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
 Operator-poc:
   stage: confluent_operator_poc
   script:
