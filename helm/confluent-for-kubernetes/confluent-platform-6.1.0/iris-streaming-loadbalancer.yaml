@@ -2,12 +2,19 @@ kind: Service
 apiVersion: v1
 metadata:
   name: kafka
-  labels:
-    service: kafka0
 spec:
   selector:
-    app: Kafka
-  type: LoadBalancer
+    service: kafka0
+  type: loadBalancer
+  loadBalancer:
+          annotations:
+            service.beta.kubernetes.io/aws-load-balancer-type: nlb
+            service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+
+          domain: iris-streaming-sb.devtest.aws.scania.com
+          bootstrapPrefix: kafka
+          brokerPrefix: s
+
   ports:
     - name: kafka0
       port: 80
