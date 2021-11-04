@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: kafka
+  labels:
+    service: kafka0
+spec:
+  selector:
+    app: Kafka
+  type: LoadBalancer
+  ports:
+    - name: kafka0
+      port: 80
+      targetPort: 9092
+      protocol: TCP
