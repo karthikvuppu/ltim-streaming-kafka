@@ -2,15 +2,18 @@ kind: Service
 apiVersion: v1
 metadata:
   name: kafka
+  namespace: confluent
   labels:
-    service: kafka0
+    app: kafka
   annotations:
+            service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-kafka-nlb
             service.beta.kubernetes.io/aws-load-balancer-type: nlb
             service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+            service.beta.kubernetes.io/aws-load-balancer-hostname: iris-streaming-sb.devtest.aws.scania.com
 spec:
   type: LoadBalancer
   ports:
-    - name: kafka0
+    - name: kafka
       port: 9092
       targetPort: 9092
       protocol: TCP
