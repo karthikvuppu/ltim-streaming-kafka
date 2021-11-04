@@ -2,9 +2,9 @@ kind: Service
 apiVersion: v1
 metadata:
   name: kafka
-  namespace: confluent
   labels:
     app: kafka
+    statefulset.kubernetes.io/pod-name: kafka-2
   annotations:
             service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-kafka-nlb
             service.beta.kubernetes.io/aws-load-balancer-type: nlb
