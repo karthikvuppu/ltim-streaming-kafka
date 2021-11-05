@@ -1,27 +1,19 @@
 apiVersion: v1
 kind: Service
 metadata:
-  annotations:
-    external-dns.alpha.kubernetes.io/hostname: iris-streaming-sb.devtest.aws.scania.com
-    external-dns.alpha.kubernetes.io/ttl: "300"
-    platform.confluent.io/cr-name: kafka
-    platform.confluent.io/namespace: confluent
-    platform.confluent.io/type: kafka
+  creationTimestamp: null
   labels:
-    app.kubernetes.io/managed-by: confluent-operator
-    confluent-platform: "true"
-    cr-name: kafka
-    type: kafka
+    app: kafka
   name: kafka
   namespace: confluent
 spec:
-  externalTrafficPolicy: Cluster
   ports:
-    - name: external
+    - name: "9092"
       port: 9092
-      protocol: TCP
       targetPort: 9092
   selector:
-    statefulset.kubernetes.io/pod-name: kafka-0
-    type: kafka
+
+    app: kafka
   type: NodePort
+status:
+  loadBalancer: {}
