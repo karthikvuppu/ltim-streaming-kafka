@@ -13,7 +13,7 @@ spec:
   storageClass:
     name: standard
   dataVolumeCapacity: 50Gi
-
+  type: NodePort
   listeners:
     external:
       externalAccess:
