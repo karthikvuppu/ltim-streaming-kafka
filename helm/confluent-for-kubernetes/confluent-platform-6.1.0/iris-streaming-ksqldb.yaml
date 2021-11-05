@@ -9,6 +9,11 @@ spec:
     application: confluentinc/cp-ksqldb-server-operator:6.1.0.0
     init: confluentinc/cp-init-container-operator:6.1.0.0
   dataVolumeCapacity: 20Gi
+  externalAccess:
+    type: nodePort
+    nodePort:
+      host: myoperator2.iris-streaming-sb.devtest.aws.scania.com
+      nodePortOffset: 30100
   storageClass:
     name: standard
   podTemplate:

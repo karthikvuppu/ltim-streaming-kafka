@@ -8,7 +8,11 @@ spec:
   image:
     application: confluentinc/cp-schema-registry-operator:6.1.0.0
     init: confluentinc/cp-init-container-operator:6.1.0.0
-
+  externalAccess:
+    type: nodePort
+    nodePort:
+      host: myoperator2.iris-streaming-sb.devtest.aws.scania.com
+      nodePortOffset: 30500
   podTemplate:
     podSecurityContext:
       fsGroup: 1000

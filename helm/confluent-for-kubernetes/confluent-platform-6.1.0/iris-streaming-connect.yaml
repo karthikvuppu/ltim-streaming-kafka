@@ -11,7 +11,11 @@ spec:
   dependencies:
     kafka:
       bootstrapEndpoint: kafka:9071
-
+  externalAccess:
+    type: nodePort
+    nodePort:
+      host: myoperator2.iris-streaming-sb.devtest.aws.scania.com
+      nodePortOffset: 30300
   storageClass:
     name: standard
   podTemplate:
