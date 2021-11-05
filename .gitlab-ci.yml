@@ -321,7 +321,7 @@ LoadBalancer-destroy:
   only:
     - master
   when: manual
-NodePort:
+NodePort-destroy:
   stage: confluent_components_destroy
   script:
     #    - "kubeval $ZK"
