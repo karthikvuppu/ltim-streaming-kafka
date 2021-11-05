@@ -12,7 +12,7 @@ spec:
   externalAccess:
     type: nodePort
     nodePort:
-      host: myoperator2.iris-streaming-sb.devtest.aws.scania.com
+      host: ksqldb.iris-streaming-sb.devtest.aws.scania.com
       nodePortOffset: 30100
   storageClass:
     name: standard

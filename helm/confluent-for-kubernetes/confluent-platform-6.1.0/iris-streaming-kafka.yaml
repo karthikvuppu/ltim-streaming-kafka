@@ -18,7 +18,7 @@ spec:
       externalAccess:
         type: nodePort
         nodePort:
-          host: myoperator2.iris-streaming-sb.devtest.aws.scania.com
+          host: kafka.iris-streaming-sb.devtest.aws.scania.com
           nodePortOffset: 30000
 #        loadBalancer:
 #          annotations:
