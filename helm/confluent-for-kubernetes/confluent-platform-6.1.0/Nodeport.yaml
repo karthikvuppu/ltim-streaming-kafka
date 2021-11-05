@@ -11,9 +11,6 @@ spec:
     - name: "9092"
       port: 9092
       targetPort: 9092
-  selector:
-
-    app: kafka
   type: NodePort
 status:
   loadBalancer: {}
