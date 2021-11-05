@@ -117,7 +117,7 @@ NodePort:
   stage: confluent_components_deployment
   script:
     #    - "kubeval $ZK"
-    - "kubectl apply -f $NP"
+    - "kubectl apply -f $NP --validate=false "
     - "kubectl get pods -n confluent"
   environment:
     name: dev
@@ -321,7 +321,7 @@ LoadBalancer-destroy:
   only:
     - master
   when: manual
-NodePort:
+NodePort-destroy:
   stage: confluent_components_destroy
   script:
     #    - "kubeval $ZK"
