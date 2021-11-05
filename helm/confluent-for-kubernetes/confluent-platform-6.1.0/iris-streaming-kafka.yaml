@@ -16,7 +16,7 @@ spec:
   listeners:
     external:
       externalAccess:
-        type: NodePort
+        type: nodePort
 #        loadBalancer:
 #          annotations:
 #            service.beta.kubernetes.io/aws-load-balancer-type: nlb
