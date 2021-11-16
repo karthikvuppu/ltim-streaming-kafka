@@ -3,8 +3,6 @@ kind: Kafka
 metadata:
   name: kafka
   namespace: confluent
-  labels:
-    app: kafka
 spec:
   replicas: 3
   image:
