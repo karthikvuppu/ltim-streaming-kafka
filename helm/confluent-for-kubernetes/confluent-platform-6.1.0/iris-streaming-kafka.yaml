@@ -15,22 +15,10 @@ spec:
     external:
       externalAccess:
         type: nodePort
-        tls: true
-          authentication:
-            type: tls
-          overrides:
-            bootstrap:
-              nodePort: 30001
-            brokers:
-              - broker: 0
-                nodePort: 30002
-              - broker: 1
-                nodePort: 30003
-              - broker: 2
-                nodePort: 30004
-    #    nodePort:
-   #       host: kafka.iris-streaming-sb.devtest.aws.scania.com
-  #        nodePortOffset: 30000
+
+        nodePort:
+          host: kafka.iris-streaming-sb.devtest.aws.scania.com
+          nodePortOffset: 30000
 #        loadBalancer:
 #          annotations:
 #            service.beta.kubernetes.io/aws-load-balancer-type: nlb
