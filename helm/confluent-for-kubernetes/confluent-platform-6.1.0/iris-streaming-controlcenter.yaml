@@ -19,7 +19,7 @@ spec:
       - name: connect
         url: http://connect.confluent.svc.cluster.local:8083
   externalAccess:
-    type:
+    type: nodePort
     nodePort:
       host: cc.iris-streaming-sb.devtest.aws.scania.com
       nodePortOffset: 30200
