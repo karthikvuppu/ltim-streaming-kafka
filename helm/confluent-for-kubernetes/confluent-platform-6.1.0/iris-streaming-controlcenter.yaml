@@ -19,10 +19,10 @@ spec:
       - name: connect
         url: http://connect.confluent.svc.cluster.local:8083
   externalAccess:
-    type: loadBalancer
-#    nodePort:
-#      host: cc.iris-streaming-sb.devtest.aws.scania.com
-#      nodePortOffset: 30200
+    type:
+    nodePort:
+      host: cc.iris-streaming-sb.devtest.aws.scania.com
+      nodePortOffset: 30200
   storageClass:
     name: standard
   oneReplicaPerNode: true
