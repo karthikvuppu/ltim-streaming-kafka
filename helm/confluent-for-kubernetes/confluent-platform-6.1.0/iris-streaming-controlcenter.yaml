@@ -49,7 +49,7 @@ spec:
                   values:
                     - zookeeper
                     - kafka0
-                    - kafka1
-                    - kafka2
+#                    - kafka1
+#                    - kafka2
                     - confluent
             topologyKey: kubernetes.io/hostname
