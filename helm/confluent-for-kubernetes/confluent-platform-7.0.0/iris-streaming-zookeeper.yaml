@@ -1,18 +1,19 @@
 apiVersion: platform.confluent.io/v1beta1
-kind: SchemaRegistry
+kind: Zookeeper
 metadata:
-  name: schemaregistry
+  name: zookeeper
   namespace: confluent
 spec:
-  replicas: 1
+  replicas: 3
   image:
-    application: confluentinc/cp-schema-registry-operator:6.1.0.0
-    init: confluentinc/cp-init-container-operator:6.1.0.0
-  externalAccess:
-    type: nodePort
-    nodePort:
-      host: schema.iris-streaming-sb.devtest.aws.scania.com
-      nodePortOffset: 30500
+    application: confluentinc/cp-zookeeper:7.0.0
+    init: confluentinc/confluent-init-container:2.2.0
+  dataVolumeCapacity: 40Gi
+  logVolumeCapacity: 30Gi
+  oneReplicaPerNode: true
+  storageClass:
+    name: standard
+
   podTemplate:
     podSecurityContext:
       fsGroup: 1000
@@ -26,17 +27,17 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - confluent
+                    - zookeeper
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
+           - labelSelector:
               matchExpressions:
                 - key: service
                   operator: In
                   values:
-                    - zookeeper
+                    - confluent
                     - kafka0
 #                    - kafka1
 #                    - kafka2
                     - controlcenter
-            topologyKey: kubernetes.io/hostname
+             topologyKey: kubernetes.io/hostname

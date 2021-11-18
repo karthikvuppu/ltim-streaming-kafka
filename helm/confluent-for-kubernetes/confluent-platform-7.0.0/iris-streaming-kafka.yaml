@@ -6,11 +6,14 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server-operator:6.1.0.0
-    init: confluentinc/cp-init-container-operator:6.1.0.0
+    application: confluentinc/cp-server:7.0.0
+    init: confluentinc/confluent-init-container:2.2.0
   storageClass:
     name: standard
   dataVolumeCapacity: 50Gi
+  configOverrides:
+    server:
+      - confluent.cluster.link.enable=true
   listeners:
     external:
       externalAccess:
