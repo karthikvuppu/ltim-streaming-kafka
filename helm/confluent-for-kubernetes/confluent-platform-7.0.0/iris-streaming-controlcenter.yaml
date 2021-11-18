@@ -18,12 +18,24 @@ spec:
     connect:
       - name: connect
         url: http://connect.confluent.svc.cluster.local:8083
+#  externalAccess:
+#    type: nodePort
+#    nodePort:
+#      host: cc.iris-streaming-sb.devtest.aws.scania.com
+#      nodePortOffset: 30200
   externalAccess:
-    type: nodePort
-    nodePort:
-      host: cc.iris-streaming-sb.devtest.aws.scania.com
-      nodePortOffset: 30200
-
+    type: loadBalancer
+    loadBalancer:
+      annotations:
+        kubernetes.io/ingress.class: alb
+        alb.ingress.kubernetes.io/scheme: internet-facing
+        alb.ingress.kubernetes.io/load-balancer-name: iris-streaming-sb-controlcenter-alb
+        alb.ingress.kubernetes.io/target-type: instance
+        alb.ingress.kubernetes.io/subnets: subnet-03bb1df2bc15436b6, subnet-061b406bbac050fcb, subnet-0a71781428bea6c6e
+        alb.ingress.kubernetes.io/inbound-cidrs: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
+        external-dns.alpha.kubernetes.io/hostname: controlcenter.iris-streaming-sb.devtest.aws.scania.com
+      domain: iris-streaming-sb.devtest.aws.scania.com
+      prefix: controlcenter
   storageClass:
     name: standard
   oneReplicaPerNode: true
