@@ -23,6 +23,7 @@ spec:
     nodePort:
       host: cc.iris-streaming-sb.devtest.aws.scania.com
       nodePortOffset: 30200
+
   storageClass:
     name: standard
   oneReplicaPerNode: true
