@@ -26,4 +26,7 @@
     <option name="Skip Tests" value="false" />
     <pom-list />
   </component>
+  <component name="ProjectPlainTextFileTypeManager">
+    <file url="file://$PROJECT_DIR$/kubectl-confluent" />
+  </component>
 </project>

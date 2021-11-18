@@ -32,7 +32,7 @@ image:
   registry: docker.io
   repository: confluentinc/confluent-operator
   pullPolicy: IfNotPresent
-  tag: "0.304.2"
+  tag: "0.174.6"
 
 ###
 ## Priority class for Confluent Operator pod
@@ -52,11 +52,11 @@ namespaceList: []
 ##
 resources:
   limits:
+    cpu: 1000m
+    memory: 1024Mi
+  requests:
     cpu: 500m
     memory: 512Mi
-  requests:
-    cpu: 100m
-    memory: 256Mi
 ## Pod termination grace-period
 ##
 terminationGracePeriodSeconds: 30
@@ -113,31 +113,19 @@ serviceAccount:
 ## create required resources out of band to be used by the Operator. In this case, follow the
 ## templates/clusterrole.yaml and templates/clusterrolebiding.yaml to create proper required resources.
 rbac: true
-
-## Enable extra Kubernetes API groups in role/clusterrole resource
-## When set to true, it will add apiGroups to role/clusterrole for Operator 1.x Migration and OpenShift route resource
-clusterRole:
-  migration: true
-  openshift: true
-
 ###
 ### Confluent Telemetry Report configuration
-## The secretRef contains following data,
+## The secretRef must contains following data,
 ## telemetry.txt: |-
 ##   api.key=<api_key>
 ##   api.secret=<api_secret>
-##   proxy.url=<proxy_url>  # only required if proxy is enabled
-##   proxy.username=<proxy_username> # only required if proxy requires credential
+##   proxy.url=<proxy_url>
+##   proxy.username=<proxy_username>
 ##   proxy.password=<proxy_password>
 ##
 telemetry:
   enabled: false
-  proxy:
-    enabled: false
-    credentialRequired: false
   secretRef: ""
-  ## To use directoryPathInContainer, need to make sure
-  ## you mount telemetry.txt in the path you provided here in each pod
   directoryPathInContainer: ""
 
 ##

@@ -6,7 +6,7 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: connects.platform.confluent.io
+  name: kafkarestproxies.platform.confluent.io
 spec:
   group: platform.confluent.io
   names:
@@ -14,12 +14,13 @@ spec:
     - all
     - confluent-platform
     - confluent
-    kind: Connect
-    listKind: ConnectList
-    plural: connects
+    kind: KafkaRestProxy
+    listKind: KafkaRestProxyList
+    plural: kafkarestproxies
     shortNames:
-    - connect
-    singular: connect
+    - kafkarestproxy
+    - krp
+    singular: kafkarestproxy
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
@@ -42,7 +43,7 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Connect is the Schema for the Connects API
+        description: KafkaRestProxy is the Schema for the kafkarestproxies API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -57,10 +58,11 @@ spec:
           metadata:
             type: object
           spec:
-            description: ConnectSpec defines the desired state of Connect
+            description: KafkaRestProxySpec defines the desired state of KafkaRestProxy
             properties:
               authentication:
-                description: Rest server security fields
+                description: RestServerAuthentication server authentication support
+                  to the CP Component
                 properties:
                   basic:
                     description: Basic defines basic authentication
@@ -107,7 +109,8 @@ spec:
                 - type
                 type: object
               authorization:
-                description: Authorization
+                description: ClientAuthorization define client side authorization
+                  configuration for CP component.
                 properties:
                   kafkaRestClassRef:
                     description: KafkaRestClassRef defines the reference for KafkaRestClass
@@ -126,106 +129,6 @@ spec:
                   type:
                     enum:
                     - rbac
-                    type: string
-                required:
-                - type
-                type: object
-              build:
-                description: Build defines the build configurations for connector
-                  plugins
-                properties:
-                  onDemand:
-                    description: OnDemand defines the build configurations for build
-                      type onDemand
-                    properties:
-                      plugins:
-                        description: ConnectorPlugins defines the install information
-                          of plugins requested to be installed
-                        properties:
-                          confluentHub:
-                            description: ConfluentHub defines the list of ConfluentHubPlugin
-                              getting from the Confluent Hub
-                            items:
-                              description: ConfluentHubPlugin defines the information
-                                to get the plugin from confluent hub
-                              properties:
-                                name:
-                                  description: Name defines the name of the connector
-                                    plugin
-                                  minLength: 1
-                                  type: string
-                                owner:
-                                  description: 'Owner defines the individual or organization
-                                    provides the plugin, for example: confluentinc'
-                                  minLength: 1
-                                  type: string
-                                version:
-                                  description: Version defines the version of plugin,
-                                    which can be either the version of the component
-                                    or the literal `latest`
-                                  minLength: 1
-                                  type: string
-                              required:
-                              - name
-                              - owner
-                              - version
-                              type: object
-                            type: array
-                          locationType:
-                            description: LocationType defines location to get the
-                              plugins
-                            enum:
-                            - confluentHub
-                            - url
-                            type: string
-                          url:
-                            description: URL defines the list of URLPlugin getting
-                              from external URL
-                            items:
-                              description: URLConnector defines the information to
-                                get the plugin from URL
-                              properties:
-                                archivePath:
-                                  description: ArchivePath defines the archive path
-                                    of the plugin
-                                  minLength: 1
-                                  pattern: ^https?://.*
-                                  type: string
-                                checksum:
-                                  description: Checksum defines the sha512sum checksum
-                                    of the plugin's remote file, used to verify the
-                                    remote file after download
-                                  type: string
-                                name:
-                                  description: Name defines the connector plugin name
-                                  minLength: 1
-                                  type: string
-                              required:
-                              - archivePath
-                              - checksum
-                              - name
-                              type: object
-                            type: array
-                        required:
-                        - locationType
-                        type: object
-                      storageLimit:
-                        anyOf:
-                        - type: integer
-                        - type: string
-                        description: StorageLimit defines the max amount of node volume
-                          can be used to store the connector plugins, default value
-                          is 4G.
-                        pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                        x-kubernetes-int-or-string: true
-                    required:
-                    - plugins
-                    type: object
-                  type:
-                    description: Type defines the build type for connector plugins,
-                      currently only support onDemand type
-                    enum:
-                    - onDemand
                     type: string
                 required:
                 - type
@@ -254,315 +157,13 @@ spec:
                       type: string
                     type: array
                 type: object
-              connectorOverridePolicy:
-                description: ConnectorOverridePolicy allows policy to permit per-connector
-                  override configuration for producer/consumer/admin prefix. More
-                  information can be found here, https://docs.confluent.io/platform/current/connect/security.html#separate-principals
-                enum:
-                - All
-                - Principal
-                type: string
-              connectorTLSCerts:
-                description: ConnectorTLSCerts defines the list of CustomTLSCertificate
-                  injected in connect cluster for connector use. Please check connect
-                  status for the mount path of the certificates. Change will roll
-                  the cluster
-                items:
-                  description: CustomTLSCertificate defines custom TLS structure for
-                    the child resources(connector, topic, schema, etc) of CP component
-                  properties:
-                    directoryPathInContainer:
-                      description: DirectoryPathInContainer contains the directory
-                        path in container where keystore/truststore.jks/jksPassword.txt
-                        keys are mounted.
-                      minLength: 1
-                      type: string
-                    jksPassword:
-                      description: JksPassword defines the secret name referenced
-                        for jks password
-                      properties:
-                        secretRef:
-                          description: SecretRef defines the secret name referenced
-                            for jks password More information about jks password key/value
-                            format can be found in Confluent Operator document
-                          maxLength: 30
-                          minLength: 1
-                          pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                          type: string
-                      required:
-                      - secretRef
-                      type: object
-                    secretRef:
-                      description: SecretRef defines the secret name referenced for
-                        certificates More information about certificates key/value
-                        format can be found in Confluent Operator document
-                      maxLength: 30
-                      minLength: 1
-                      pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                      type: string
-                  type: object
-                type: array
               dependencies:
-                description: ConnectDependencies holds dependencies a connect requires
-                  or can enable
+                description: KafkaRestProxyDependencies defines the dependencies for
+                  KafkaRestProxy
                 properties:
-                  admin:
-                    description: configure admin client If bootstrapEndpoint is not
-                      configured, the security is configured based on the kafka dependencies
-                      configuration. Configure if different bootstrapEndpoint is required
-                      for admin client
-                    properties:
-                      authentication:
-                        description: Authentication defines the authentication for
-                          the kafka cluster
-                        properties:
-                          jaasConfig:
-                            description: JaaS defines opinionated CP component's JaaS
-                              configuration.
-                            properties:
-                              secretRef:
-                                description: SecretRef defines secret reference to
-                                  pass required credentials
-                                maxLength: 30
-                                minLength: 1
-                                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                                type: string
-                            required:
-                            - secretRef
-                            type: object
-                          jaasConfigPassThrough:
-                            description: JaaSPassThrough user provided complete JaaS
-                              configuration.
-                            properties:
-                              directoryPathInContainer:
-                                minLength: 1
-                                type: string
-                              secretRef:
-                                description: SecretRef defines the secret name referenced
-                                  for authentication
-                                maxLength: 30
-                                minLength: 1
-                                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                                type: string
-                            type: object
-                          type:
-                            enum:
-                            - plain
-                            - oauthbearer
-                            - scram
-                            - digest
-                            - kerberos
-                            - mtls
-                            type: string
-                        required:
-                        - type
-                        type: object
-                      bootstrapEndpoint:
-                        description: BootstrapEndpoint defines the kafka bootstrap
-                          endpoint
-                        minLength: 1
-                        pattern: .+:[0-9]+
-                        type: string
-                      discovery:
-                        description: Discovery defines the discovery capability to
-                          discover kafka cluster
-                        properties:
-                          name:
-                            description: Name is the name of the CP component
-                            type: string
-                          namespace:
-                            description: Namespace defines where CP component is running
-                              Uses the same namespace where Operator is running if
-                              not configured
-                            type: string
-                          secretRef:
-                            description: SecretRef defines the name of the secret
-                              reference
-                            maxLength: 30
-                            minLength: 1
-                            pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                            type: string
-                        required:
-                        - name
-                        type: object
-                      tls:
-                        description: TLSDependencyConfig defines the client side TLS
-                          setting for kafka cluster
-                        properties:
-                          directoryPathInContainer:
-                            description: DirectoryPathInContainer contains the directory
-                              path in container where keystore/truststore.jks/jksPassword.txt
-                              keys are mounted. CP will not configure truststore.jks
-                              can be ignored with IgnoreTrustStoreConfig field
-                            minLength: 1
-                            type: string
-                          enabled:
-                            description: Enabled enables the TLS configuration for
-                              CP component
-                            type: boolean
-                          ignoreTrustStoreConfig:
-                            description: IgnoreTrustStoreConfig when configure ignores
-                              the truststore configuration for CP component
-                            type: boolean
-                          jksPassword:
-                            description: JksPassword defines the secret name referenced
-                              for jks password
-                            properties:
-                              secretRef:
-                                description: SecretRef defines the secret name referenced
-                                  for jks password More information about jks password
-                                  key/value format can be found in Confluent Operator
-                                  document
-                                maxLength: 30
-                                minLength: 1
-                                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                                type: string
-                            required:
-                            - secretRef
-                            type: object
-                          secretRef:
-                            description: SecretRef defines the secret name referenced
-                              for certificates More information about certificates
-                              key/value format can be found in Confluent Operator
-                              document
-                            maxLength: 30
-                            minLength: 1
-                            pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                            type: string
-                        required:
-                        - enabled
-                        type: object
-                    type: object
-                  consumer:
-                    description: Consumer security configuration to connect to Kafka
-                      Cluster pointed by bootstrapEndpoint, used for sink connectors.
-                      If bootstrapEndpoint is not configured, the security is configured
-                      based on the kafka dependencies configuration. Configure if
-                      different bootstrapEndpoint is required for consumer
-                    properties:
-                      authentication:
-                        description: Authentication defines the authentication for
-                          the kafka cluster
-                        properties:
-                          jaasConfig:
-                            description: JaaS defines opinionated CP component's JaaS
-                              configuration.
-                            properties:
-                              secretRef:
-                                description: SecretRef defines secret reference to
-                                  pass required credentials
-                                maxLength: 30
-                                minLength: 1
-                                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                                type: string
-                            required:
-                            - secretRef
-                            type: object
-                          jaasConfigPassThrough:
-                            description: JaaSPassThrough user provided complete JaaS
-                              configuration.
-                            properties:
-                              directoryPathInContainer:
-                                minLength: 1
-                                type: string
-                              secretRef:
-                                description: SecretRef defines the secret name referenced
-                                  for authentication
-                                maxLength: 30
-                                minLength: 1
-                                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                                type: string
-                            type: object
-                          type:
-                            enum:
-                            - plain
-                            - oauthbearer
-                            - scram
-                            - digest
-                            - kerberos
-                            - mtls
-                            type: string
-                        required:
-                        - type
-                        type: object
-                      bootstrapEndpoint:
-                        description: BootstrapEndpoint defines the kafka bootstrap
-                          endpoint
-                        minLength: 1
-                        pattern: .+:[0-9]+
-                        type: string
-                      discovery:
-                        description: Discovery defines the discovery capability to
-                          discover kafka cluster
-                        properties:
-                          name:
-                            description: Name is the name of the CP component
-                            type: string
-                          namespace:
-                            description: Namespace defines where CP component is running
-                              Uses the same namespace where Operator is running if
-                              not configured
-                            type: string
-                          secretRef:
-                            description: SecretRef defines the name of the secret
-                              reference
-                            maxLength: 30
-                            minLength: 1
-                            pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                            type: string
-                        required:
-                        - name
-                        type: object
-                      tls:
-                        description: TLSDependencyConfig defines the client side TLS
-                          setting for kafka cluster
-                        properties:
-                          directoryPathInContainer:
-                            description: DirectoryPathInContainer contains the directory
-                              path in container where keystore/truststore.jks/jksPassword.txt
-                              keys are mounted. CP will not configure truststore.jks
-                              can be ignored with IgnoreTrustStoreConfig field
-                            minLength: 1
-                            type: string
-                          enabled:
-                            description: Enabled enables the TLS configuration for
-                              CP component
-                            type: boolean
-                          ignoreTrustStoreConfig:
-                            description: IgnoreTrustStoreConfig when configure ignores
-                              the truststore configuration for CP component
-                            type: boolean
-                          jksPassword:
-                            description: JksPassword defines the secret name referenced
-                              for jks password
-                            properties:
-                              secretRef:
-                                description: SecretRef defines the secret name referenced
-                                  for jks password More information about jks password
-                                  key/value format can be found in Confluent Operator
-                                  document
-                                maxLength: 30
-                                minLength: 1
-                                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                                type: string
-                            required:
-                            - secretRef
-                            type: object
-                          secretRef:
-                            description: SecretRef defines the secret name referenced
-                              for certificates More information about certificates
-                              key/value format can be found in Confluent Operator
-                              document
-                            maxLength: 30
-                            minLength: 1
-                            pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                            type: string
-                        required:
-                        - enabled
-                        type: object
-                    type: object
                   interceptor:
-                    description: configure confluent monitoring interceptor
+                    description: InterceptorDependency defines interceptor settings
+                      for CP component
                     properties:
                       configs:
                         description: Configs defines configs for the CP interceptor
@@ -832,8 +433,8 @@ spec:
                     - enabled
                     type: object
                   kafka:
-                    description: Connect dependency for connecting to kafka. Uses
-                      discovery if that specified
+                    description: KafkaClientDependency allows configuring CP component
+                      dependency to configure kafka settings
                     properties:
                       authentication:
                         description: Authentication defines the authentication for
@@ -957,7 +558,8 @@ spec:
                         type: object
                     type: object
                   mds:
-                    description: Mds configurations for when RBAC is enabled
+                    description: MDSDependencies defines MDS configure when CP RBAC
+                      is enabled
                     properties:
                       authentication:
                         description: Authentication defines MDS authentication configuration
@@ -1056,136 +658,9 @@ spec:
                     - endpoint
                     - tokenKeyPair
                     type: object
-                  producer:
-                    description: Producer security configuration to connect to Kafka
-                      Cluster pointed by bootstrapEndpoint, used for source connectors.
-                      If bootstrapEndpoint is not configured, the security is configured
-                      based on the kafka dependencies configuration. Configure if
-                      different bootstrapEndpoint/security is required for producer
-                    properties:
-                      authentication:
-                        description: Authentication defines the authentication for
-                          the kafka cluster
-                        properties:
-                          jaasConfig:
-                            description: JaaS defines opinionated CP component's JaaS
-                              configuration.
-                            properties:
-                              secretRef:
-                                description: SecretRef defines secret reference to
-                                  pass required credentials
-                                maxLength: 30
-                                minLength: 1
-                                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                                type: string
-                            required:
-                            - secretRef
-                            type: object
-                          jaasConfigPassThrough:
-                            description: JaaSPassThrough user provided complete JaaS
-                              configuration.
-                            properties:
-                              directoryPathInContainer:
-                                minLength: 1
-                                type: string
-                              secretRef:
-                                description: SecretRef defines the secret name referenced
-                                  for authentication
-                                maxLength: 30
-                                minLength: 1
-                                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                                type: string
-                            type: object
-                          type:
-                            enum:
-                            - plain
-                            - oauthbearer
-                            - scram
-                            - digest
-                            - kerberos
-                            - mtls
-                            type: string
-                        required:
-                        - type
-                        type: object
-                      bootstrapEndpoint:
-                        description: BootstrapEndpoint defines the kafka bootstrap
-                          endpoint
-                        minLength: 1
-                        pattern: .+:[0-9]+
-                        type: string
-                      discovery:
-                        description: Discovery defines the discovery capability to
-                          discover kafka cluster
-                        properties:
-                          name:
-                            description: Name is the name of the CP component
-                            type: string
-                          namespace:
-                            description: Namespace defines where CP component is running
-                              Uses the same namespace where Operator is running if
-                              not configured
-                            type: string
-                          secretRef:
-                            description: SecretRef defines the name of the secret
-                              reference
-                            maxLength: 30
-                            minLength: 1
-                            pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                            type: string
-                        required:
-                        - name
-                        type: object
-                      tls:
-                        description: TLSDependencyConfig defines the client side TLS
-                          setting for kafka cluster
-                        properties:
-                          directoryPathInContainer:
-                            description: DirectoryPathInContainer contains the directory
-                              path in container where keystore/truststore.jks/jksPassword.txt
-                              keys are mounted. CP will not configure truststore.jks
-                              can be ignored with IgnoreTrustStoreConfig field
-                            minLength: 1
-                            type: string
-                          enabled:
-                            description: Enabled enables the TLS configuration for
-                              CP component
-                            type: boolean
-                          ignoreTrustStoreConfig:
-                            description: IgnoreTrustStoreConfig when configure ignores
-                              the truststore configuration for CP component
-                            type: boolean
-                          jksPassword:
-                            description: JksPassword defines the secret name referenced
-                              for jks password
-                            properties:
-                              secretRef:
-                                description: SecretRef defines the secret name referenced
-                                  for jks password More information about jks password
-                                  key/value format can be found in Confluent Operator
-                                  document
-                                maxLength: 30
-                                minLength: 1
-                                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                                type: string
-                            required:
-                            - secretRef
-                            type: object
-                          secretRef:
-                            description: SecretRef defines the secret name referenced
-                              for certificates More information about certificates
-                              key/value format can be found in Confluent Operator
-                              document
-                            maxLength: 30
-                            minLength: 1
-                            pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
-                            type: string
-                        required:
-                        - enabled
-                        type: object
-                    type: object
                   schemaRegistry:
-                    description: configure connect dependency for schemaregistry
+                    description: SchemaRegistryClientDependency allows configuring
+                      CP component dependency to configure schemaRegistry settings
                     properties:
                       authentication:
                         description: Authentication defines the authentication for
@@ -1292,9 +767,6 @@ spec:
                     - url
                     type: object
                 type: object
-              enableSchemas:
-                description: EnableSchemas defines whether to enable scheme or not
-                type: boolean
               externalAccess:
                 description: CPExternalAccess holds all external access policies for
                   non-kafka components
@@ -1641,22 +1113,10 @@ spec:
                   resources created by Operator. All the internal labels is preserved
                   and forbidden to override. For pod labels, use podTemplate.labels
                 type: object
-              internalTopicReplicationFactor:
-                description: ' InternalTopicReplicationFactor defines internal topic
-                  replication factor  If not configured, it will be configured as
-                  3'
-                format: int32
-                type: integer
               k8sClusterDomain:
                 description: K8SClusterDomain defines configuring kubernetes cluster
                   domain if required. If this setting is not configured it will default
                   to cluster.local domain.
-                type: string
-              keyConverterType:
-                description: KeyConverter defines the supported converters package
-                  for CP platform Supported converter types here,  https://docs.confluent.io/current/connect/concepts.html#connect-converters
-                  By default, it is configured as org.apache.kafka.connect.json.JsonConverter
-                minLength: 1
                 type: string
               license:
                 description: License defines license  configuration for Confluent
@@ -2994,8 +2454,8 @@ spec:
                 format: int32
                 type: integer
               telemetry:
-                description: ConfluentTelemetry defines the confluent telemetry reporter
-                  configuration
+                description: ConfluentTelemetry provides a way to disable global confluent
+                  telemetry setting configure as part of operator deployment.
                 properties:
                   global:
                     description: Global will allow disabling telemetry configuration.
@@ -3046,18 +2506,12 @@ spec:
                     pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
                     type: string
                 type: object
-              valueConverterType:
-                description: ValueConverter defines the supported converters package
-                  for CP platform Supported converter types here, https://docs.confluent.io/current/connect/concepts.html#connect-converters
-                  By default, it is configured as org.apache.kafka.connect.json.JsonConverter
-                minLength: 1
-                type: string
             required:
             - image
             - replicas
             type: object
           status:
-            description: ConnectStatus defines the observed state of Connect
+            description: KafkaRestProxyStatus defines the observed state of KafkaRestProxy
             properties:
               authorizationType:
                 type: string
@@ -3100,51 +2554,10 @@ spec:
                       type: string
                   type: object
                 type: array
-              connectorPlugins:
-                items:
-                  description: ConnectorPlugin define the state of connector plugin
-                  properties:
-                    class:
-                      description: ClassName defines the class name of the connector
-                        plugin
-                      type: string
-                    type:
-                      description: Type defines the type of the connector plugin,
-                        which can be SOURCE, SINK or UNKNOWN
-                      type: string
-                    version:
-                      description: Version defines the current version of the connector
-                        plugin
-                      type: string
-                  required:
-                  - class
-                  type: object
-                type: array
-              connectorTLSFilePaths:
-                items:
-                  description: CustomTLSFilePathStatus defines the file paths of custom
-                    TLS certificates
-                  properties:
-                    jksPasswordPath:
-                      description: JksPasswordPath defines the absolute path of the
-                        jksPassword.txt file
-                      type: string
-                    keyStorePath:
-                      description: KeyStorePath defines the absolute path of the truststore
-                        .jks or .p12 file
-                      type: string
-                    trustStorePath:
-                      description: TrustStorePath defines the absolute path of the
-                        truststore .jks or .p12 file
-                      type: string
-                  type: object
-                type: array
               currentReplicas:
                 description: CurrentReplicas defines current running replicas
                 format: int32
                 type: integer
-              groupId:
-                type: string
               internalSecrets:
                 description: InternalSecrets defines the list of internal secrets
                   created by Operator for each CP component.
@@ -3172,6 +2585,8 @@ spec:
                     description: TLS defines if tls is enabled for kafka dependency
                     type: boolean
                 type: object
+              metricPrefix:
+                type: string
               operatorVersion:
                 description: OperatorVersion defines the internal version of operator
                 type: string

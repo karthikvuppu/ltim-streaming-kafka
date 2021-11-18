@@ -19,7 +19,6 @@ metadata:
   namespace: {{ .Release.Namespace }}
   {{- end }}
 rules:
-{{- if .Values.clusterRole.migration }}
 - apiGroups:
   - cluster.confluent.com
   resources:
@@ -42,7 +41,6 @@ rules:
   - physicalstatefulclusters/finalizers
   verbs:
   - '*'
-{{- end }}
 - apiGroups:
   - platform.confluent.io
   resources:
@@ -61,7 +59,6 @@ rules:
   - update
   - patch
   - delete
-{{- if .Values.clusterRole.openshift }}
 - apiGroups:
   - route.openshift.io
   resources:
@@ -75,7 +72,6 @@ rules:
   - update
   - patch
   - delete
-{{- end }}
 - apiGroups:
   - apps
   resources:
@@ -99,6 +95,7 @@ rules:
   - secrets
   - secrets/finalizers
   - pods
+  - pods/exec
   - services
   verbs:
   - get
@@ -121,13 +118,4 @@ rules:
   - update
   - patch
   - delete
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
-{{- if $clusterRole }}
-  - list
-{{- end }}
 {{- end }}

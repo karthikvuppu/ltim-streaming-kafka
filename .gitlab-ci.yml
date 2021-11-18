@@ -3,8 +3,8 @@
 variables:
 
   SC: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-storage-class.yaml'
-  CRD :  'helm/confluent-for-kubernetes/resources/crds/v1'
-  CRB : 'helm/confluent-for-kubernetes/resources/crds/v1/platform.confluent.io_confluentrolebindings.yaml'
+  CRD :  'helm/confluent-for-kubernetes/crds'
+  CRB : 'helm/confluent-for-kubernetes/crds/platform.confluent.io_confluentrolebindings.yaml'
   ZK  : 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-zookeeper.yaml'
   KAFKA: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-kafka.yaml'
   SR: 'helm/confluent-for-kubernetes/confluent-platform-6.1.0/iris-streaming-schemaregistry.yaml'
