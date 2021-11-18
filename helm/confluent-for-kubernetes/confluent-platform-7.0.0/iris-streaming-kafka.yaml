@@ -30,6 +30,7 @@ spec:
             service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-0e18497ffe09aa1bc, subnet-0869429a688c9e4ad, subnet-0a3762c0ef8a83cf0
             service.beta.kubernetes.io/load-balancer-source-ranges: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
 #            service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka0
 
           domain: iris-streaming-sb.devtest.aws.scania.com
           bootstrapPrefix: kafka
