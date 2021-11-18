@@ -16,8 +16,8 @@ spec:
     nodePort:
       host: connect.iris-streaming-sb.devtest.aws.scania.com
       nodePortOffset: 30300
-  storageClass:
-    name: standard
+#  storageClass:
+#    name: standard
   podTemplate:
     podSecurityContext:
       fsGroup: 1000
