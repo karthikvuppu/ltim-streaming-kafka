@@ -1,0 +1,68 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0
+  dataVolumeCapacity: 70Gi
+  dependencies:
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
+    ksqldb:
+      - name: ksqldb
+        url: http://ksqldb.confluent.svc.cluster.local:8088
+    connect:
+      - name: connect
+        url: http://connect.confluent.svc.cluster.local:8083
+#  externalAccess:
+#    type: nodePort
+#    nodePort:
+#      host: cc.iris-streaming-sb.devtest.aws.scania.com
+#      nodePortOffset: 30200
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      annotations:
+        kubernetes.io/ingress.class: alb
+        alb.ingress.kubernetes.io/scheme: internet-facing
+        alb.ingress.kubernetes.io/load-balancer-name: iris-streaming-sb-controlcenter-alb
+        alb.ingress.kubernetes.io/target-type: instance
+        alb.ingress.kubernetes.io/subnets: subnet-03bb1df2bc15436b6, subnet-061b406bbac050fcb, subnet-0a71781428bea6c6e
+        alb.ingress.kubernetes.io/inbound-cidrs: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
+        external-dns.alpha.kubernetes.io/hostname: controlcenter.iris-streaming-sb.devtest.aws.scania.com
+      domain: iris-streaming-sb.devtest.aws.scania.com
+      prefix: controlcenter
+  storageClass:
+    name: standard
+  oneReplicaPerNode: true
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - controlcenter
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - zookeeper
+                    - kafka0
+#                    - kafka1
+#                    - kafka2
+                    - confluent
+            topologyKey: kubernetes.io/hostname
