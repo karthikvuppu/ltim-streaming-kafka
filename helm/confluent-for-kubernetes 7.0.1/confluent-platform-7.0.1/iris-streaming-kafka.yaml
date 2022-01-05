@@ -4,10 +4,10 @@ metadata:
   name: kafka
   namespace: confluent
 spec:
-  replicas: 3
+  replicas: 1
   image:
     application: confluentinc/cp-server:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0
+    init: confluentinc/confluent-init-container:2.2.0-1
   storageClass:
     name: standard
   dataVolumeCapacity: 50Gi
@@ -53,8 +53,8 @@ spec:
                   operator: In
                   values:
                     - kafka0
-#                    - kafka1
-#                    - kafka2
+                    - kafka1
+                    - kafka2
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
