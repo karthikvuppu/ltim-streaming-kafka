@@ -1,7 +1,7 @@
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
-  name: kafka
+  name: kafka2
   namespace: confluent
 spec:
   replicas: 1
