@@ -22,7 +22,7 @@ spec:
 #        nodePort:
 #          host: kafka.iris-streaming-sb.devtest.aws.scania.com
 #          nodePortOffset: 30000
-      loadBalancer0:
+      loadBalancer:
         annotations:
           service.beta.kubernetes.io/aws-load-balancer-type: nlb
           service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
@@ -34,7 +34,7 @@ spec:
         domain: iris-streaming-sb.devtest.aws.scania.com
         bootstrapPrefix: kafka
         brokerPrefix: k0
-      loadBalancer1:
+      loadBalancer:
         annotations:
           service.beta.kubernetes.io/aws-load-balancer-type: nlb
           service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
@@ -46,7 +46,7 @@ spec:
         domain: iris-streaming-sb.devtest.aws.scania.com
         bootstrapPrefix: kafka
         brokerPrefix: k1
-      loadBalancer2:
+      loadBalancer:
         annotations:
           service.beta.kubernetes.io/aws-load-balancer-type: nlb
           service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
