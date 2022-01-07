@@ -6,7 +6,9 @@ variables:
   CRD :  'helm/confluent-for-kubernetes/crds'
   CRB : 'helm/confluent-for-kubernetes/crds/platform.confluent.io_confluentrolebindings.yaml'
   ZK  : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-zookeeper.yaml'
-  KAFKA: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka.yaml'
+  KAFKA0: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka0.yaml'
+  KAFKA1: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka0.yaml'
+  KAFKA2: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka0.yaml'
   SR: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-schemaregistry.yaml'
   REPLICATOR: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-replicator.yaml'
   KSQLDB: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-ksqldb.yaml'
@@ -101,7 +103,9 @@ Kafka:
   stage: confluent_components_deployment
   script:
 
-    - "kubectl apply -f $KAFKA"
+    - "kubectl apply -f $KAFKA0"
+    - "kubectl apply -f $KAFKA1"
+    - "kubectl apply -f $KAFKA2"
     - "kubectl get pods -n confluent"
   environment:
     name: dev
@@ -199,7 +203,9 @@ kafka-destroy:
   stage: confluent_components_destroy
   script:
 
-    - "kubectl delete -f $KAFKA"
+    - "kubectl delete -f $KAFKA0"
+    - "kubectl delete -f $KAFKA1"
+    - "kubectl delete -f $KAFKA2"
     - "kubectl get pods -n confluent"
   environment:
     name: dev
@@ -326,7 +332,9 @@ Kafka-poc:
   stage: confluent_components_deployment_poc
   script:
 
-    - "kubectl apply -f $KAFKA"
+    - "kubectl apply -f $KAFKA0"
+    - "kubectl apply -f $KAFKA1"
+    - "kubectl apply -f $KAFKA2"
     - "kubectl get pods -n confluent"
   environment:
     name: poc
@@ -424,7 +432,9 @@ kafka-destroy-poc:
   stage: confluent_components_destroy_poc
   script:
 
-    - "kubectl delete -f $KAFKA"
+    - "kubectl delete -f $KAFKA0"
+    - "kubectl delete -f $KAFKA1"
+    - "kubectl delete -f $KAFKA2"
     - "kubectl get pods -n confluent"
   environment:
     name: poc
