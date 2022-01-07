@@ -35,9 +35,10 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - confluent
+                    - connect
                     - kafka0
-#                    - kafka1
-#                    - kafka2
-                    - controlcenter
+                    - kafka1
+                    - kafka2
+                    - k2
+                    - srrp
              topologyKey: kubernetes.io/hostname

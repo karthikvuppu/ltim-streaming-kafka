@@ -29,7 +29,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - confluent
+                    - k2
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
@@ -38,8 +38,9 @@ spec:
                   operator: In
                   values:
                     - zookeeper
+                    - srrp
+                    - connect
                     - kafka0
-#                    - kafka1
-#                    - kafka2
-                    - controlcenter
+                    - kafka1
+                    - kafka2
             topologyKey: kubernetes.io/hostname
