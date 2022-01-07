@@ -6,6 +6,7 @@ metadata:
 spec:
   replicas: 2
   oneReplicaPerNode: true
+  dataVolumeCapacity: 5Gi
   image:
     application: confluentinc/cp-server-connect:7.0.1
     init: confluentinc/confluent-init-container:2.2.0-1
