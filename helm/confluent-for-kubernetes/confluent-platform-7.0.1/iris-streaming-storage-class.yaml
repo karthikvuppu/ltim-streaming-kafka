@@ -6,7 +6,7 @@ metadata:
   name: standard
 provisioner: kubernetes.io/aws-ebs
 parameters:
-  type: gp3
+  type: gp2
 reclaimPolicy: Retain
 allowVolumeExpansion: true
 mountOptions:
