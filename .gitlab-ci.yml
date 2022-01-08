@@ -270,7 +270,7 @@ schemaregistry-destroy:
     - master
   when: manual
 StorageClass-destroy:
-  stage: confluent_components_deployment
+  stage: confluent_components_destroy
   script:
     #    - "kubeval $ZK"
     - "kubectl delete -f $SC"
