@@ -269,10 +269,6 @@ schemaregistry-destroy:
   only:
     - master
   when: manual
-destroy-all:
-  stage: confluent_components_destroy
-  script:
-
 StorageClass-destroy:
   stage: confluent_components_deployment
   script:
@@ -286,6 +282,9 @@ StorageClass-destroy:
   only:
     - master
   when: manual
+destroy-all:
+  stage: confluent_components_destroy
+  script:
     - "kubectl delete -f $SR"
     - "kubectl delete -f $KAFKA0"
     - "kubectl delete -f $KAFKA1"
