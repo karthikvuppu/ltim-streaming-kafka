@@ -273,6 +273,19 @@ destroy-all:
   stage: confluent_components_destroy
   script:
 
+StorageClass-destroy:
+  stage: confluent_components_deployment
+  script:
+    #    - "kubeval $ZK"
+    - "kubectl delete -f $SC"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
     - "kubectl delete -f $SR"
     - "kubectl delete -f $KAFKA0"
     - "kubectl delete -f $KAFKA1"
