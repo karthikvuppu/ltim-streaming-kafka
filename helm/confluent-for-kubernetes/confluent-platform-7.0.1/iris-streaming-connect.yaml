@@ -1,0 +1,49 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 2
+  oneReplicaPerNode: true
+  image:
+    application: confluentinc/cp-server-connect:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0-1
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka:9071
+  externalAccess:
+    type: nodePort
+    nodePort:
+      host: connect.iris-streaming-sb.devtest.aws.scania.com
+      nodePortOffset: 30300
+#  storageClass:
+#    name: standard
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - connect
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - zookeeper
+                    - kafka0
+                    - kafka1
+                    - kafka2
+                    - srrp
+                    - k2
+            topologyKey: kubernetes.io/hostname
