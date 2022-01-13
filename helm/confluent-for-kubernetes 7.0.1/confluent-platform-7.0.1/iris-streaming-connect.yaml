@@ -4,7 +4,7 @@ metadata:
   name: connect
   namespace: confluent
 spec:
-  replicas: 1
+  replicas: 2
   image:
     application: confluentinc/cp-server-connect:7.0.1
     init: confluentinc/confluent-init-container:2.2.0-1
@@ -31,7 +31,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - confluent
+                    - connect
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
@@ -41,7 +41,8 @@ spec:
                   values:
                     - zookeeper
                     - kafka0
-#                    - kafka1
-#                    - kafka2
-                    - controlcenter
+                    - kafka1
+                    - kafka2
+                    - srrp
+                    - k2
             topologyKey: kubernetes.io/hostname
