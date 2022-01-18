@@ -4,7 +4,7 @@ metadata:
   name: kafka0
   namespace: confluent
 spec:
-  replicas: 1
+  replicas: 3
   image:
     application: confluentinc/cp-server:7.0.1
     init: confluentinc/confluent-init-container:2.2.0-1
@@ -26,14 +26,14 @@ spec:
           annotations:
             service.beta.kubernetes.io/aws-load-balancer-type: nlb
             service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-            service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-kafka0-nlb
+            service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-kafka-nlb
             service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-03bb1df2bc15436b6, subnet-061b406bbac050fcb, subnet-0a71781428bea6c6e
             service.beta.kubernetes.io/load-balancer-source-ranges: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32, 10.0.0.0/24
             #            service.beta.kubernetes.io/aws-load-balancer-scheme: internal
             service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka0
           domain: iris-streaming-sb.devtest.aws.scania.com
           bootstrapPrefix: kafka
-          brokerPrefix: k0
+          brokerPrefix: k
   metricReporter:
     enabled: true
   oneReplicaPerNode: true
@@ -62,6 +62,4 @@ spec:
                     - srrp
                     - k2
                     - connect
-                    - kafka1
-                    - kafka2
             topologyKey: kubernetes.io/hostname

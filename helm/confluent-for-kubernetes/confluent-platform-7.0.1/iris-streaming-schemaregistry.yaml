@@ -36,8 +36,6 @@ spec:
                   values:
                     - zookeeper
                     - kafka0
-                    - kafka1
-                    - kafka2
                     - k2
                     - connect
             topologyKey: kubernetes.io/hostname

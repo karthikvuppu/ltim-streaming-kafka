@@ -37,8 +37,6 @@ spec:
                   values:
                     - connect
                     - kafka0
-                    - kafka1
-                    - kafka2
                     - k2
                     - srrp
              topologyKey: kubernetes.io/hostname

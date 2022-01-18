@@ -7,8 +7,8 @@ variables:
   CRB : 'helm/confluent-for-kubernetes/crds/platform.confluent.io_confluentrolebindings.yaml'
   ZK  : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-zookeeper.yaml'
   KAFKA0: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka0.yaml'
-  KAFKA1: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka1.yaml'
-  KAFKA2: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka2.yaml'
+#  KAFKA1: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka1.yaml'
+#  KAFKA2: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka2.yaml'
   SR: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-schemaregistry.yaml'
   REPLICATOR: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-replicator.yaml'
   KSQLDB: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-ksqldb.yaml'
@@ -104,8 +104,8 @@ Kafka:
   script:
 
     - "kubectl apply -f $KAFKA0"
-    - "kubectl apply -f $KAFKA1"
-    - "kubectl apply -f $KAFKA2"
+#    - "kubectl apply -f $KAFKA1"
+#    - "kubectl apply -f $KAFKA2"
     - "kubectl get pods -n confluent"
   environment:
     name: dev
@@ -204,8 +204,8 @@ kafka-destroy:
   script:
 
     - "kubectl delete -f $KAFKA0"
-    - "kubectl delete -f $KAFKA1"
-    - "kubectl delete -f $KAFKA2"
+#    - "kubectl delete -f $KAFKA1"
+#    - "kubectl delete -f $KAFKA2"
     - "kubectl get pods -n confluent"
   environment:
     name: dev
@@ -287,8 +287,8 @@ destroy-all:
   script:
     - "kubectl delete -f $SR"
     - "kubectl delete -f $KAFKA0"
-    - "kubectl delete -f $KAFKA1"
-    - "kubectl delete -f $KAFKA2"
+#    - "kubectl delete -f $KAFKA1"
+#    - "kubectl delete -f $KAFKA2"
     - "kubectl delete -f $ZK"
     - "kubectl delete -f $KSQLDB"
     - "kubectl delete -f $CONNECT"
