@@ -62,11 +62,7 @@ spec:
         {{- if empty .Values.namespaceList }}
         - --namespaces={{ .Release.Namespace }}
         {{- else}}
-        {{- $ns := "" }}
-        {{- range $i, $v := .Values.namespaceList }}
-        {{- $ns =  printf "%s,%s" $ns (trim $v) }}
-        {{- end }}
-        - --namespaces={{ substr 1 (len $ns) $ns }} 
+        - --namespaces={{ join "," .Values.namespaceList }}
         {{- end }}
         {{- end }}
         name: {{ .Values.name }}
@@ -113,19 +109,7 @@ spec:
           - name: CONFLUENT_TELEMETRY_DIRECTORY_PATH
             value: {{ .Values.telemetry.directoryPathInContainer }}
           {{- end }}
-          {{- if .Values.telemetry.proxy.enabled }}
-          - name: CONFLUENT_TELEMETRY_PROXY_ENABLED
-            value: "true"
           {{- end }}
-          {{- if .Values.telemetry.proxy.credentialRequired }}
-          - name: CONFLUENT_TELEMETRY_PROXY_CREDENTIAL_REQUIRED
-            value: "true"
-          {{- end }}
-          {{- end }}
-      {{- if and .Values.imagePullSecretRef (not .Values.serviceAccount.create) }}
-      imagePullSecrets:
-        - name: {{ .Values.imagePullSecretRef }}
-      {{- end }}
       serviceAccountName: {{ template "confluent-operator.service-account" . }}
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName | quote }}
