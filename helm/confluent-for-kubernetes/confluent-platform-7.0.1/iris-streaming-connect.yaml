@@ -11,7 +11,8 @@ spec:
     init: confluentinc/confluent-init-container:2.2.0-1
   dependencies:
     kafka:
-      bootstrapEndpoint: kafka:9071
+      # bootstrapEndpoint: kafka:9071
+      bootstrapEndpoint: kafka:9092
   externalAccess:
     type: nodePort
     nodePort:
