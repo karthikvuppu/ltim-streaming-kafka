@@ -35,8 +35,5 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - connect
                     - kafka0
-                    - k2
-                    - srrp
              topologyKey: kubernetes.io/hostname

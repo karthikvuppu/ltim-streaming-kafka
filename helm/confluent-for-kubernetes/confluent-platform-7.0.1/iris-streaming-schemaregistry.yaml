@@ -34,8 +34,5 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - zookeeper
                     - kafka0
-                    - k2
-                    - connect
             topologyKey: kubernetes.io/hostname
