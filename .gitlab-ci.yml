@@ -74,9 +74,14 @@ Operator:
 All:
   stage: confluent_components_deployment
   script:
-    #    - "kubeval $ZK"
+    - "kubectl apply -f $SC"
     - "kubectl apply -f $ZK"
+    - "kubectl apply -f $KAFKA0"
+    - "kubectl apply -f $KSQLDB"
+    - "kubectl apply -f $SR"
+    - "kubectl apply -f $CONNECT"
     - "kubectl get pods -n confluent"
+
     environment:
       name: dev
     tags:
@@ -87,13 +92,10 @@ All:
 Zookeeper:
   stage: confluent_components_deployment
   script:
-    - "kubectl apply -f $SC"
+    #    - "kubeval $ZK"
     - "kubectl apply -f $ZK"
-    - "kubectl apply -f $KAFKA0"
-    - "kubectl apply -f $KSQLDB"
-    - "kubectl apply -f $SR"
-    - "kubectl apply -f $CONNECT"
     - "kubectl get pods -n confluent"
+
   environment:
     name: dev
   tags:
