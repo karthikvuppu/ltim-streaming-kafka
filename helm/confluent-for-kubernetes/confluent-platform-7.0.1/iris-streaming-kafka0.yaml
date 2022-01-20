@@ -1,7 +1,7 @@
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
-  name: kafka0
+  name: kafka
   namespace: confluent
 spec:
   replicas: 3
@@ -33,7 +33,7 @@ spec:
             service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka0
           domain: iris-streaming-sb.devtest.aws.scania.com
           bootstrapPrefix: kafka
-          brokerPrefix: k
+          brokerPrefix: s
   metricReporter:
     enabled: true
   oneReplicaPerNode: true
