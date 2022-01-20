@@ -71,24 +71,25 @@ Operator:
     - master
   when: manual
 
-All:
-  stage: confluent_components_deployment
-  script:
-    - "kubectl apply -f $SC"
-    - "kubectl apply -f $ZK"
-    - "kubectl apply -f $KAFKA0"
-    - "kubectl apply -f $KSQLDB"
-    - "kubectl apply -f $SR"
-    - "kubectl apply -f $CONNECT"
-    - "kubectl get pods -n confluent"
+#All:
+#  stage: confluent_components_deployment
+#  script:
+#    - "kubectl apply -f $SC"
+#    - "kubectl apply -f $ZK"
+#    - "kubectl apply -f $KAFKA0"
+#    - "kubectl apply -f $KSQLDB"
+#    - "kubectl apply -f $SR"
+#    - "kubectl apply -f $CONNECT"
+#    - "kubectl get pods -n confluent"
+#
+#    environment:
+#      name: dev
+#    tags:
+#      - docker
+#    only:
+#      - master
+#    when: manual
 
-    environment:
-      name: dev
-    tags:
-      - docker
-    only:
-      - master
-    when: manual
 Zookeeper:
   stage: confluent_components_deployment
   script:
