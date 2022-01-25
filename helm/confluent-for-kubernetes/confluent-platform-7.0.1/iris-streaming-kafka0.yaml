@@ -14,7 +14,7 @@ spec:
   configOverrides:
     server:
       - confluent.cluster.link.enable=true
-      # - confluent.metrics.reporter.bootstrap.servers=cc.iris-streaming-sb.devtest.aws.scania.com:9092
+      - confluent.metrics.reporter.bootstrap.servers=cc.iris-streaming-sb.devtest.aws.scania.com:9092
 
   listeners:
     external:
