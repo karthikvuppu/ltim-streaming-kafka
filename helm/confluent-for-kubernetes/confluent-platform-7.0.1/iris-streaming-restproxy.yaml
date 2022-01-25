@@ -41,11 +41,11 @@ spec:
        domain: iris-streaming-sb.devtest.aws.scania.com
        prefix: restproxy
 #    oneReplicaPerNode: true
-    podTemplate:
-      podSecurityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
-        runAsUser: 1000
+#    podTemplate:
+#      podSecurityContext:
+#        fsGroup: 1000
+#        runAsGroup: 1000
+#        runAsUser: 1000
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
