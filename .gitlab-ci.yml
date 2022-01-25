@@ -14,6 +14,7 @@ variables:
   KSQLDB: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-ksqldb.yaml'
   CC: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-controlcenter.yaml'
   CONNECT: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-connect.yaml'
+  RESTPROXY: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-restproxy.yaml'
   GIT_SUBMODULE_STRATEGY: recursive
 
 
@@ -134,7 +135,19 @@ Kafka:
   only:
     - master
   when: manual
+restproxy:
+  stage: confluent_components_deployment
+  script:
 
+    - "kubectl apply -f $RESTPROXY"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
 connect:
   stage: confluent_components_deployment
   script:
@@ -234,7 +247,19 @@ kafka-destroy:
   only:
     - master
   when: manual
+restproxy-destroy:
+  stage: confluent_components_destroy
+  script:
 
+    - "kubectl delete -f $RESTPROXY"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
 connect-destroy:
   stage: confluent_components_destroy
   script:

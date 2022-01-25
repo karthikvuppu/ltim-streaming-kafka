@@ -8,7 +8,9 @@ spec:
 #    basic:
 #      secretRef: kafkarestproxy-users
 #    type: basic
-#  dependencies:
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka:9071
 #    schemaRegistry:
 #      authentication:
 #        basic:
