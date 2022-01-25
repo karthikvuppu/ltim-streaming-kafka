@@ -41,30 +41,30 @@ spec:
        domain: iris-streaming-sb.devtest.aws.scania.com
        prefix: restproxy
 #    oneReplicaPerNode: true
-#    podTemplate:
-#      podSecurityContext:
-#        fsGroup: 1000
-#        runAsGroup: 1000
-#        runAsUser: 1000
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: service
-                    operator: In
-                    values:
-                      - zookeeper
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchExpressions:
-                  - key: service
-                    operator: In
-                    values:
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - zookeeper
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: service
+                  operator: In
+                  values:
 #                      - zookeeper
 #                      - srrp
 #                      - k2
 #                      - connect
-                      - kafka0
-              topologyKey: kubernetes.io/hostname
+                    - kafka0
+            topologyKey: kubernetes.io/hostname
