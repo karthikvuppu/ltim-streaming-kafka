@@ -10,7 +10,7 @@ spec:
     init: confluentinc/confluent-init-container:2.2.0-1
   dataVolumeCapacity: 40Gi
   logVolumeCapacity: 30Gi
-  oneReplicaPerNode: true
+#  oneReplicaPerNode: true
   storageClass:
     name: standard
 
