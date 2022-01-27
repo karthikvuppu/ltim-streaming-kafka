@@ -27,6 +27,12 @@ spec:
   dependencies:
     kafka:
       bootstrapEndpoint: kafka:9071
+  configOverrides:
+    server:
+      - key.converter=org.apache.kafka.connect.storage.StringConverter
+      - value.converter=io.confluent.connect.avro.AvroConverter
+      - value.converter.schema.registry.url=http://schemaregistry:8081
+
   externalAccess:
 #    type: nodePort
 #    nodePort:
