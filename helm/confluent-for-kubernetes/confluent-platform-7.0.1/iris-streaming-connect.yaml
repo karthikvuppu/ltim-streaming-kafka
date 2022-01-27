@@ -9,6 +9,18 @@ spec:
   image:
     application: confluentinc/cp-server-connect:7.0.1
     init: confluentinc/confluent-init-container:2.2.0-1
+  build:
+    type: onDemand
+    onDemand:
+      plugins:
+        locationType: confluentHub                          #if the k8s have internet connection i.e to confluenthub
+        confluentHub:
+          - name: kafka-connect-datagen
+            owner: confluentinc
+            version: 0.5.2
+          - name: debezium-connector-mysql
+            owner: debezium
+            version: 1.7.1
   dependencies:
     kafka:
       bootstrapEndpoint: kafka:9071
