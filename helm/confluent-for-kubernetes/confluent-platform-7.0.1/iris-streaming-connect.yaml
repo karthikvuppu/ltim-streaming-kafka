@@ -21,6 +21,9 @@ spec:
           - name: debezium-connector-mysql
             owner: debezium
             version: 1.7.1
+          - name: kafka-connect-hdfs3
+            owner: confluentinc
+            version: 1.1.8
   dependencies:
     kafka:
       bootstrapEndpoint: kafka:9071
