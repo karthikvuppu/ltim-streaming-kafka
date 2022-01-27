@@ -54,7 +54,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - zookeeper
+                    - srrp
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
@@ -62,9 +62,5 @@ spec:
                 - key: service
                   operator: In
                   values:
-#                      - zookeeper
-#                      - srrp
-#                      - k2
-#                      - connect
                     - kafka0
             topologyKey: kubernetes.io/hostname
