@@ -69,6 +69,8 @@ spec:
           defaultMode: 420
           name: {{ .Values.name }}-ldifs
       {{- end }}
+  storageClass:
+    name: standard
   volumeClaimTemplates:
   - metadata:
       name: ldap-data
