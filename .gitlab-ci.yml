@@ -61,7 +61,7 @@ before_script:
 Operator:
   stage: confluent_operator
   script:
-    - "kubectl create namespace confluent"
+   # - "kubectl create namespace confluent"
     - "kubectl apply -f $CRD"
     - "kubectl apply -f $CRB -n confluent"
     - "helm upgrade --install confluent-operator helm/confluent-for-kubernetes --namespace confluent"
