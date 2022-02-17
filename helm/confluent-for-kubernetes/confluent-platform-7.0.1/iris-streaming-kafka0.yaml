@@ -96,7 +96,7 @@ spec:
       authentication:
         type: digest
         jaasConfig:
-          secretRef: credential
+          secretRef: credential1
       tls:
         enabled: true
   metricReporter:

@@ -34,7 +34,7 @@ spec:
       authentication:
         type: plain
         jaasConfig:
-          secretRef: credential
+          secretRef: credential1
       tls:
         enabled: true
     mds:

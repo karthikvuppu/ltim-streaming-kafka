@@ -13,7 +13,7 @@ spec:
   authentication:                             #secret needs to be created
     type: digest
     jaasConfig:
-      secretRef: credential
+      secretRef: credential1
   tls:
     secretRef: tls-zookeeper
 #  oneReplicaPerNode: true
