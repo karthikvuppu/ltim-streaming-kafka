@@ -10,6 +10,12 @@ spec:
     init: confluentinc/confluent-init-container:2.2.0-1
   dataVolumeCapacity: 40Gi
   logVolumeCapacity: 30Gi
+  authentication:                             #secret needs to be created
+    type: digest
+    jaasConfig:
+      secretRef: credential
+  tls:
+    secretRef: tls-zookeeper
 #  oneReplicaPerNode: true
   storageClass:
     name: standard

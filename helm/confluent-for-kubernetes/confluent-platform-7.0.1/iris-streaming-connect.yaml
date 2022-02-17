@@ -24,9 +24,29 @@ spec:
           - name: kafka-connect-hdfs3
             owner: confluentinc
             version: 1.1.8
+  tls:
+    secretRef: tls-connect
+  authorization:
+    type: rbac
   dependencies:
     kafka:
-      bootstrapEndpoint: kafka:9071
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+      mds:
+        endpoint: https://kafka.confluent.svc.cluster.local:8090
+        tokenKeyPair:
+          secretRef: mds-token
+        authentication:
+          type: bearer
+          bearer:
+            secretRef: connect-mds-client
+        tls:
+          enabled: true
   configOverrides:
     server:
       - key.converter=org.apache.kafka.connect.storage.StringConverter

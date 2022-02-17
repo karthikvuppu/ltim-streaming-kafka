@@ -15,12 +15,28 @@ spec:
     server:
       - confluent.cluster.link.enable=true
       - confluent.metrics.reporter.bootstrap.servers=cc.iris-streaming-sb.devtest.aws.scania.com:9092
-
+  tls:
+    secretRef: tls-group1
   listeners:
+    internal:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+        secretRef: tls-kafka-internal           # Use auto-generated certs
     external:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9.]*)?.*/$1/
+      tls:
+        enabled: true
+        secretRef: tls-kafka-external
+        # Use provided certs in secret `tls-kafka`
       externalAccess:
         type: loadBalancer
-
 #        nodePort:
 #          host: kafka.iris-streaming-sb.devtest.aws.scania.com
 #          nodePortOffset: 30000
@@ -30,12 +46,59 @@ spec:
             service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
             service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-kafka-nlb
             service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-03bb1df2bc15436b6, subnet-061b406bbac050fcb, subnet-0a71781428bea6c6e
-            service.beta.kubernetes.io/load-balancer-source-ranges: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32, 10.0.0.0/24
+            service.beta.kubernetes.io/load-balancer-source-ranges: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
             #            service.beta.kubernetes.io/aws-load-balancer-scheme: internal
             service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka0
           domain: iris-streaming-sb.devtest.aws.scania.com
           bootstrapPrefix: kafka
           brokerPrefix: s
+    authorization:
+      type: rbac
+      superUsers:
+        - User:kafka
+    services:
+      mds:
+        tls:
+          enabled: true
+        tokenKeyPair:
+          secretRef: mds-token
+        externalAccess:
+          type: loadBalancer
+          loadBalancer:
+            domain: iris-streaming-sb.devtest.aws.scania.com
+            prefix: rb-mds
+        provider:
+          type: ldap
+          ldap:
+            address: ldap://ldap.confluent.svc.cluster.local:389
+            authentication:
+              type: simple
+              simple:
+                secretRef: credential
+            configurations:
+              groupNameAttribute: cn
+              groupObjectClass: group
+              groupMemberAttribute: member
+              groupMemberAttributePattern: CN=(.*),DC=test,DC=com
+              groupSearchBase: dc=test,dc=com
+              userNameAttribute: cn
+              userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
+              userObjectClass: organizationalRole
+              userSearchBase: dc=test,dc=com
+    dependencies:
+      kafkaRest:
+        authentication:
+          type: bearer
+          bearer:
+            secretRef: mds-client
+      zookeeper:
+        endpoint: zookeeper.confluent.svc.cluster.local:2182
+        authentication:
+          type: digest
+          jaasConfig:
+            secretRef: credential
+        tls:
+          enabled: true
   metricReporter:
     enabled: true
   oneReplicaPerNode: true
