@@ -79,7 +79,7 @@ LDAP:
 #    - "helm upgrade --install -f secure-deploy/assets/openldap/ldaps-rbac.yaml test-ldap secure-deploy/assets/openldap --namespace confluent"
 #    - "kubectl get pods --namespace confluent"
 #    - "kubectl create secret tls ca-pair-sslcerts --cert=$ca_cert --key=$key_pem --namespace confluent"
-    - "kubectl delete secret generic credential --from-file=plain-users.json=secure-deploy/creds-kafka-sasl-users.json --from-file=digest-users.json=secure-deploy/creds-zookeeper-sasl-digest-users.json --from-file=digest.txt=secure-deploy/creds-kafka-zookeeper-credentials.txt --from-file=plain.txt=secure-deploy/creds-client-kafka-sasl-user.txt --from-file=basic.txt=secure-deploy/creds-control-center-users.txt --from-file=ldap.txt=secure-deploy/ldap.txt --namespace confluent"
+    - "kubectl delete secret credential --namespace confluent"
     - "kubectl create secret generic credential --from-file=plain-users.json=secure-deploy/creds-kafka-sasl-users.json --from-file=digest-users.json=secure-deploy/creds-zookeeper-sasl-digest-users.json --from-file=digest.txt=secure-deploy/creds-kafka-zookeeper-credentials.txt --from-file=plain.txt=secure-deploy/creds-client-kafka-sasl-user.txt --from-file=basic.txt=secure-deploy/creds-control-center-users.txt --from-file=ldap.txt=secure-deploy/ldap.txt --namespace confluent"
     - "kubectl create secret generic mds-token --from-file=mdsPublicKey.pem=secure-deploy/assets/certs/mds-publickey.txt --from-file=mdsTokenKeyPair.pem=secure-deploy/assets/certs/mds-tokenkeypair.txt --namespace confluent"
     # Kafka RBAC credential
