@@ -326,7 +326,7 @@ StorageClass-destroy:
   when: manual
 
 LDAP_destroy:
-  stage: confluent_LDAP_destroy
+  stage: confluent_destroy_LDAP
   script:
     - "helm delete test-ldap --namespace confluent"
   environment:
