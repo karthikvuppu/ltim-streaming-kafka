@@ -15,7 +15,7 @@ spec:
     jaasConfig:
       secretRef: credential1
   tls:
-    secretRef: tls-group1
+    secretRef: tls-group2
 #  oneReplicaPerNode: true
   storageClass:
     name: standard

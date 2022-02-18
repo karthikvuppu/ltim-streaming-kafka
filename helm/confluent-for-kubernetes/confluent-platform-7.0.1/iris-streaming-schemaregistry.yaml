@@ -9,7 +9,7 @@ spec:
     application: confluentinc/cp-schema-registry:7.0.1
     init: confluentinc/confluent-init-container:2.2.0-1
   tls:
-    secretRef: tls-group1
+    secretRef: tls-group2
   authorization:
     type: rbac
   dependencies:

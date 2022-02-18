@@ -25,7 +25,7 @@ spec:
             owner: confluentinc
             version: 1.1.8
   tls:
-    secretRef: tls-group1
+    secretRef: tls-group2
   authorization:
     type: rbac
   dependencies:
