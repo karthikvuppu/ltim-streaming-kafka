@@ -15,7 +15,7 @@ spec:
   authorization:
     type: rbac
   tls:
-    secretRef: tls-ksqldb
+    secretRef: tls-group1
   dependencies:
     kafka:
       bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
