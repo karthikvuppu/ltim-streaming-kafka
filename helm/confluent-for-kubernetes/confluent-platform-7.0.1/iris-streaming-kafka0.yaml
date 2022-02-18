@@ -84,11 +84,11 @@ spec:
             userObjectClass: organizationalRole
             userSearchBase: dc=test,dc=com
   dependencies:
-    # kafkaRest:
-    #   authentication:
-    #     type: bearer
-    #     bearer:
-    #       secretRef: mds-client
+     kafkaRest:
+       authentication:
+         type: bearer
+         bearer:
+           secretRef: mds-client
     zookeeper:
       endpoint: zookeeper.confluent.svc.cluster.local:2182
       authentication:

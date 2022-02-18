@@ -15,6 +15,7 @@ variables:
   CC: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-controlcenter.yaml'
   CONNECT: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-connect.yaml'
   RESTPROXY: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-restproxy.yaml'
+  RESTCLASS: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-restclass.yaml'
 
   GIT_SUBMODULE_STRATEGY: recursive
 
@@ -161,6 +162,19 @@ restproxy:
   only:
     - master
   when: manual
+restclass:
+  stage: confluent_components_deployment
+  script:
+
+    - "kubectl apply -f $RESTCLASS"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
 connect:
   stage: confluent_components_deployment
   script:
@@ -265,6 +279,19 @@ restproxy-destroy:
   script:
 
     - "kubectl delete -f $RESTPROXY"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: dev
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+restclass-destroy:
+  stage: confluent_components_destroy
+  script:
+
+    - "kubectl delete -f $RESTCLASS"
     - "kubectl get pods -n confluent"
   environment:
     name: dev
