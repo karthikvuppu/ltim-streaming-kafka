@@ -9,9 +9,8 @@ spec:
 #      secretRef: kafkarestproxy-users
 #    type: basic
   authentication:
-      type: mtls
-  tls:
-    enabled: true
+    type: mtls
+  
   dependencies:
     kafka:
       bootstrapEndpoint:  kafka.confluent.svc.cluster.local:9071
