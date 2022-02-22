@@ -34,10 +34,10 @@ spec:
       tls:
         enabled: true
     schemaRegistry:
-      authentication:
-        basic:
-          secretRef: credential1
-        type: basic
+      # authentication:
+      #   basic:
+      #     secretRef: credential1
+      #   type: basic
       tls:
         enabled: true
       url: https://schemaregistry.operator.svc.cluster.local:8081
