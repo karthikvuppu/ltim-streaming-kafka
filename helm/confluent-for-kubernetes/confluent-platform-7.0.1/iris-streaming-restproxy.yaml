@@ -36,7 +36,7 @@ spec:
     schemaRegistry:
       authentication:
         basic:
-          secretRef: sr-client-basic
+          secretRef: sr-mds-client
         type: basic
       tls:
         enabled: true
