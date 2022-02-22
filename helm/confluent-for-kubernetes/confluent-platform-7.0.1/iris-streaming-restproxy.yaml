@@ -10,7 +10,10 @@ spec:
 #    type: basic
   authentication:
     type: mtls
-  
+  tls:
+    secretRef: tls-group2
+  authorization:
+    type: rbac
   dependencies:
     kafka:
       bootstrapEndpoint:  kafka.confluent.svc.cluster.local:9071
