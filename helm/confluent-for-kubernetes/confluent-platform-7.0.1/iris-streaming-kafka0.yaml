@@ -15,15 +15,14 @@ spec:
     server:
       - confluent.cluster.link.enable=true
       - confluent.metrics.reporter.bootstrap.servers=cc.iris-streaming-sb.devtest.aws.scania.com:9092
-      - listener.name.internal.plain.sasl.server.callback.handler.class=io.confluent.security.auth.provider.ldap.LdapAuthenticateCallbackHandler
   tls:
     secretRef: tls-group2
   listeners:
     internal:
       authentication:
-        type: plain
-        jaasConfigPassThrough:
-          secretRef: broker-credential
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9]*)?.*/$1/
       tls:
         enabled: true
     external:
@@ -99,13 +98,7 @@ spec:
       tls:
         enabled: true
   metricReporter:
-    enabled: true
-    authentication:
-      type: plain
-      jaasConfigPassThrough:
-        secretRef: broker-credential
-    tls:
-      enabled: true  
+    enabled: true      
   oneReplicaPerNode: true
   podTemplate:
     podSecurityContext:
