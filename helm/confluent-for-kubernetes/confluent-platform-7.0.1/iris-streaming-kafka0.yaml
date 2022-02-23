@@ -20,9 +20,9 @@ spec:
   listeners:
     internal:
       authentication:
-        type: mtls
-        principalMappingRules:
-          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9]*)?.*/$1/
+        type: plain
+        jaasConfig:
+          secretRef: credential1
       tls:
         enabled: true
     external:
