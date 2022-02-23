@@ -15,14 +15,16 @@ spec:
     server:
       - confluent.cluster.link.enable=true
       - confluent.metrics.reporter.bootstrap.servers=cc.iris-streaming-sb.devtest.aws.scania.com:9092
+      - listener.name.internal.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required;
+      - listener.name.internal.sasl.server.callback.handler.class=io.confluent.security.auth.provider.ldap.LdapAuthenticateCallbackHandler
   tls:
     secretRef: tls-group2
   listeners:
     internal:
       authentication:
         type: plain
-        jaasConfig:
-          secretRef: credential1
+#        jaasConfig:
+#          secretRef: credential1
       tls:
         enabled: true
     external:
