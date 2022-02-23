@@ -25,7 +25,8 @@ spec:
         type: plain
         jaasConfigPassThrough:
 #        jaasConfig:
-          secretRef: credential1
+#          secretRef: credential1
+          secretRef: broker-credential
       tls:
         enabled: true
     external:
