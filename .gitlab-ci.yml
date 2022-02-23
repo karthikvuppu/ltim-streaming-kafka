@@ -93,6 +93,8 @@ LDAP:
     - "kubectl create secret generic connect-mds-client --from-file=bearer.txt=secure-deploy/connect-mds-client.txt --namespace confluent"
     # Schema Registry RBAC credential
     - "kubectl create secret generic sr-mds-client --from-file=bearer.txt=secure-deploy/sr-mds-client.txt --namespace confluent"
+    # Restproxy RBAC credential
+    - "kubectl create secret generic rp-mds-client --from-file=bearer.txt=secure-deploy/rp-mds-client.txt --namespace confluent"
     # ksqlDB RBAC credential
     - "kubectl create secret generic ksqldb-mds-client --from-file=bearer.txt=secure-deploy/ksqldb-mds-client.txt --namespace confluent"
     # Kafka REST credential
@@ -371,7 +373,7 @@ StorageClass-destroy:
 LDAP_destroy:
   stage: confluent_destroy_LDAP
   script:
-    - "helm delete test-ldap --namespace confluent"
+    - "helm delete test-ldap --namespace confluent" #add to delete secrets later
   environment:
     name: dev
   tags:
