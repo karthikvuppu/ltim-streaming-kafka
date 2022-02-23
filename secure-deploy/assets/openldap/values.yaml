@@ -132,6 +132,11 @@ ldifs:
     add: memberuid
     memberuid: cn=alice,ou=users,{{ LDAP_BASE_DN }}
 
+    dn: cn=readonlyusers,ou=groups,{{ LDAP_BASE_DN }}
+    changetype: modify
+    add: memberuid
+    memberuid: cn=streaming,ou=users,{{ LDAP_BASE_DN }}
+
     dn: cn=c3users,ou=groups,{{ LDAP_BASE_DN }}
     changetype: modify
     add: memberuid
@@ -150,10 +155,10 @@ ldifs:
     objectClass: shadowAccount
     uid: streaming
     sn: LookingGlass
-    givenName: Streaming
+    givenName: streaming
     cn: streaming
     displayName: Streaming LookingGlass
-    uidNumber: 10000
+    uidNumber: 10010
     gidNumber: 5000
     userPassword: streaming-secret
     gecos: streaming
