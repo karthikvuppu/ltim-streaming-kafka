@@ -22,7 +22,7 @@ variables:
 
 stages:
   - confluent_operator
-#  - confluent_operator_obm
+  - confluent_operator_obm
   - confluent_operator_sbox
   - confluent_components_deployment
   - confluent_deployment_obm
