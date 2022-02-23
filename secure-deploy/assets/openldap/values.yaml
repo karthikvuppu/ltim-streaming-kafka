@@ -143,3 +143,19 @@ ldifs:
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: devuser
+  15_streaming.ldif:  |-
+    dn: cn=streaming,ou=users,{{ LDAP_BASE_DN }}
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: streaming
+    sn: LookingGlass
+    givenName: Streaming
+    cn: streaming
+    displayName: Streaming LookingGlass
+    uidNumber: 10000
+    gidNumber: 5000
+    userPassword: streaming-secret
+    gecos: streaming
+    loginShell: /bin/bash
+    homeDirectory: /home/streaming
