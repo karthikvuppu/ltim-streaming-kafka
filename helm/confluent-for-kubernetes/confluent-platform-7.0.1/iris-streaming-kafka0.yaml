@@ -22,31 +22,14 @@ spec:
     secretRef: tls-group2
   listeners:
     custom:
-    - name: oauth
-      port: 9093
+    - name: internaleks
+      port: 9094
       authentication:
-        type: oauthbearer
-        jaasConfig:
-          secretRef: oauth-keycloak-secret
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9]*)?.*/$1/
       tls:
         enabled: true
-      externalAccess:
-        type: loadBalancer
-#        nodePort:
-#          host: kafka.iris-streaming-sb.devtest.aws.scania.com
-#          nodePortOffset: 30000
-        loadBalancer:
-          annotations:
-            service.beta.kubernetes.io/aws-load-balancer-type: nlb
-            service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-            service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-kafka-nlb
-            service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-03bb1df2bc15436b6, subnet-061b406bbac050fcb, subnet-0a71781428bea6c6e
-            service.beta.kubernetes.io/load-balancer-source-ranges: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
-            #            service.beta.kubernetes.io/aws-load-balancer-scheme: internal
-            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka0
-          domain: iris-streaming-sb.devtest.aws.scania.com
-          bootstrapPrefix: kafka
-          brokerPrefix: s
     internal:
       authentication: 
         type: plain
