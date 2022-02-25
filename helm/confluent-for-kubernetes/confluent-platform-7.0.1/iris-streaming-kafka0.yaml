@@ -7,7 +7,7 @@ spec:
   replicas: 3
   image:
 #    application: confluentinc/cp-server:7.0.1
-    application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-streaming-confluent
+    application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-streaming-confluent:latest
     init: confluentinc/confluent-init-container:2.2.0-1
   storageClass:
     name: standard
