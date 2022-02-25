@@ -26,7 +26,7 @@ spec:
       - listener.name.oauth.ssl.truststore.location=/mnt/sslcerts/truststore.p12
       - listener.name.oauth.ssl.truststore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
       - listener.name.oauth.sasl.enabled.mechanisms=OAUTHBEARER
-      - listener.name.oauth.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required oauth.valid.issuer.uri="https://fg.ciam.preprod.aws.scania.com/auth/realms/scania" oauth.jwks.endpoint.uri="https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/token" unsecuredLoginStringClaim_sub="unused" oauth.username.claim="preferred_username" ;
+      - listener.name.oauth.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required oauth.valid.issuer.uri="https://fg.ciam.preprod.aws.scania.com/auth/realms/scania" oauth.jwks.endpoint.uri="https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs" unsecuredLoginStringClaim_sub="unused" oauth.username.claim="preferred_username" ;
       - listener.name.oauth.sasl.mechanism=PLAIN
       - principal.builder.class=io.strimzi.kafka.oauth.server.OAuthKafkaPrincipalBuilder
   tls:
