@@ -22,14 +22,6 @@ spec:
     secretRef: tls-group2
   listeners:
     custom:
-    # - name: internaleks
-    #   port: 9094
-    #   authentication:
-    #     type: mtls
-    #     principalMappingRules:
-    #       - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9]*)?.*/$1/
-    #   tls:
-    #     enabled: true
     - name: oauth
       port: 9093
       authentication:
