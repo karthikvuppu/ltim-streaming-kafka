@@ -15,10 +15,9 @@ spec:
   configOverrides:
     server:
       - confluent.cluster.link.enable=true
-#      - confluent.metrics.reporter.bootstrap.servers=cc.iris-streaming-sb.devtest.aws.scania.com:9092
       - listener.security.protocol.map=EXTERNAL:SSL,INTERNAL:SASL_SSL,INTERNALEKS:SSL,REPLICATION:SASL_PLAINTEXT,TOKEN:SASL_SSL,OAUTH:SASL_PLAINTEXT
       - listeners=EXTERNAL://:9092,INTERNAL://:9071,INTERNALEKS://:9094,REPLICATION://:9072,TOKEN://:9073,OAUTH://:9093
-      - advertised.listeners=EXTERNAL://s0.iris-streaming-sb.devtest.aws.scania.com:9092,INTERNAL://kafka-0.kafka.confluent.svc.cluster.local:9071,INTERNALEKS://kafka-0.kafka.confluent.svc.cluster.local:9094,REPLICATION://kafka-0.kafka.confluent.svc.cluster.local:9072,TOKEN://kafka-0.kafka.confluent.svc.cluster.local:9073,OAUTH://s0.iris-streaming-sb.devtest.aws.scania.com:9093
+#      - advertised.listeners=EXTERNAL://s0.iris-streaming-sb.devtest.aws.scania.com:9092,INTERNAL://kafka-0.kafka.confluent.svc.cluster.local:9071,INTERNALEKS://kafka-0.kafka.confluent.svc.cluster.local:9094,REPLICATION://kafka-0.kafka.confluent.svc.cluster.local:9072,TOKEN://kafka-0.kafka.confluent.svc.cluster.local:9073,OAUTH://s0.iris-streaming-sb.devtest.aws.scania.com:9093
       - listener.name.oauth.oauthbearer.sasl.server.callback.handler.class=io.strimzi.kafka.oauth.server.JaasServerOauthValidatorCallbackHandler
       - listener.name.oauth.ssl.key.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
       - listener.name.oauth.ssl.keystore.location=/mnt/sslcerts/keystore.p12
