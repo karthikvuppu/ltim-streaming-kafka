@@ -6,8 +6,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.0.1
-#    application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-streaming-confluent:latest
+#    application: confluentinc/cp-server:7.0.1
+    application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-streaming-confluent:latest
     init: confluentinc/confluent-init-container:2.2.0-1
   storageClass:
     name: standard
@@ -15,20 +15,20 @@ spec:
   configOverrides:
     server:
       - confluent.cluster.link.enable=true
-      # - confluent.metrics.reporter.bootstrap.servers=cc.iris-streaming-sb.devtest.aws.scania.com:9092
-      # - listener.security.protocol.map=EXTERNAL:SSL,INTERNAL:SASL_SSL,INTERNALEKS:SSL,REPLICATION:SASL_PLAINTEXT,TOKEN:SASL_SSL,OAUTH:SASL_PLAINTEXT
-      # - listeners=EXTERNAL://:9092,INTERNAL://:9071,INTERNALEKS://:9094,REPLICATION://:9072,TOKEN://:9073,OAUTH://:9093
-      # - advertised.listeners=EXTERNAL://s0.iris-streaming-sb.devtest.aws.scania.com:9092,INTERNAL://kafka-0.kafka.confluent.svc.cluster.local:9071,INTERNALEKS://kafka-0.kafka.confluent.svc.cluster.local:9094,REPLICATION://kafka-0.kafka.confluent.svc.cluster.local:9072,TOKEN://kafka-0.kafka.confluent.svc.cluster.local:9073,OAUTH://s0.iris-streaming-sb.devtest.aws.scania.com:9093
-      # - listener.name.oauth.oauthbearer.sasl.server.callback.handler.class=io.strimzi.kafka.oauth.server.JaasServerOauthValidatorCallbackHandler
-      # - listener.name.oauth.ssl.key.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
-      # - listener.name.oauth.ssl.keystore.location=/mnt/sslcerts/keystore.p12
-      # - listener.name.oauth.ssl.keystore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
-      # - listener.name.oauth.ssl.truststore.location=/mnt/sslcerts/truststore.p12
-      # - listener.name.oauth.ssl.truststore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
-      # - listener.name.oauth.sasl.enabled.mechanisms=OAUTHBEARER
-      # - listener.name.oauth.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required oauth.valid.issuer.uri="https://fg.ciam.preprod.aws.scania.com/auth/realms/scania" oauth.jwks.endpoint.uri="https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs" unsecuredLoginStringClaim_sub="unused" oauth.username.claim="preferred_username" ;
-      # - listener.name.oauth.sasl.mechanism=PLAIN
-      # - principal.builder.class=io.strimzi.kafka.oauth.server.OAuthKafkaPrincipalBuilder
+#      - confluent.metrics.reporter.bootstrap.servers=cc.iris-streaming-sb.devtest.aws.scania.com:9092
+      - listener.security.protocol.map=EXTERNAL:SSL,INTERNAL:SASL_SSL,INTERNALEKS:SSL,REPLICATION:SASL_PLAINTEXT,TOKEN:SASL_SSL,OAUTH:SASL_PLAINTEXT
+      - listeners=EXTERNAL://:9092,INTERNAL://:9071,INTERNALEKS://:9094,REPLICATION://:9072,TOKEN://:9073,OAUTH://:9093
+      - advertised.listeners=EXTERNAL://s0.iris-streaming-sb.devtest.aws.scania.com:9092,INTERNAL://kafka-0.kafka.confluent.svc.cluster.local:9071,INTERNALEKS://kafka-0.kafka.confluent.svc.cluster.local:9094,REPLICATION://kafka-0.kafka.confluent.svc.cluster.local:9072,TOKEN://kafka-0.kafka.confluent.svc.cluster.local:9073,OAUTH://s0.iris-streaming-sb.devtest.aws.scania.com:9093
+      - listener.name.oauth.oauthbearer.sasl.server.callback.handler.class=io.strimzi.kafka.oauth.server.JaasServerOauthValidatorCallbackHandler
+      - listener.name.oauth.ssl.key.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      - listener.name.oauth.ssl.keystore.location=/mnt/sslcerts/keystore.p12
+      - listener.name.oauth.ssl.keystore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      - listener.name.oauth.ssl.truststore.location=/mnt/sslcerts/truststore.p12
+      - listener.name.oauth.ssl.truststore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      - listener.name.oauth.sasl.enabled.mechanisms=OAUTHBEARER
+      - listener.name.oauth.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required oauth.valid.issuer.uri="https://fg.ciam.preprod.aws.scania.com/auth/realms/scania" oauth.jwks.endpoint.uri="https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs" unsecuredLoginStringClaim_sub="unused" oauth.username.claim="preferred_username" ;
+      - listener.name.oauth.sasl.mechanism=PLAIN
+      - principal.builder.class=io.strimzi.kafka.oauth.server.OAuthKafkaPrincipalBuilder
   tls:
     secretRef: tls-group2
   listeners:
