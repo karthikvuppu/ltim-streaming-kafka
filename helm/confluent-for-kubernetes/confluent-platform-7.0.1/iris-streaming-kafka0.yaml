@@ -107,7 +107,7 @@ spec:
       tls:
         enabled: true
   metricReporter:
-    enabled: true      
+    enabled: false      
   oneReplicaPerNode: true
   podTemplate:
     podSecurityContext:
