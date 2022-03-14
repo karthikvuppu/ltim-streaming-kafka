@@ -69,7 +69,9 @@ spec:
         authentication:
           jaasConfig:
             secretRef: mds-client
-          type: bearer
+          type: plain
+        tls:
+          enabled: true
       tokenKeyPair:
         secretRef: mds-token
     zookeeper:
