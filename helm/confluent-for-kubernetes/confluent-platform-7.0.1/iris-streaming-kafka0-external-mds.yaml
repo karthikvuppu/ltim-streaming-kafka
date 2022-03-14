@@ -68,8 +68,8 @@ spec:
       kafka:
         authentication:
           jaasConfig:
-            secretRef: mds-client
-          type: oauthbearer
+            secretRef: mds-client-plain
+          type: plain
         tls:
           enabled: true
       tokenKeyPair:
