@@ -69,14 +69,9 @@ spec:
         authentication:
           jaasConfig:
             secretRef: mds-client
-          type: oauthbearer
+          type: bearer
       tokenKeyPair:
         secretRef: mds-token
-    kafkaRest:
-      authentication:
-        type: bearer
-        bearer:
-          secretRef: mds-client
     zookeeper:
       endpoint: zookeeper.confluent.svc.cluster.local:2182
       authentication:
