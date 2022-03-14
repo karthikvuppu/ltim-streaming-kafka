@@ -65,14 +65,13 @@ spec:
   dependencies:
     mds:
       endpoint: https://a20e6e825a2de4042a6e7b2c86b5c11f-1306362567.eu-north-1.elb.amazonaws.com:443
+      kafka:
+        authentication:
+          jaasConfig:
+            secretRef: mds-client
+          type: oauthbearer
       tokenKeyPair:
         secretRef: mds-token
-      authentication:
-        type: bearer
-        bearer:
-          secretRef: mds-client
-        tls:
-          enabled: true
     kafkaRest:
       authentication:
         type: bearer
