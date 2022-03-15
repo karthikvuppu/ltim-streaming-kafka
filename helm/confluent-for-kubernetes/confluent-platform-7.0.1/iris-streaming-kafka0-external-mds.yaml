@@ -67,7 +67,7 @@ spec:
       authentication:
         type: bearer
         bearer:
-          secretRef: mds-client
+          secretRef: rest-credential
     mds:
       endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443
       tls:
