@@ -58,8 +58,8 @@ spec:
             #            service.beta.kubernetes.io/aws-load-balancer-scheme: internal
             service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka0
           domain: iris-streaming-sb.devtest.aws.scania.com
-          bootstrapPrefix: kafka
-          brokerPrefix: s
+          bootstrapPrefix: kafka-ext
+          brokerPrefix: s-ext
   authorization:
     type: rbac
     superUsers:
