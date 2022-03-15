@@ -71,7 +71,7 @@ spec:
     mds:
       endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443
       kafka:
-        bootstrapEndpoint: kafka0.iris-streaming-sb.devtest.aws.scania.com:9092,kafka1.iris-streaming-sb.devtest.aws.scania.com:9092,kafka2.iris-streaming-sb.devtest.aws.scania.com:9092
+        bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
         authentication:
           jaasConfig:
             secretRef: mds-client-plain
