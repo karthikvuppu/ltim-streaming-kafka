@@ -69,9 +69,9 @@ spec:
         bearer:
           secretRef: mds-client
     mds:
-      endpoint: https://a20e6e825a2de4042a6e7b2c86b5c11f-1306362567.eu-north-1.elb.amazonaws.com:443
+      endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443
       kafka:
-        bootstrapEndpoint: adc8b139acf314c7f8b751acaa8582c6-02566451be86cc7a.elb.eu-north-1.amazonaws.com:9092,ae790dac7bcb14eb095e87c0018b0f1a-3090fb148954c6e3.elb.eu-north-1.amazonaws.com:9092,a0112505bd0304b45850fecf6757e1dc-37f5c0253502be85.elb.eu-north-1.amazonaws.com:9092
+        bootstrapEndpoint: kafka0.iris-streaming-sb.devtest.aws.scania.com:9092,kafka1.iris-streaming-sb.devtest.aws.scania.com:9092,kafka2.iris-streaming-sb.devtest.aws.scania.com:9092
         authentication:
           jaasConfig:
             secretRef: mds-client-plain
