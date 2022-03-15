@@ -4,6 +4,8 @@ metadata:
   name: kafka
   namespace: confluent
 spec:
+  license:
+    secretRef: confluent-license
   replicas: 3
   image:
     application: confluentinc/cp-server:7.0.1
