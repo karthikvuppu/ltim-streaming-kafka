@@ -16,12 +16,6 @@ spec:
   dataVolumeCapacity: 50Gi
   configOverrides:
     server:
-      - confluent.monitoring.interceptor.bootstrap.servers=s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
-      - confluent.monitoring.interceptor.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="${file:/mnt/secrets/mds-client-plain/plain.txt:username}" password="${file:/mnt/secrets/mds-client-plain/plain.txt:password}";
-      - confluent.monitoring.interceptor.sasl.mechanism=PLAIN
-      - confluent.monitoring.interceptor.security.protocol=SASL_SSL
-      - confluent.monitoring.interceptor.ssl.truststore.location=/mnt/sslcerts/tls-group2/truststore.p12
-      - confluent.monitoring.interceptor.ssl.truststore.password=${file:/mnt/sslcerts/tls-group2/jksPassword.txt:jksPassword}
   tls:
     secretRef: tls-group2
   listeners:
@@ -81,7 +75,6 @@ spec:
     mds:
       endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443
       tls:
-        secretRef: tls-group2
         enabled: true
       kafka:
         bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
@@ -90,7 +83,6 @@ spec:
             secretRef: mds-client-plain
           type: plain
         tls:
-          secretRef: tls-group2
           enabled: true
       tokenKeyPair:
         secretRef: mds-token
@@ -110,7 +102,6 @@ spec:
         secretRef: mds-client-plain
       type: plain
     tls:
-      secretRef: tls-group2
       enabled: true      
   oneReplicaPerNode: true
   podTemplate:
