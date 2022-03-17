@@ -30,7 +30,7 @@ spec:
       authentication:
         type: bearer
         bearer:
-          secretRef: rp-mds-client
+          secretRef: mds-client
       tls:
         enabled: true
     schemaRegistry:
