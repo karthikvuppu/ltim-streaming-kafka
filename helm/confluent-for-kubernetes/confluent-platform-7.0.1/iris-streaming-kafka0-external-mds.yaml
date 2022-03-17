@@ -38,10 +38,7 @@ spec:
         enabled: true
       
     external:
-      authentication:
-        type: plain
-        jaasConfig:
-          secretRef: credential1
+      # authentication:
 #        type: mtls
         # principalMappingRules:
         #   - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9]*)?.*/$1/
