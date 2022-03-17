@@ -39,7 +39,7 @@ spec:
       
     external:
       authentication:
-       type: mtls
+        type: mtls
         principalMappingRules:
           - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9]*)?.*/$1/
       tls:
