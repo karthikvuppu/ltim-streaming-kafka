@@ -26,14 +26,11 @@ spec:
       endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443
       tls:
         enabled: true
-      kafka:
-        bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
-        authentication:
-          jaasConfig:
-            secretRef: mds-client-plain
-          type: plain
-        tls:
-          enabled: true
+      authentication:
+        jaasConfig:
+          secretRef: mds-client-plain
+        type: plain
+      
       tokenKeyPair:
         secretRef: mds-token
   externalAccess:
