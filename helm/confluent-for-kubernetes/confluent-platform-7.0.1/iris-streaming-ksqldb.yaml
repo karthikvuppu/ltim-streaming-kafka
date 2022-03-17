@@ -26,7 +26,7 @@ spec:
       tls:
         enabled: true
     mds:
-      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443
       tokenKeyPair:
         secretRef: mds-token
       authentication:
