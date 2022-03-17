@@ -30,7 +30,9 @@ spec:
       authentication:
         type: bearer
         bearer:
-          secretRef: mds-client
+        #we are using internal user kafka for rest proxy
+        #to do: change it to rp-mds-client
+          secretRef: mds-client 
       tls:
         enabled: true
     schemaRegistry:
