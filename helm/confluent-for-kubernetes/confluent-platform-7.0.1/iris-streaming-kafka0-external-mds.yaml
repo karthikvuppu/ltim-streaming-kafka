@@ -38,10 +38,10 @@ spec:
         enabled: true
       
     external:
-      # authentication:
-#        type: mtls
-        # principalMappingRules:
-        #   - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9]*)?.*/$1/
+      authentication:
+       type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9]*)?.*/$1/
       tls:
         enabled: true
         # Use provided certs in secret `tls-kafka`
