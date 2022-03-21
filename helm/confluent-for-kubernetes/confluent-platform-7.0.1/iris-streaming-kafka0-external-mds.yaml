@@ -20,7 +20,7 @@ spec:
     secretRef: tls-group2
   listeners:
     custom:
-    
+
     - name: internaleks
       port: 9094
       authentication:
@@ -30,18 +30,22 @@ spec:
       tls:
         enabled: true
     internal:
-      authentication: 
+      authentication:
         type: plain
         jaasConfig:
           secretRef: credential1
       tls:
         enabled: true
-      
+
     external:
       authentication:
-        type: mtls
-        principalMappingRules:
-          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9]*)?.*/$1/
+        type: plain
+        jaasConfig:
+          secretRef: credential1
+      # authentication:
+      #   type: mtls
+      #   principalMappingRules:
+      #     - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9]*)?.*/$1/
       tls:
         enabled: true
         # Use provided certs in secret `tls-kafka`
@@ -102,7 +106,7 @@ spec:
         secretRef: mds-client-plain
       type: plain
     tls:
-      enabled: true      
+      enabled: true
   oneReplicaPerNode: true
   podTemplate:
     podSecurityContext:
