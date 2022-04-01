@@ -22,14 +22,8 @@ variables:
 
 
 stages:
-  - confluent_operator
-  - confluent_operator_obm
   - confluent_operator_sbox
-  - confluent_components_deployment
-  - confluent_deployment_obm
   - confluent_deployment_sbox
-  - confluent_components_destroy
-  - confluent_destroy_obm
   - confluent_destroy_sbox
 
 image: dtzar/helm-kubectl
