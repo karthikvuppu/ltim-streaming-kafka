@@ -66,7 +66,7 @@ Operator:
   when: manual
 
 LDAP:
-  stage: confluent_components_deployment
+  stage: confluent_deployment_sbox
   script:
     - "helm upgrade --install -f secure-deploy/assets/openldap/ldaps-rbac.yaml test-ldap secure-deploy/assets/openldap --namespace confluent"
     - "kubectl get pods --namespace confluent"
