@@ -6,10 +6,7 @@ variables:
   CRD :  'helm/confluent-for-kubernetes/crds'
   CRB : 'helm/confluent-for-kubernetes/crds/platform.confluent.io_confluentrolebindings.yaml'
   ZK  : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-zookeeper.yaml'
-#  KAFKA0: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka0.yaml'
-  KAFKA0: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka0-external-mds.yaml'
-  #  KAFKA1: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka1.yaml'
-  #  KAFKA2: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka2.yaml'
+  KAFKA: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka0-external-mds.yaml'
   SR: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-schemaregistry.yaml'
   REPLICATOR: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-replicator.yaml'
   KSQLDB: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-ksqldb.yaml'
@@ -49,16 +46,19 @@ before_script:
   - echo "$eks_cluster"
   - aws eks --region "$cluster_region" update-kubeconfig --name "$eks_cluster"
   - kubectl get nodes
+  - kubectl set env ds aws-node -n kube-system WARM_IP_TARGET=2
+  - kubectl set env ds aws-node -n kube-system MINIMUM_IP_TARGET=2
+  - kubectl rollout restart ds aws-node -n kube-system
 
 Operator:
-  stage: confluent_operator
+  stage: confluent_operator_sbox
   script:
     - "kubectl create namespace confluent"
     - "kubectl apply -f $CRD"
     - "kubectl apply -f $CRB -n confluent"
     - "helm upgrade --install confluent-operator helm/confluent-for-kubernetes --namespace confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
@@ -88,7 +88,7 @@ LDAP:
     # Kafka REST credential
     - "kubectl create secret generic rest-credential --from-file=bearer.txt=secure-deploy/bearer.txt --from-file=basic.txt=secure-deploy/bearer.txt --namespace confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
@@ -96,14 +96,12 @@ LDAP:
   when: manual
 
 Zookeeper:
-  stage: confluent_components_deployment
+  stage: confluent_deployment_sbox
   script:
-    #    - "kubeval $ZK"
     - "kubectl apply -f $ZK"
     - "kubectl get pods -n confluent"
-
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
@@ -111,13 +109,12 @@ Zookeeper:
   when: manual
 
 StorageClass:
-  stage: confluent_components_deployment
+  stage: confluent_deployment_sbox
   script:
-    #    - "kubeval $ZK"
     - "kubectl apply -f $SC"
     - "kubectl get pods -n confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
@@ -125,82 +122,64 @@ StorageClass:
   when: manual
 
 Kafka:
-  stage: confluent_components_deployment
+  stage: confluent_deployment_sbox
   script:
-
-    - "kubectl apply -f $KAFKA0"
-    #    - "kubectl apply -f $KAFKA1"
-    #    - "kubectl apply -f $KAFKA2"
+    - "kubectl apply -f $KAFKA"
     - "kubectl get pods -n confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
     - master
   when: manual
-restproxy:
-  stage: confluent_components_deployment
-  script:
 
+restproxy:
+  stage: confluent_deployment_sbox
+  script:
     - "kubectl apply -f $RESTPROXY"
     - "kubectl get pods -n confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
     - master
   when: manual
-restclass:
-  stage: confluent_components_deployment
-  script:
 
+restclass:
+  stage: confluent_deployment_sbox
+  script:
     - "kubectl apply -f $RESTCLASS"
     - "kubectl get pods -n confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
     - master
   when: manual
-connect:
-  stage: confluent_components_deployment
-  script:
 
+connect:
+  stage: confluent_deployment_sbox
+  script:
     - "kubectl apply -f $CONNECT"
     - "kubectl get pods -n confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
     - master
   when: manual
 
-#replicator:
-#  stage: confluent_components_deployment
-#  script:
-#
-#    - "kubectl apply -f $REPLICATOR"
-#    - "kubectl get pods -n confluent"
-#  environment:
-#    name: dev
-#  tags:
-#    - docker
-#  only:
-#    - master
-#  when: manual
-
 ksqldb:
-  stage: confluent_components_deployment
+  stage: confluent_deployment_sbox
   script:
-
     - "kubectl apply -f $KSQLDB"
     - "kubectl get pods -n confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
@@ -208,41 +187,27 @@ ksqldb:
   when: manual
 
 schemaregistry:
-  stage: confluent_components_deployment
+  stage: confluent_deployment_sbox
   script:
-
     - "kubectl apply -f $SR"
     - "kubectl get pods -n confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
     - master
   when: manual
 
-#controlcenter:
-#  stage: confluent_components_deployment
-#  script:
-#
-#    - "kubectl apply -f $CC"
-#    - "kubectl get pods -n confluent"
-#  environment:
-#    name: dev
-#  tags:
-#    - docker
-#  only:
-#    - master
-#  when: manual
 
+# Destroy sandbox components in below order
 zookeeper-destroy:
-  stage: confluent_components_destroy
+  stage: confluent_destroy_sbox
   script:
-
     - "kubectl delete -f $ZK"
     - "kubectl get pods -n confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
@@ -250,81 +215,64 @@ zookeeper-destroy:
   when: manual
 
 kafka-destroy:
-  stage: confluent_components_destroy
+  stage: confluent_destroy_sbox
   script:
-
-    - "kubectl delete -f $KAFKA0"
-    #    - "kubectl delete -f $KAFKA1"
-    #    - "kubectl delete -f $KAFKA2"
+    - "kubectl delete -f $KAFKA"
     - "kubectl get pods -n confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
     - master
   when: manual
-restproxy-destroy:
-  stage: confluent_components_destroy
-  script:
 
+restproxy-destroy:
+  stage: confluent_destroy_sbox
+  script:
     - "kubectl delete -f $RESTPROXY"
     - "kubectl get pods -n confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
     - master
   when: manual
-restclass-destroy:
-  stage: confluent_components_destroy
-  script:
 
+restclass-destroy:
+  stage: confluent_destroy_sbox
+  script:
     - "kubectl delete -f $RESTCLASS"
     - "kubectl get pods -n confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
     - master
   when: manual
+
 connect-destroy:
-  stage: confluent_components_destroy
+  stage: confluent_destroy_sbox
   script:
     - "kubectl delete -f $CONNECT"
     - "kubectl get pods -n confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
     - master
   when: manual
 
-#replicator-destroy:
-#  stage: confluent_components_destroy
-#  script:
-#
-#    - "kubectl delete -f $REPLICATOR"
-#    - "kubectl get pods -n confluent"
-#  environment:
-#    name: dev
-#  tags:
-#    - docker
-#  only:
-#    - master
-#  when: manual
-
 ksqldb-destroy:
-  stage: confluent_components_destroy
+  stage: confluent_destroy_sbox
   script:
-
     - "kubectl delete -f $KSQLDB"
     - "kubectl get pods -n confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
@@ -332,13 +280,12 @@ ksqldb-destroy:
   when: manual
 
 schemaregistry-destroy:
-  stage: confluent_components_destroy
+  stage: confluent_destroy_sbox
   script:
-
     - "kubectl delete -f $SR"
     - "kubectl get pods -n confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
@@ -346,13 +293,12 @@ schemaregistry-destroy:
   when: manual
 
 StorageClass-destroy:
-  stage: confluent_components_destroy
+  stage: confluent_destroy_sbox
   script:
-    #    - "kubeval $ZK"
     - "kubectl delete -f $SC"
     - "kubectl get pods -n confluent"
   environment:
-    name: dev
+    name: sbox
   tags:
     - docker
   only:
@@ -360,118 +306,9 @@ StorageClass-destroy:
   when: manual
 
 LDAP_destroy:
-  stage: confluent_components_destroy
-  script:
-    - "helm delete test-ldap --namespace confluent" #add to delete secrets later
-  environment:
-    name: dev
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-#Obm account of greenfield
-Operator_obm:
-  stage: confluent_operator_obm
-  script:
-    - "kubectl create namespace confluent"
-    - "kubectl apply -f $CRD"
-    - "kubectl apply -f $CRB -n confluent"
-    - "helm upgrade --install confluent-operator helm/confluent-for-kubernetes --namespace confluent"
-
-  environment:
-    name: obm
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-create_all_obm:
-  stage: confluent_deployment_obm
-  script:
-    - "kubectl apply -f $SC"
-    - "kubectl apply -f $ZK"
-    - "kubectl apply -f $KAFKA0"
-    - "kubectl apply -f $KSQLDB"
-    - "kubectl apply -f $CONNECT"
-    - "kubectl apply -f $SR"
-    - "kubectl apply -f $RESTPROXY"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: obm
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-destroy-all-obm:
-  stage: confluent_destroy_obm
-  script:
-    - "kubectl delete -f $SR"
-    - "kubectl delete -f $RESTPROXY"
-    - "kubectl delete -f $KAFKA0"
-    - "kubectl delete -f $ZK"
-    - "kubectl delete -f $KSQLDB"
-    - "kubectl delete -f $CONNECT"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: obm
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-
-# sbox
-Operator_sbox:
-  stage: confluent_operator_sbox
-  script:
-    - "kubectl create namespace confluent"
-    - "kubectl apply -f $CRD"
-    - "kubectl apply -f $CRB -n confluent"
-    - "helm upgrade --install confluent-operator helm/confluent-for-kubernetes --namespace confluent"
-
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-create_all_sbox:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $SC"
-    - "kubectl apply -f $ZK"
-    - "kubectl apply -f $KAFKA0"
-    - "kubectl apply -f $KSQLDB"
-    - "kubectl apply -f $CONNECT"
-    - "kubectl apply -f $SR"
-    - "kubectl apply -f $RESTPROXY"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-destroy-all-sbox:
   stage: confluent_destroy_sbox
   script:
-    - "kubectl delete -f $SR"
-    - "kubectl delete -f $RESTPROXY"
-    - "kubectl delete -f $KAFKA0"
-    - "kubectl delete -f $ZK"
-    - "kubectl delete -f $KSQLDB"
-    - "kubectl delete -f $CONNECT"
-    - "kubectl get pods -n confluent"
+    - "helm delete test-ldap --namespace confluent" #add to delete secrets later
   environment:
     name: sbox
   tags:
