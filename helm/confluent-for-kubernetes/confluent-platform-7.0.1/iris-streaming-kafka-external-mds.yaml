@@ -17,7 +17,7 @@ spec:
   configOverrides:
     server:
   tls:
-    secretRef: tls-group2
+    secretRef: tls-group
   listeners:
     custom:
 
@@ -33,7 +33,7 @@ spec:
       authentication:
         type: plain
         jaasConfig:
-          secretRef: credential1
+          secretRef: credential
       tls:
         enabled: true
 
@@ -91,7 +91,7 @@ spec:
       authentication:
         type: digest
         jaasConfig:
-          secretRef: credential1
+          secretRef: credential
       tls:
         enabled: true
   metricReporter:

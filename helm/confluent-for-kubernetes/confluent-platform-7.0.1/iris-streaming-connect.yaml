@@ -25,7 +25,7 @@ spec:
             owner: confluentinc
             version: 1.1.8
   tls:
-    secretRef: tls-group2
+    secretRef: tls-group
   authorization:
     type: rbac
   dependencies:
@@ -34,7 +34,7 @@ spec:
       authentication:
         type: plain
         jaasConfig:
-          secretRef: credential1
+          secretRef: credential
       tls:
         enabled: true
     mds:

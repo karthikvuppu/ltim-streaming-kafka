@@ -10,7 +10,7 @@ spec:
     application: confluentinc/cp-schema-registry:7.0.1
     init: confluentinc/confluent-init-container:2.2.0-1
   tls:
-    secretRef: tls-group2
+    secretRef: tls-group
   authorization:
     type: rbac
   dependencies:
@@ -19,7 +19,7 @@ spec:
       authentication:
         type: plain
         jaasConfig:
-          secretRef: credential1
+          secretRef: credential
       tls:
         enabled: true
     mds:
