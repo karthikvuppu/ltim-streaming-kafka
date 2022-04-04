@@ -6,7 +6,7 @@ variables:
   CRD :  'helm/confluent-for-kubernetes/crds'
   CRB : 'helm/confluent-for-kubernetes/crds/platform.confluent.io_confluentrolebindings.yaml'
   ZK  : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-zookeeper.yaml'
-  KAFKA: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka0-external-mds.yaml'
+  KAFKA: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka-external-mds.yaml'
   SR: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-schemaregistry.yaml'
   REPLICATOR: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-replicator.yaml'
   KSQLDB: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-ksqldb.yaml'

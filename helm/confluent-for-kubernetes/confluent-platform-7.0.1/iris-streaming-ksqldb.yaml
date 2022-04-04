@@ -75,5 +75,5 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - kafka0
+                    - kafka
             topologyKey: kubernetes.io/hostname

@@ -4,8 +4,6 @@ metadata:
   name: kafka
   namespace: confluent
 spec:
-  license:
-    secretRef: confluent-license
   replicas: 3
   image:
     application: confluentinc/cp-server:7.0.1
@@ -16,11 +14,11 @@ spec:
   dataVolumeCapacity: 50Gi
   configOverrides:
     server:
+      - confluent.cluster.link.enable=true
   tls:
     secretRef: tls-group2
   listeners:
     custom:
-
     - name: internaleks
       port: 9094
       authentication:
@@ -30,13 +28,12 @@ spec:
       tls:
         enabled: true
     internal:
-      authentication:
+      authentication: 
         type: plain
         jaasConfig:
           secretRef: credential1
       tls:
         enabled: true
-
     external:
       authentication:
         type: mtls
@@ -58,34 +55,49 @@ spec:
             service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-03bb1df2bc15436b6, subnet-061b406bbac050fcb, subnet-0a71781428bea6c6e
             service.beta.kubernetes.io/load-balancer-source-ranges: 13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32
             #            service.beta.kubernetes.io/aws-load-balancer-scheme: internal
-            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka0
+            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
           domain: iris-streaming-sb.devtest.aws.scania.com
-          bootstrapPrefix: kafka-ext
-          brokerPrefix: s-ext
+          bootstrapPrefix: kafka
+          brokerPrefix: s
   authorization:
     type: rbac
     superUsers:
       - User:kafka
+  services:
+    mds:
+      tls:
+        enabled: true
+      tokenKeyPair:
+        secretRef: mds-token
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: iris-streaming-sb.devtest.aws.scania.com
+          prefix: rb-mds
+      provider:
+        type: ldap
+        ldap:
+          address: ldap://ldap.confluent.svc.cluster.local:389
+          authentication:
+            type: simple
+            simple:
+              secretRef: credential1
+          configurations:
+            groupNameAttribute: cn
+            groupObjectClass: group
+            groupMemberAttribute: member
+            groupMemberAttributePattern: CN=(.*),DC=test,DC=com
+            groupSearchBase: dc=test,dc=com
+            userNameAttribute: cn
+            userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
+            userObjectClass: organizationalRole
+            userSearchBase: dc=test,dc=com
   dependencies:
     kafkaRest:
       authentication:
         type: bearer
         bearer:
-          secretRef: rest-credential
-    mds:
-      endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443
-      tls:
-        enabled: true
-      kafka:
-        bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
-        authentication:
-          jaasConfig:
-            secretRef: mds-client-plain
-          type: plain
-        tls:
-          enabled: true
-      tokenKeyPair:
-        secretRef: mds-token
+          secretRef: mds-client
     zookeeper:
       endpoint: zookeeper.confluent.svc.cluster.local:2182
       authentication:
@@ -95,14 +107,7 @@ spec:
       tls:
         enabled: true
   metricReporter:
-    enabled: true
-    bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
-    authentication:
-      jaasConfig:
-        secretRef: mds-client-plain
-      type: plain
-    tls:
-      enabled: true
+    enabled: false      
   oneReplicaPerNode: true
   podTemplate:
     podSecurityContext:
@@ -117,7 +122,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - kafka0
+                    - kafka
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
