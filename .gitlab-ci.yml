@@ -2,18 +2,18 @@
 
 variables:
 
-  SC: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-storage-class.yaml'
-  CRD :  'helm/confluent-for-kubernetes/crds'
-  CRB : 'helm/confluent-for-kubernetes/crds/platform.confluent.io_confluentrolebindings.yaml'
-  ZK  : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-zookeeper.yaml'
-  KAFKA: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka-external-mds.yaml'
-  SR: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-schemaregistry.yaml'
-  REPLICATOR: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-replicator.yaml'
-  KSQLDB: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-ksqldb.yaml'
-  CC: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-controlcenter.yaml'
-  CONNECT: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-connect.yaml'
-  RESTPROXY: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-restproxy.yaml'
-  RESTCLASS: 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-restclass.yaml'
+  SC          : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-storage-class.yaml'
+  CRD         :  'helm/confluent-for-kubernetes/crds'
+  CRB         : 'helm/confluent-for-kubernetes/crds/platform.confluent.io_confluentrolebindings.yaml'
+  ZK          : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-zookeeper.yaml'
+  KAFKA       : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka-external-mds.yaml'
+  SR          : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-schemaregistry.yaml'
+  REPLICATOR  : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-replicator.yaml'
+  KSQLDB      : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-ksqldb.yaml'
+  CC          : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-controlcenter.yaml'
+  CONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-connect.yaml'
+  RESTPROXY   : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-restproxy.yaml'
+  RESTCLASS   : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-restclass.yaml'
 
   GIT_SUBMODULE_STRATEGY: recursive
 
@@ -46,9 +46,6 @@ before_script:
   - echo "$eks_cluster"
   - aws eks --region "$cluster_region" update-kubeconfig --name "$eks_cluster"
   - kubectl get nodes
-  - kubectl set env ds aws-node -n kube-system WARM_IP_TARGET=2
-  - kubectl set env ds aws-node -n kube-system MINIMUM_IP_TARGET=2
-  - kubectl rollout restart ds aws-node -n kube-system
 
 Operator:
   stage: confluent_operator_sbox
@@ -57,6 +54,9 @@ Operator:
     - "kubectl apply -f $CRD"
     - "kubectl apply -f $CRB -n confluent"
     - "helm upgrade --install confluent-operator helm/confluent-for-kubernetes --namespace confluent"
+    - "kubectl set env ds aws-node -n kube-system WARM_IP_TARGET=2"
+    - "kubectl set env ds aws-node -n kube-system MINIMUM_IP_TARGET=2"
+    - "kubectl rollout restart ds aws-node -n kube-system"
   environment:
     name: sbox
   tags:
@@ -65,7 +65,7 @@ Operator:
     - master
   when: manual
 
-LDAP:
+Ldap:
   stage: confluent_deployment_sbox
   script:
     - "helm upgrade --install -f secure-deploy/assets/openldap/ldaps-rbac.yaml test-ldap secure-deploy/assets/openldap --namespace confluent"
@@ -305,7 +305,7 @@ StorageClass-destroy:
     - master
   when: manual
 
-LDAP_destroy:
+ldap_destroy:
   stage: confluent_destroy_sbox
   script:
     - "helm delete test-ldap --namespace confluent" #add to delete secrets later
