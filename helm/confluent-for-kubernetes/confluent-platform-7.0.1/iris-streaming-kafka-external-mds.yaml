@@ -78,7 +78,8 @@ spec:
       tls:
         enabled: true
       kafka:
-        bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
+    #    bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
+        bootstrapEndpoint: a0928f4ce96dd45cfb3b994d9e2b58af-83d30711604ac210.elb.eu-north-1.amazonaws.com:9092,a980d22be1a8642db913d571d0a4951d-fd80afe48a3675ae.elb.eu-north-1.amazonaws.com:9092,a0323dbb0731e490ca78ddfcaf317ec4-3466734fe828e02a.elb.eu-north-1.amazonaws.com:9092
         authentication:
           jaasConfig:
             secretRef: mds-client-plain
@@ -97,7 +98,8 @@ spec:
         enabled: true
   metricReporter:
     enabled: true
-    bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
+  #  bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
+    bootstrapEndpoint: a0928f4ce96dd45cfb3b994d9e2b58af-83d30711604ac210.elb.eu-north-1.amazonaws.com:9092,a980d22be1a8642db913d571d0a4951d-fd80afe48a3675ae.elb.eu-north-1.amazonaws.com:9092,a0323dbb0731e490ca78ddfcaf317ec4-3466734fe828e02a.elb.eu-north-1.amazonaws.com:9092
     authentication:
       jaasConfig:
         secretRef: mds-client-plain
