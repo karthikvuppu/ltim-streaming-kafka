@@ -241,7 +241,7 @@ kafka-destroy:
     - master
   when: manual
 
-  token-destroy:
+token-destroy:
   stage: confluent_destroy_sbox
   script:
     - "kubectl delete -f $TOKEN"
