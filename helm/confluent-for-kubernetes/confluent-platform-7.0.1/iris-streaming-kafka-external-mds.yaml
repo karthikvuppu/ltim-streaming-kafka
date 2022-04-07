@@ -73,7 +73,8 @@ spec:
         bearer:
           secretRef: rest-credential
     mds:
-      endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443
+    #  endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443   #actual one
+      endpoint: https://a74ab47b1c2b4425eac371132fffd5a0-610264199.eu-north-1.elb.amazonaws.com:443  #until we map it in route53
       tls:
         enabled: true
       kafka:
