@@ -126,6 +126,18 @@ Kafka:
   stage: confluent_deployment_sbox
   script:
     - "kubectl apply -f $KAFKA"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+Token:
+  stage: confluent_deployment_sbox
+  script:
     - "kubectl apply -f $TOKEN"
     - "kubectl get pods -n confluent"
   environment:
@@ -228,6 +240,20 @@ kafka-destroy:
   only:
     - master
   when: manual
+
+  token-destroy:
+  stage: confluent_destroy_sbox
+  script:
+    - "kubectl delete -f $TOKEN"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
 
 restproxy-destroy:
   stage: confluent_destroy_sbox
