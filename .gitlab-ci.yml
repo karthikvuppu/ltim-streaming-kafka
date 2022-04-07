@@ -14,6 +14,7 @@ variables:
   CONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-connect.yaml'
   RESTPROXY   : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-restproxy.yaml'
   RESTCLASS   : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-restclass.yaml'
+  TOKEN       : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/loadbalancer-token-kafka.yaml'
 
   GIT_SUBMODULE_STRATEGY: recursive
 
@@ -125,6 +126,7 @@ Kafka:
   stage: confluent_deployment_sbox
   script:
     - "kubectl apply -f $KAFKA"
+    - "kubectl apply -f $TOKEN"
     - "kubectl get pods -n confluent"
   environment:
     name: sbox
