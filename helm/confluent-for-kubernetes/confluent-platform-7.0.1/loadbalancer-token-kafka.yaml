@@ -6,8 +6,8 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-type: nlb
     service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
     service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-kafka-nlb
-    service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
-    service.beta.kubernetes.io/load-balancer-source-ranges: 13.48.228.240/32, 13.51.129.156/32, 13.51.76.45/32
+    service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
+    service.beta.kubernetes.io/load-balancer-source-ranges: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
     #            service.beta.kubernetes.io/aws-load-balancer-scheme: internal
     service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
     external-dns.alpha.kubernetes.io/hostname: s-token-ext0.iris-streaming-sb.devtest.aws.scania.com

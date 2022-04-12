@@ -45,8 +45,8 @@ spec:
         alb.ingress.kubernetes.io/scheme: internet-facing
         alb.ingress.kubernetes.io/load-balancer-name: iris-streaming-sb-schemaregistry-alb
         alb.ingress.kubernetes.io/target-type: instance
-        alb.ingress.kubernetes.io/subnets: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
-        alb.ingress.kubernetes.io/inbound-cidrs: 13.48.228.240/32, 13.51.129.156/32, 13.51.76.45/32
+        alb.ingress.kubernetes.io/subnets: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
+        alb.ingress.kubernetes.io/inbound-cidrs: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
         external-dns.alpha.kubernetes.io/hostname: schemaregistry.iris-streaming-sb.devtest.aws.scania.com
       domain: iris-streaming-sb.devtest.aws.scania.com
       prefix: schemaregistry
@@ -68,7 +68,7 @@ spec:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
               matchExpressions:
-                - key: service
+                - key: app
                   operator: In
                   values:
                     - kafka

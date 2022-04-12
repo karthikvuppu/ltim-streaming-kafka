@@ -3,7 +3,7 @@
 variables:
 
   SC          : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-storage-class.yaml'
-  CRD         :  'helm/confluent-for-kubernetes/crds'
+  CRD         : 'helm/confluent-for-kubernetes/crds'
   CRB         : 'helm/confluent-for-kubernetes/crds/platform.confluent.io_confluentrolebindings.yaml'
   ZK          : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-zookeeper.yaml'
   KAFKA       : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka-external-mds.yaml'
@@ -336,7 +336,8 @@ StorageClass-destroy:
 ldap_destroy:
   stage: confluent_destroy_sbox
   script:
-    - "helm delete test-ldap --namespace confluent" #add to delete secrets later
+    - "kubectl delete sts ldap -n confluent"
+    - "kubectl get pods -n confluent"
   environment:
     name: sbox
   tags:
@@ -344,3 +345,18 @@ ldap_destroy:
   only:
     - master
   when: manual
+
+operator_sbox_destroy:
+  stage: confluent_destroy_sbox
+  script:
+    - "kubectl delete deploy confluent-operator -n confluent"
+    - "kubectl get pods -n confluent"
+    - "kubectl delete ns confluent"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
