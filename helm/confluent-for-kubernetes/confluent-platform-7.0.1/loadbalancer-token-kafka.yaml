@@ -10,7 +10,8 @@ metadata:
     service.beta.kubernetes.io/load-balancer-source-ranges: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
     #            service.beta.kubernetes.io/aws-load-balancer-scheme: internal
     service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
-    external-dns.alpha.kubernetes.io/hostname: s-token-ext0.iris-streaming-sb.devtest.aws.scania.com
+    #external-dns.alpha.kubernetes.io/hostname: s-token-ext0.iris-streaming-sb.devtest.aws.scania.com
+    external-dns.alpha.kubernetes.io/hostname: s-token-sbox.iris-streaming-sb.devtest.aws.scania.com
 
 spec:
   selector:
