@@ -43,4 +43,8 @@ spec:
                   values:
                     - kafka
                     - zookeeper
+                    - connect
+                    - k2
+                    - srrp
+                    - controlcenter
              topologyKey: kubernetes.io/hostname

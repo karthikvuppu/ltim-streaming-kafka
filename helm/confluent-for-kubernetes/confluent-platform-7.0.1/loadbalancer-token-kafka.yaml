@@ -14,7 +14,7 @@ metadata:
 
 spec:
   selector:
-    statefulset.kubernetes.io/pod-name: kafka-0
+    statefulset.kubernetes.io/pod-name: kafka
   ports:
     - port: 9073
       targetPort: 9073
