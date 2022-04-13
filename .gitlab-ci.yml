@@ -143,6 +143,7 @@ Token:
   script:
     - "kubectl apply -f $TOKEN"
     - "kubectl get pods -n confluent"
+    - "kubectl get services -n confluent | grep loadbalancer"
   environment:
     name: sbox
   tags:
