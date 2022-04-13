@@ -14,7 +14,9 @@ variables:
   CONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-connect.yaml'
   RESTPROXY   : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-restproxy.yaml'
   RESTCLASS   : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-restclass.yaml'
-  TOKEN       : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/loadbalancer-token-kafka.yaml'
+  TOKEN0      : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/loadbalancer-token-kafka0.yaml'
+  TOKEN1      : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/loadbalancer-token-kafka1.yaml'
+  TOKEN2      : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/loadbalancer-token-kafka2.yaml'
 
   GIT_SUBMODULE_STRATEGY: recursive
 
@@ -141,7 +143,9 @@ Kafka:
 Token:
   stage: confluent_deployment_sbox
   script:
-    - "kubectl apply -f $TOKEN"
+    - "kubectl apply -f $TOKEN0"
+    - "kubectl apply -f $TOKEN1"
+    - "kubectl apply -f $TOKEN2"
     - "kubectl get pods -n confluent"
     - "kubectl get services -n confluent | grep loadbalancer"
   environment:
@@ -248,7 +252,9 @@ kafka-destroy:
 token-destroy:
   stage: confluent_destroy_sbox
   script:
-    - "kubectl delete -f $TOKEN"
+    - "kubectl delete -f $TOKEN0"
+    - "kubectl delete -f $TOKEN1"
+    - "kubectl delete -f $TOKEN2"
     - "kubectl get pods -n confluent"
   environment:
     name: sbox
