@@ -60,8 +60,10 @@ spec:
             #            service.beta.kubernetes.io/aws-load-balancer-scheme: internal
             service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
           domain: iris-streaming-sb.devtest.aws.scania.com
-          bootstrapPrefix: kafka-ext
-          brokerPrefix: s-ext
+          #bootstrapPrefix: kafka-ext
+          bootstrapPrefix: kafka-ext-sbox
+          #brokerPrefix: s-ext
+          brokerPrefix: s-ext-sbox
   authorization:
     type: rbac
     superUsers:
@@ -74,12 +76,12 @@ spec:
           secretRef: rest-credential
     mds:
     #  endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443   #actual one
-      endpoint: https://a74ab47b1c2b4425eac371132fffd5a0-610264199.eu-north-1.elb.amazonaws.com:443  #until we map it in route53
+      endpoint: https://mds-cc-sbox.iris-streaming-sb.devtest.aws.scania.com:443  #until we map it in route53
       tls:
         enabled: true
       kafka:
     #    bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
-        bootstrapEndpoint: a0928f4ce96dd45cfb3b994d9e2b58af-83d30711604ac210.elb.eu-north-1.amazonaws.com:9092,a980d22be1a8642db913d571d0a4951d-fd80afe48a3675ae.elb.eu-north-1.amazonaws.com:9092,a0323dbb0731e490ca78ddfcaf317ec4-3466734fe828e02a.elb.eu-north-1.amazonaws.com:9092
+        bootstrapEndpoint: s-cc-sbox0.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox1.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox2.iris-streaming-sb.devtest.aws.scania.com:9092
         authentication:
           jaasConfig:
             secretRef: mds-client-plain
@@ -99,7 +101,7 @@ spec:
   metricReporter:
     enabled: true
   #  bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
-    bootstrapEndpoint: a0928f4ce96dd45cfb3b994d9e2b58af-83d30711604ac210.elb.eu-north-1.amazonaws.com:9092,a980d22be1a8642db913d571d0a4951d-fd80afe48a3675ae.elb.eu-north-1.amazonaws.com:9092,a0323dbb0731e490ca78ddfcaf317ec4-3466734fe828e02a.elb.eu-north-1.amazonaws.com:9092
+    bootstrapEndpoint: s-cc-sbox0.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox1.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox2.iris-streaming-sb.devtest.aws.scania.com:9092
     authentication:
       jaasConfig:
         secretRef: mds-client-plain
