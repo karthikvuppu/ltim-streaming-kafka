@@ -90,7 +90,7 @@ Ldap:
     # Kafka REST credential
     - "kubectl create secret generic rest-credential --from-file=bearer.txt=secure-deploy/bearer.txt --from-file=basic.txt=secure-deploy/bearer.txt --namespace confluent"
     # mds-client-plain
-    kubectl create secret generic mds-client-plain --from-file=plain.txt=./plain.txt --namespace confluent
+    - "kubectl create secret generic mds-client-plain --from-file=plain.txt=./plain.txt --namespace confluent"
   environment:
     name: sbox
   tags:
