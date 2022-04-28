@@ -135,6 +135,4 @@ spec:
                     - schemaregistry
                     - ksqldb
                     - connect
-                    - controlcenter
-                    - confluent-operator
             topologyKey: kubernetes.io/hostname
