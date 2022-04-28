@@ -15,8 +15,6 @@ spec:
   dataVolumeCapacity: 50Gi
   configOverrides:
     server:
-      - listener.security.protocol.map=EXTERNAL:SSL,INTERNAL:SASL_SSL,INTERNALEKS:SSL,REPLICATION:SASL_SSL,TOKEN:SASL_SSL,CLIENT:SASL_PLAINTEXT
-      - listeners=EXTERNAL://:9092,INTERNAL://:9071,INTERNALEKS://:9094,REPLICATION://:9072,TOKEN://:9073,CLIENT://:9093
       - listener.name.client.sasl.enabled.mechanism=OAUTHBEARER
       - listener.name.client.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
       - listener.name.client.sasl.oauthbearer.expected.audience=account
@@ -26,6 +24,11 @@ spec:
     secretRef: tls-group
   listeners:
     custom:
+    - name: client
+      port: 9093
+      type: plain
+        jaasConfig:
+          secretRef: credential
     - name: internaleks
       port: 9094
       authentication:
@@ -94,15 +97,15 @@ spec:
           enabled: true
       tokenKeyPair:
         secretRef: mds-token
-    #zookeeper:
-      #endpoint: zookeeper.confluent.svc.cluster.local:2182
+    zookeeper:
+      endpoint: zookeeper.confluent.svc.cluster.local:2182
       #endpoint: zookeeper.confluent.svc.cluster.local:2181
-      #authentication:
-        #type: digest
-        #jaasConfig:
-          #secretRef: credential
-      #tls:
-        #enabled: true
+      authentication:
+        type: digest
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
   metricReporter:
     enabled: true
   #  bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
