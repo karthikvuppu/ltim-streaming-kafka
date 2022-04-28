@@ -27,6 +27,7 @@ spec:
     - name: client
       port: 9093
       authentication:
+        ## This is only required for using the CFK custom listener section. configOverrides listener.name.client.sasl.enabled.mechanism=OAUTHBEARER will do the trick!
         type: plain
         jaasConfig:
           secretRef: credential
