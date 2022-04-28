@@ -14,8 +14,8 @@ spec:
     #type: digest
     #jaasConfig:
       #secretRef: credential
-  tls:
-    secretRef: tls-group
+  #tls:
+    #secretRef: tls-group
 #  oneReplicaPerNode: true
   storageClass:
     name: standard
