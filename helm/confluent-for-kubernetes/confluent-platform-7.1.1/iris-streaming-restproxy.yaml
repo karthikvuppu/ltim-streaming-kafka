@@ -45,8 +45,8 @@ spec:
         enabled: true
       url: https://schemaregistry.operator.svc.cluster.local:8081
   image:
-    application: confluentinc/cp-kafka-rest:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    application: confluentinc/cp-kafka-rest:7.1.1
+    init: confluentinc/confluent-init-container:2.3.0
 #    pullSecretRef:
 #      - confluent-registry
   replicas: 1
