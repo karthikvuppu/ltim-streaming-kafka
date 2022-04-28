@@ -2,21 +2,21 @@
 
 variables:
 
-  SC          : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-storage-class.yaml'
+  SC          : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-storage-class.yaml'
   CRD         : 'helm/confluent-for-kubernetes/crds'
   CRB         : 'helm/confluent-for-kubernetes/crds/platform.confluent.io_confluentrolebindings.yaml'
-  ZK          : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-zookeeper.yaml'
-  KAFKA       : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-kafka-external-mds.yaml'
-  SR          : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-schemaregistry.yaml'
-  REPLICATOR  : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-replicator.yaml'
-  KSQLDB      : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-ksqldb.yaml'
-  CC          : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-controlcenter.yaml'
-  CONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-connect.yaml'
-  RESTPROXY   : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-restproxy.yaml'
-  RESTCLASS   : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/iris-streaming-restclass.yaml'
-  TOKEN0      : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/loadbalancer-token-kafka0.yaml'
-  TOKEN1      : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/loadbalancer-token-kafka1.yaml'
-  TOKEN2      : 'helm/confluent-for-kubernetes/confluent-platform-7.0.1/loadbalancer-token-kafka2.yaml'
+  ZK          : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-zookeeper.yaml'
+  KAFKA       : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-kafka-external-mds.yaml'
+  SR          : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-schemaregistry.yaml'
+  REPLICATOR  : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-replicator.yaml'
+  KSQLDB      : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-ksqldb.yaml'
+  CC          : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-controlcenter.yaml'
+  CONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-connect.yaml'
+  RESTPROXY   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy.yaml'
+  RESTCLASS   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restclass.yaml'
+  TOKEN0      : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/loadbalancer-token-kafka0.yaml'
+  TOKEN1      : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/loadbalancer-token-kafka1.yaml'
+  TOKEN2      : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/loadbalancer-token-kafka2.yaml'
 
   GIT_SUBMODULE_STRATEGY: recursive
 

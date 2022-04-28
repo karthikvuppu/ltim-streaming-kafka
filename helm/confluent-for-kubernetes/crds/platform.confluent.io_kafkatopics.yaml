@@ -4,7 +4,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.4.1
+    controller-gen.kubebuilder.io/version: v0.7.0
   creationTimestamp: null
   name: kafkatopics.platform.confluent.io
 spec:
@@ -33,8 +33,8 @@ spec:
     - jsonPath: .status.state
       name: Status
       type: string
-    - jsonPath: .status.kafkaClusterId
-      name: ClusterId
+    - jsonPath: .status.kafkaClusterID
+      name: ClusterID
       type: string
     - jsonPath: .metadata.creationTimestamp
       name: Age
@@ -46,7 +46,7 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: KafkaTopic is the Schema for the kafkatopics API
+        description: KafkaTopic is the schema for the Kafka Topic API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -61,60 +61,95 @@ spec:
           metadata:
             type: object
           spec:
-            description: KafkaTopicSpec defines the desired state of KafkaTopic
+            description: spec defines the desired state of the KafkaTopic.
             properties:
               configs:
                 additionalProperties:
                   type: string
-                description: Configs allows passing configs for topic More information
-                  about topic configs is available here https://docs.confluent.io/current/installation/configuration/topic-configs.html
+                description: 'configs is a map of string key and value pairs that
+                  are used to pass the configuration settings for the topic. More
+                  info: https://docs.confluent.io/current/installation/configuration/topic-configs.html.'
                 type: object
+                x-kubernetes-map-type: granular
               kafkaClusterRef:
-                description: KafkaClusterRef defines the name of the kafka cluster
+                description: kafkaClusterRef specifies the name of the Kafka cluster.
                 properties:
                   name:
-                    description: Name defines name of the cluster
+                    description: name specifies the name of the Confluent Platform
+                      component cluster.
                     type: string
                   namespace:
-                    description: Namespace defines namespace where cluster is running
+                    description: namespace specifies the namespace where the Confluent
+                      Platform component cluster is running.
                     type: string
                 required:
                 - name
                 type: object
               kafkaRest:
-                description: KafkaRestRef defines the Kafka Rest API configuration
+                description: kafkaRest specifies the Kafka REST API configuration.
                 properties:
                   authentication:
-                    description: Authentication defines the Rest API authentication
-                      mechanism
+                    description: authentication specifies the REST API authentication
+                      mechanism.
                     properties:
                       basic:
-                        description: Basic defines basic authentication for the rest
-                          client
+                        description: basic specifies the basic authentication settings
+                          for the REST API client.
                         properties:
+                          debug:
+                            description: debug enables the basic authentication debug
+                              logs for JaaS configuration.
+                            type: boolean
+                          directoryPathInContainer:
+                            description: 'directoryPathInContainer allows to pass
+                              the basic credential through a directory path in the
+                              container. More info: https://docs.confluent.io/operator/current/co-authenticate.html#basic-authentication'
+                            minLength: 1
+                            type: string
+                          restrictedRoles:
+                            description: restrictedRoles specify the restricted roles
+                              on the server side only. Changes will be only reflected
+                              in Control Center. This configuration is ignored on
+                              the client side configuration.
+                            items:
+                              type: string
+                            minItems: 1
+                            type: array
+                          roles:
+                            description: roles specify the roles on the server side
+                              only. This configuration is ignored on the client side
+                              configuration.
+                            items:
+                              type: string
+                            type: array
                           secretRef:
-                            description: Name of the secret reference
+                            description: 'secretRef defines secret reference to pass
+                              the required credentials. More info: https://docs.confluent.io/operator/current/co-authenticate.html#basic-authentication'
                             maxLength: 30
                             minLength: 1
                             pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
                             type: string
-                        required:
-                        - secretRef
                         type: object
                       bearer:
-                        description: BearerAuthentication defines bearer authentication
-                          for the rest client
+                        description: bearer specifies the bearer authentication settings
+                          for the REST API client.
                         properties:
+                          directoryPathInContainer:
+                            description: directoryPathInContainer specifies the directory
+                              path in the container where the credential is mounted.
+                            minLength: 1
+                            type: string
                           secretRef:
-                            description: Name of the secret reference
+                            description: 'secretRef specifies the name of the secret
+                              that contains the credential. More info: https://docs.confluent.io/operator/current/co-authenticate.html#bearer-authentication'
                             maxLength: 30
                             minLength: 1
                             pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
                             type: string
-                        required:
-                        - secretRef
                         type: object
                       type:
+                        description: type specifies the REST API authentication type.
+                          Valid options are `basic`, `bearer`, and `mtls`.
                         enum:
                         - basic
                         - bearer
@@ -124,30 +159,34 @@ spec:
                     - type
                     type: object
                   endpoint:
-                    description: Endpoint defines where confluent Rest API is running
+                    description: endpoint specifies where Confluent REST API is running.
                     minLength: 1
                     pattern: ^https?://.*
                     type: string
+                  kafkaClusterID:
+                    description: kafkaClusterID specifies the id of Kafka cluster.
+                      It takes precedence over using the Kafka REST API to get the
+                      cluster id.
+                    minLength: 1
+                    type: string
                   tls:
-                    description: TLSDependencyConfig defines custom TLS structure
-                      for the child resources(connector, topic, schema, etc) of CP
-                      component
+                    description: tls specifies the custom TLS structure for the application
+                      resources, e.g. connector, topic, schema, of the Confluent Platform
+                      components.
                     properties:
                       directoryPathInContainer:
-                        description: DirectoryPathInContainer contains the directory
-                          path in container where keystore/truststore.jks/jksPassword.txt
-                          keys are mounted.
+                        description: directoryPathInContainer contains the directory
+                          path in the container where `keystore.jks`, `truststore.jks`,
+                          `jksPassword.txt` keys are mounted.
                         minLength: 1
                         type: string
                       jksPassword:
-                        description: JksPassword defines the secret name referenced
-                          for jks password
+                        description: jksPassword specifies the secret name that contains
+                          the JKS password.
                         properties:
                           secretRef:
-                            description: SecretRef defines the secret name referenced
-                              for jks password More information about jks password
-                              key/value format can be found in Confluent Operator
-                              document
+                            description: 'secretRef references the name of the secret
+                              containing the JKS password. More info: https://docs.confluent.io/operator/current/co-network-encryption.html#configure-user-provided-tls-certificates'
                             maxLength: 30
                             minLength: 1
                             pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
@@ -156,9 +195,9 @@ spec:
                         - secretRef
                         type: object
                       secretRef:
-                        description: SecretRef defines the secret name referenced
-                          for certificates More information about certificates key/value
-                          format can be found in Confluent Operator document
+                        description: 'secretRef specifies the secret name that contains
+                          the certificates. More info about certificates key/value
+                          format: https://docs.confluent.io/operator/current/co-network-encryption.html#configure-user-provided-tls-certificates'
                         maxLength: 30
                         minLength: 1
                         pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
@@ -166,86 +205,95 @@ spec:
                     type: object
                 type: object
               kafkaRestClassRef:
-                description: KafkaRestClassRef defines the reference for KafkaRestClass
-                  which defines Kafka Rest API
+                description: kafkaRestClassRef references the KafkaRestClass which
+                  defines Kafka REST API connection information.
                 properties:
                   name:
-                    description: Name defines the name of KafkaRestClass
+                    description: name specifies the name of the KafkaRestClass application
+                      resource.
                     minLength: 1
                     type: string
                   namespace:
-                    description: Namespace defines the namespace of the KafkaRestClass
+                    description: namespace specifies the namespace of the KafkaRestClass.
                     type: string
                 required:
                 - name
                 type: object
               name:
-                description: Name defines the topic name. If not configured uses the
-                  CR name as topic name.
+                description: name specifies the topic name. If not configured, the
+                  KafkaTopic CR name is used as the topic name.
                 maxLength: 255
                 minLength: 1
                 pattern: ^[a-zA-Z0-9\._\-]*$
                 type: string
               partitionCount:
-                description: PartitionCount defines the partition count. If not configured
-                  then it will be defaulted to whatever kafkarest V3 APIs supports
+                description: partitionCount specifies the number of partitions for
+                  the topic. If not configured, it will be defaulted to the partition
+                  count that Kafka REST V3 API supports.
                 format: int32
                 type: integer
               replicas:
-                description: Replicas defines the replication factor for a topic.
-                  If not configured then it will be defaulted to whatever kafkarest
-                  V3 APIs supports
+                description: replicas specifies the replication factor for the topic.
+                  If not configured, it will be defaulted to the replication factor
+                  that Kafka REST V3 API supports.
                 format: int32
                 type: integer
             type: object
           status:
-            description: KafkaTopicStatus defines the observed state of KafkaTopic
+            description: status defines the observed state of the KafkaTopic.
             properties:
               conditions:
+                description: conditions are the latest available observed states of
+                  the topic.
                 items:
-                  description: Conditions represents the latest available observations
-                    of a statefulset's current state.
+                  description: Condition represent the latest available observations
+                    of the current state.
                   properties:
                     lastProbeTime:
-                      description: LastProbeTime defines a last time the condition
-                        is evaluated.
+                      description: lastProbeTime shows the last time the condition
+                        was evaluated.
                       format: date-time
                       type: string
                     lastTransitionTime:
-                      description: LastTransitionTime defines a last time the condition
-                        transitioned from one status to another.
+                      description: lastTransitionTime shows the last time the condition
+                        was transitioned from one status to another.
                       format: date-time
                       type: string
                     message:
-                      description: ' Message defines  a human readable message indicating
-                        details about the transition.'
+                      description: message shows a human-readable message with details
+                        about the transition.
                       type: string
                     reason:
-                      description: ' Reason defines reason for the condition''s last
-                        transition.'
+                      description: reason shows the reason for the last transition
+                        of the condition.
                       type: string
                     status:
-                      description: Status defines a status of the condition, one of
-                        True, False, Unknown
+                      description: status shows the status of the condition, one of
+                        `True`, `False`, or `Unknown`.
                       type: string
                     type:
-                      description: Type defines type of condition
+                      description: type shows the condition type.
                       type: string
                   type: object
                 type: array
               kafkaCluster:
                 type: string
-              kafkaClusterId:
+              kafkaClusterID:
+                description: kafkaClusterID is the id of the Kafka cluster.
                 type: string
               kafkaRestEndpoint:
+                description: kafkaRestEndpoint is the endpoint of the Kafka REST API.
                 type: string
               partitionCount:
+                description: partitionCount is the partition count of the topic.
                 format: int32
                 type: integer
               replicas:
+                description: replicas is the replication factor of the topic.
                 format: int32
                 type: integer
               state:
+                description: state is the state of the topic.
                 type: string
             type: object
         type: object
