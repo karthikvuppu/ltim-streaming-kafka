@@ -42,11 +42,7 @@ spec:
                   operator: In
                   values:
                     - kafka
-                    - zookeeper
                     - connect
-                    - kafkarestproxy
-                    - schemaregistry
-                    - ksqldb
-                    - controlcenter
-                    - confluent-operator
+                    - k2
+                    - srrp
              topologyKey: kubernetes.io/hostname

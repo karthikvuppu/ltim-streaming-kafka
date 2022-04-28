@@ -74,4 +74,5 @@ spec:
                   operator: In
                   values:
                     - kafka
+                    - zookeeper
             topologyKey: kubernetes.io/hostname
