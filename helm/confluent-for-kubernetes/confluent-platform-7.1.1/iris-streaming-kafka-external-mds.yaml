@@ -96,10 +96,10 @@ spec:
         secretRef: mds-token
     zookeeper:
       endpoint: zookeeper.confluent.svc.cluster.local:2182
-      authentication:
-        type: digest
-        jaasConfig:
-          secretRef: credential
+      #authentication:
+        #type: digest
+        #jaasConfig:
+          #secretRef: credential
       tls:
         enabled: true
   metricReporter:

@@ -10,10 +10,10 @@ spec:
     init: confluentinc/confluent-init-container:2.3.0
   dataVolumeCapacity: 40Gi
   logVolumeCapacity: 30Gi
-  authentication:
-    type: digest
-    jaasConfig:
-      secretRef: credential
+  #authentication:
+    #type: digest
+    #jaasConfig:
+      #secretRef: credential
   tls:
     secretRef: tls-group
 #  oneReplicaPerNode: true
