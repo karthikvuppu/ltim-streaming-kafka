@@ -9,18 +9,23 @@ spec:
   replicas: 3
   image:
     application: confluentinc/cp-server:7.1.1
-#    application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-streaming-confluent:latest
     init: confluentinc/confluent-init-container:2.3.0
   storageClass:
     name: standard
   dataVolumeCapacity: 50Gi
   configOverrides:
     server:
+      - listener.security.protocol.map: EXTERNAL:SSL,INTERNAL:SASL_SSL,INTERNALEKS:SSL,REPLICATION:SASL_SSL,TOKEN:SASL_SSL,CLIENT:SASL_PLAINTEXT
+      - listeners: EXTERNAL://:9092,INTERNAL://:9071,INTERNALEKS://:9094,REPLICATION://:9072,TOKEN://:9073,CLIENT://:9093
+      - listener.name.client.sasl.enabled.mechanism: OAUTHBEARER
+      - listener.name.client.sasl.oauthbearer.jwks.endpoint.url: https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
+      - listener.name.client.sasl.oauthbearer.expected.audience: account
+      - listener.name.client.oauthbearer.sasl.server.callback.handler.class: org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
+      - listener.name.client.oauthbearer.sasl.jaas.config: org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
   tls:
     secretRef: tls-group
   listeners:
     custom:
-
     - name: internaleks
       port: 9094
       authentication:
@@ -36,7 +41,6 @@ spec:
           secretRef: credential
       tls:
         enabled: true
-
     external:
       authentication:
         type: mtls
