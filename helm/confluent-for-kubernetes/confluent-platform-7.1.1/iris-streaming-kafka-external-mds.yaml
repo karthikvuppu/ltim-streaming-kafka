@@ -130,7 +130,6 @@ spec:
                 - key: app
                   operator: In
                   values:
-                    - kafka
                     - zookeeper
                     - kafkarestproxy
                     - schemaregistry
