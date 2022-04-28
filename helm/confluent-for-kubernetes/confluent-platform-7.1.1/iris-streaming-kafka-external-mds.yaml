@@ -131,8 +131,7 @@ spec:
                   operator: In
                   values:
                     - zookeeper
-                    - kafkarestproxy
-                    - schemaregistry
-                    - ksqldb
+                    - srrp
+                    - k2
                     - connect
             topologyKey: kubernetes.io/hostname
