@@ -26,7 +26,8 @@ spec:
     custom:
     - name: client
       port: 9093
-      type: plain
+      authentication:
+        type: plain
         jaasConfig:
           secretRef: credential
     - name: internaleks
