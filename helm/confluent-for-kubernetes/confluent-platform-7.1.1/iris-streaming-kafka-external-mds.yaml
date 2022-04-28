@@ -95,7 +95,8 @@ spec:
       tokenKeyPair:
         secretRef: mds-token
     zookeeper:
-      endpoint: zookeeper.confluent.svc.cluster.local:2182
+      #endpoint: zookeeper.confluent.svc.cluster.local:2182
+      endpoint: zookeeper.confluent.svc.cluster.local:2181
       #authentication:
         #type: digest
         #jaasConfig:
