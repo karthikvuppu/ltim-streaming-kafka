@@ -9,9 +9,6 @@ spec:
     application: confluentinc/cp-ksqldb-server:7.1.1
     init: confluentinc/confluent-init-container:2.3.0
   dataVolumeCapacity: 20Gi
-  configOverrides:
-    server:
-      - ksql.schema.registry.url=http://schemaregistry:8081
   authorization:
     type: rbac
   tls:
