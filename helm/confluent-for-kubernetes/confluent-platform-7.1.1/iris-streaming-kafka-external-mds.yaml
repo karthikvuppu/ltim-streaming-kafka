@@ -73,13 +73,13 @@ spec:
           domain: iris-streaming-sb.devtest.aws.scania.com
           bootstrapPrefix: kafka-ext-sbox
           brokerPrefix: s-ext-sbox
-    configOverrides:
-      server:
-        - listener.name.client.sasl.enabled.mechanism=OAUTHBEARER
-        - listener.name.client.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
-        - listener.name.client.sasl.oauthbearer.expected.audience=account
-        - listener.name.client.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
-        - listener.name.client.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
+  configOverrides:
+    server:
+      - listener.name.client.sasl.enabled.mechanism=OAUTHBEARER
+      - listener.name.client.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
+      - listener.name.client.sasl.oauthbearer.expected.audience=account
+      - listener.name.client.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
+      - listener.name.client.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
   authorization:
     type: rbac
     superUsers:
