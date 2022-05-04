@@ -13,25 +13,17 @@ spec:
   storageClass:
     name: standard
   dataVolumeCapacity: 50Gi
-  configOverrides:
-    server:
-      - listener.security.protocol.map=CLIENT:SASL_PLAINTEXT,EXTERNAL:SSL,INTERNAL:SASL_SSL,INTERNALEKS:SSL,REPLICATION:SASL_SSL,TOKEN:SASL_SSL
-      - listener.name.client.sasl.enabled.mechanism=OAUTHBEARER
-      - listener.name.client.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
-      - listener.name.client.sasl.oauthbearer.expected.audience=account
-      - listener.name.client.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
-      - listener.name.client.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
   tls:
     secretRef: tls-group
   listeners:
     custom:
     - name: client
       port: 9093
-      #authentication:
+      authentication:
         ## This is only required for using the CFK custom listener section. configOverrides listener.name.client.sasl.enabled.mechanism=OAUTHBEARER will do the trick!
-        #type: plain
-        #jaasConfig:
-          #secretRef: credential
+        type: plain
+        jaasConfig:
+          secretRef: credential
       externalAccess:
         type: loadBalancer
         loadBalancer:
@@ -81,6 +73,13 @@ spec:
           domain: iris-streaming-sb.devtest.aws.scania.com
           bootstrapPrefix: kafka-ext-sbox
           brokerPrefix: s-ext-sbox
+    configOverrides:
+      server:
+        - listener.name.client.sasl.enabled.mechanism=OAUTHBEARER
+        - listener.name.client.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
+        - listener.name.client.sasl.oauthbearer.expected.audience=account
+        - listener.name.client.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
+        - listener.name.client.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
   authorization:
     type: rbac
     superUsers:
