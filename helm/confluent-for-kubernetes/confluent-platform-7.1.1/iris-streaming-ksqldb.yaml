@@ -33,14 +33,11 @@ spec:
       authentication:
         type: bearer
         bearer:
-          secretRef: ksqldb-mds-client
+          #secretRef: ksqldb-mds-client
+          secretRef: mds-client
       tls:
         enabled: true
   externalAccess:
-#    type: nodePort
-#    nodePort:
-#      host: ksqldb.iris-streaming-sb.devtest.aws.scania.com
-#      nodePortOffset: 30100
     type: loadBalancer
     loadBalancer:
       annotations:
@@ -52,7 +49,7 @@ spec:
         alb.ingress.kubernetes.io/inbound-cidrs: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
         external-dns.alpha.kubernetes.io/hostname: ksqldb.iris-streaming-sb.devtest.aws.scania.com
       domain: iris-streaming-sb.devtest.aws.scania.com
-      #prefix: ksqldb
+
       prefix: ksqldb-sbox
   storageClass:
     name: standard

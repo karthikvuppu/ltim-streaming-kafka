@@ -64,7 +64,6 @@ spec:
          alb.ingress.kubernetes.io/inbound-cidrs: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
          external-dns.alpha.kubernetes.io/hostname: restproxy.iris-streaming-sb.devtest.aws.scania.com
        domain: iris-streaming-sb.devtest.aws.scania.com
-       #prefix: restproxy
        prefix: restproxy-sbox
 #    oneReplicaPerNode: true
   podTemplate:
