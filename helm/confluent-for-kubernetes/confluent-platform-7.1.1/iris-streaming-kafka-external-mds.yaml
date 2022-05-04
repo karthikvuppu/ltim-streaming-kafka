@@ -42,7 +42,7 @@ spec:
             service.beta.kubernetes.io/load-balancer-source-ranges: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
             service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
           domain: iris-streaming-sb.devtest.aws.scania.com
-          bootstrapPrefix: kafka-oauth-sbox
+          bootstrapPrefix: kafka-oauth-client-sbox
           brokerPrefix: s-oauth-sbox
     - name: internaleks
       port: 9094
