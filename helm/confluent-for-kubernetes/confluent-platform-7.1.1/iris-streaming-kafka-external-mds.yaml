@@ -15,6 +15,7 @@ spec:
   dataVolumeCapacity: 50Gi
   configOverrides:
     server:
+      - listener.security.protocol.map=CLIENT:SASL_PLAINTEXT,EXTERNAL:SSL,INTERNAL:SASL_SSL,INTERNALEKS:SSL,REPLICATION:SASL_SSL,TOKEN:SASL_SSL
       - listener.name.client.sasl.enabled.mechanism=OAUTHBEARER
       - listener.name.client.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
       - listener.name.client.sasl.oauthbearer.expected.audience=account
