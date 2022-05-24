@@ -129,12 +129,35 @@ spec:
     superUsers:
       - User:servicesspadmintest
       - User:kafka
-  services:
-    mds:
+  # services:
+  #   mds:
       # tls:
       #   enabled: true
       # tokenKeyPair:
       #   secretRef: mds-token
+      
+  dependencies:
+    kafkaRest:
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: rest-credential
+    mds:
+    #  endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443   #actual one
+      endpoint: https://mds-cc-sbox.iris-streaming-sb.devtest.aws.scania.com:443  #until we map it in route53
+      tls:
+        enabled: true
+      kafka:
+    #    bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
+        bootstrapEndpoint: s-cc-sbox0.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox1.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox2.iris-streaming-sb.devtest.aws.scania.com:9092
+        authentication:
+          jaasConfig:
+            secretRef: mds-client-plain
+          type: plain
+        tls:
+          enabled: true
+      tokenKeyPair:
+        secretRef: mds-token
       provider:
         type: ldap
         ldap:
@@ -159,28 +182,6 @@ spec:
             userSearchBase: DC=global,DC=scd,DC=scania,DC=com
             #userSearchBase: (|(OU=InfoMate,OU=Sodertalje,OU=SE,DC=global,DC=scd,DC=scania,DC=com)(OU=Administrative.*,OU=SSP,OU=Enterprise,DC=global,DC=scd,DC=scania,DC=com))
             userSearchScope: 2
-  dependencies:
-    kafkaRest:
-      authentication:
-        type: bearer
-        bearer:
-          secretRef: rest-credential
-    mds:
-    #  endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443   #actual one
-      endpoint: https://mds-cc-sbox.iris-streaming-sb.devtest.aws.scania.com:443  #until we map it in route53
-      tls:
-        enabled: true
-      kafka:
-    #    bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
-        bootstrapEndpoint: s-cc-sbox0.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox1.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox2.iris-streaming-sb.devtest.aws.scania.com:9092
-        authentication:
-          jaasConfig:
-            secretRef: mds-client-plain
-          type: plain
-        tls:
-          enabled: true
-      tokenKeyPair:
-        secretRef: mds-token
     zookeeper:
       endpoint: zookeeper.confluent.svc.cluster.local:2182
       #endpoint: zookeeper.confluent.svc.cluster.local:2181
