@@ -131,10 +131,10 @@ spec:
       - User:kafka
   services:
     mds:
-      tls:
-        enabled: true
-      tokenKeyPair:
-        secretRef: mds-token
+      # tls:
+      #   enabled: true
+      # tokenKeyPair:
+      #   secretRef: mds-token
       provider:
         type: ldap
         ldap:
