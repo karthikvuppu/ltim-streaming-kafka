@@ -13,28 +13,6 @@ spec:
   storageClass:
     name: standard
   dataVolumeCapacity: 50Gi
-  mountedVolumes:
-    volumes:
-      - name: keytab
-        configMap:
-          name: keytab-cm
-          items:
-            - key: kt-key
-              path: keytab
-      - name: krb
-        configMap:
-          name: krb-cm
-          items:
-            - key: krb5.conf
-              path: krb5.conf
-    volumeMounts:
-      - name: keytab
-        mountPath: /tmp/keytab
-        readOnly: true
-      - name: krb
-        mountPath: /etc/krb5.conf
-        subPath: krb5.conf
-        readOnly: true
   tls:
     secretRef: tls-group
   listeners:
@@ -96,8 +74,6 @@ spec:
           bootstrapPrefix: kafka-ext-sbox
           brokerPrefix: s-ext-sbox
   configOverrides:
-    log4j:
-      - log4j.logger.io.confluent.security.auth.provider.ldap=TRACE
     server:
       - listener.name.client.sasl.enabled.mechanisms=OAUTHBEARER
       - listener.name.client.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
@@ -105,69 +81,10 @@ spec:
       - listener.name.client.sasl.oauthbearer.sub.claim.name=clientId
       - listener.name.client.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
       - listener.name.client.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
-      - confluent.balancer.enable=true
-      - listener.name.client.sasl.enabled.mechanisms=OAUTHBEARER
-      ## Additional properties for ldap not supported by CFK directly
-      - listener.name.client.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
-      - ldap.com.sun.jndi.ldap.read.timeout=60000
-      - listener.name.client.sasl.oauthbearer.expected.audience=account
-      - ldap.refresh.interval.ms=60000
-      - listener.name.client.sasl.oauthbearer.sub.claim.name=clientId
-      - ldap.java.naming.security.authentication=GSSAPI
-      - listener.name.client.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
-      - ldap.retry.timeout.ms=6600000
-      - listener.name.client.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
-      - ldap.java.naming.security.principal=servicesspadmintest@GLOBAL.SCD.SCANIA.COM
-      - ldap.sasl.jaas.config=com.sun.security.auth.module.Krb5LoginModule required debug=true useKeyTab=true storeKey=true keyTab="/tmp/keytab/keytab" principal="servicesspadmintest@GLOBAL.SCD.SCANIA.COM";
-    jvm:
-      - "-Djava.security.krb5.conf=/etc/krb5.conf"
-      - "-Dsun.security.jgss.debug=true"
-      - "-Dsun.security.krb5.debug=true"
-      - "-Dcom.sun.jndi.ldap.debug=true"
   authorization:
     type: rbac
     superUsers:
-      - User:servicesspadmintest
       - User:kafka
-  services:
-    mds:
-      tls:
-        enabled: true
-      tokenKeyPair:
-        secretRef: mds-token
-      provider:
-        type: ldap
-        ldap:
-          address: ldaps://sesodc0016.global.scd.scania.com:636
-          authentication:
-            type: simple
-            simple:
-              secretRef: credential
-          tls:
-            enabled: true
-            secretRef: tls-group
-          configurations:
-            groupNameAttribute: cn
-            groupObjectClass: group
-            groupSearchFilter: (objectclass=group)
-            groupMemberAttribute: member
-            groupMemberAttributePattern: CN=([^,]+).*,DC=global,DC=scd,DC=scania,DC=com
-            groupSearchBase: OU=Groups,OU=SSP,OU=Enterprise,DC=global,DC=scd,DC=scania,DC=com
-            userNameAttribute: sAMAccountName
-            userMemberOfAttributePattern: CN=(.*),OU=Groups,OU=SSP,OU=Enterprise,DC=global,DC=scd,DC=scania,DC=com
-            userObjectClass: user
-            userSearchBase: DC=global,DC=scd,DC=scania,DC=com
-            #userSearchBase: (|(OU=InfoMate,OU=Sodertalje,OU=SE,DC=global,DC=scd,DC=scania,DC=com)(OU=Administrative.*,OU=SSP,OU=Enterprise,DC=global,DC=scd,DC=scania,DC=com))
-            userSearchScope: 2
-      kafka:
-    #    bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
-        bootstrapEndpoint: s-cc-sbox0.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox1.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox2.iris-streaming-sb.devtest.aws.scania.com:9092
-        authentication:
-          jaasConfig:
-            secretRef: mds-client-plain
-          type: plain
-        tls:
-          enabled: true
   dependencies:
     kafkaRest:
       authentication:
@@ -179,7 +96,15 @@ spec:
       endpoint: https://mds-cc-sbox.iris-streaming-sb.devtest.aws.scania.com:443  #until we map it in route53
       tls:
         enabled: true
-      
+      kafka:
+    #    bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
+        bootstrapEndpoint: s-cc-sbox0.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox1.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox2.iris-streaming-sb.devtest.aws.scania.com:9092
+        authentication:
+          jaasConfig:
+            secretRef: mds-client-plain
+          type: plain
+        tls:
+          enabled: true
       tokenKeyPair:
         secretRef: mds-token
     zookeeper:
