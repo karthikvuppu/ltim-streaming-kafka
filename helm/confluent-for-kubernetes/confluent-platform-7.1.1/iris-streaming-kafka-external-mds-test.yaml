@@ -174,14 +174,14 @@ spec:
         type: bearer
         bearer:
           secretRef: rest-credential
-    mds:
-    #  endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443   #actual one
-      endpoint: https://mds-cc-sbox.iris-streaming-sb.devtest.aws.scania.com:443  #until we map it in route53
-      tls:
-        enabled: true
+    # mds:
+    # #  endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443   #actual one
+      # endpoint: https://mds-cc-sbox.iris-streaming-sb.devtest.aws.scania.com:443  #until we map it in route53
+      # tls:
+        # enabled: true
       
-      tokenKeyPair:
-        secretRef: mds-token
+      # tokenKeyPair:
+        # secretRef: mds-token
     zookeeper:
       endpoint: zookeeper.confluent.svc.cluster.local:2182
       #endpoint: zookeeper.confluent.svc.cluster.local:2181
