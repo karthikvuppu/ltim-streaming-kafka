@@ -131,6 +131,7 @@ spec:
       - User:kafka
   services:
     mds:
+      endpoint: https://mds-cc-sbox.iris-streaming-sb.devtest.aws.scania.com:443
       tls:
         enabled: true
       tokenKeyPair:
