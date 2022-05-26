@@ -92,12 +92,10 @@ spec:
         bearer:
           secretRef: rest-credential
     mds:
-    #  endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443   #actual one
       endpoint: https://mds-cc-sbox.iris-streaming-sb.devtest.aws.scania.com:443  #until we map it in route53
       tls:
         enabled: true
       kafka:
-    #    bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
         bootstrapEndpoint: s-cc-sbox0.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox1.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox2.iris-streaming-sb.devtest.aws.scania.com:9092
         authentication:
           jaasConfig:
@@ -109,7 +107,6 @@ spec:
         secretRef: mds-token
     zookeeper:
       endpoint: zookeeper.confluent.svc.cluster.local:2182
-      #endpoint: zookeeper.confluent.svc.cluster.local:2181
       authentication:
         type: digest
         jaasConfig:
@@ -118,7 +115,6 @@ spec:
         enabled: true
   metricReporter:
     enabled: true
-  #  bootstrapEndpoint: s0.iris-streaming-sb.devtest.aws.scania.com:9092,s1.iris-streaming-sb.devtest.aws.scania.com:9092,s2.iris-streaming-sb.devtest.aws.scania.com:9092
     bootstrapEndpoint: s-cc-sbox0.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox1.iris-streaming-sb.devtest.aws.scania.com:9092,s-cc-sbox2.iris-streaming-sb.devtest.aws.scania.com:9092
     authentication:
       jaasConfig:

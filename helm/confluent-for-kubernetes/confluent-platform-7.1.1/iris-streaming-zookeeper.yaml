@@ -16,10 +16,8 @@ spec:
       secretRef: credential
   tls:
     secretRef: tls-group
-#  oneReplicaPerNode: true
   storageClass:
     name: standard
-
   podTemplate:
     podSecurityContext:
       fsGroup: 1000
