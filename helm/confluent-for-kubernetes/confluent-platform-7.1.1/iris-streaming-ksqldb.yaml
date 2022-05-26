@@ -23,14 +23,12 @@ spec:
       tls:
         enabled: true
     mds:
-      #endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443
       endpoint: https://mds-cc-sbox.iris-streaming-sb.devtest.aws.scania.com:443
       tokenKeyPair:
         secretRef: mds-token
       authentication:
         type: bearer
         bearer:
-          #secretRef: ksqldb-mds-client
           secretRef: mds-client
       tls:
         enabled: true

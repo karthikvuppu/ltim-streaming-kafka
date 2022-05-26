@@ -84,6 +84,7 @@ spec:
   authorization:
     type: rbac
     superUsers:
+      - User:servicesspadmintest
       - User:kafka
   dependencies:
     kafkaRest:

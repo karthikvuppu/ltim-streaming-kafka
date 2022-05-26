@@ -38,14 +38,12 @@ spec:
       tls:
         enabled: true
     mds:
-      #endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443
       endpoint: https://mds-cc-sbox.iris-streaming-sb.devtest.aws.scania.com:443
       tokenKeyPair:
         secretRef: mds-token
       authentication:
         type: bearer
         bearer:
-          #secretRef: connect-mds-client
           secretRef: mds-client
       tls:
         enabled: true
@@ -68,8 +66,6 @@ spec:
         external-dns.alpha.kubernetes.io/hostname: connect.iris-streaming-sb.devtest.aws.scania.com
       domain: iris-streaming-sb.devtest.aws.scania.com
       prefix: connect-sbox
-#  storageClass:
-#    name: standard
   podTemplate:
     podSecurityContext:
       fsGroup: 1000
