@@ -38,7 +38,7 @@ spec:
       tls:
         enabled: true
     mds:
-      endpoint: https://mds-cc-sbox.iris-streaming-sb.devtest.aws.scania.com:443
+      endpoint: https://mds.iris-streaming-sb.devtest.aws.scania.com:443
       tokenKeyPair:
         secretRef: mds-token
       authentication:
