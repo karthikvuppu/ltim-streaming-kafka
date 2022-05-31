@@ -38,26 +38,26 @@ spec:
           bootstrapPrefix: kafka-oauth-client-sbox
           brokerPrefix: s-oauth-sbox
     - name: clientonprem
-        port: 9095
-        authentication:
-          ## This is only required for using the CFK custom listener section. configOverrides listener.name.client.sasl.enabled.mechanism=OAUTHBEARER will do the trick!
-          type: plain
-          jaasConfig:
-            secretRef: credential
-        externalAccess:
-          type: loadBalancer
-          loadBalancer:
-            annotations:
-              service.beta.kubernetes.io/aws-load-balancer-type: nlb
-              service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
-              service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-oauthonprem-kafka-nlb
-              service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
-              service.beta.kubernetes.io/load-balancer-source-ranges: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
-              service.beta.kubernetes.io/aws-load-balancer-internal: "true"
-              service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
-            domain: iris-streaming-sb.devtest.aws.scania.com
-            bootstrapPrefix: kafka-oauth-clientonprem-sbox
-            brokerPrefix: s-oauthonprem-sbox
+      port: 9095
+      authentication:
+        ## This is only required for using the CFK custom listener section. configOverrides listener.name.client.sasl.enabled.mechanism=OAUTHBEARER will do the trick!
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          annotations:
+            service.beta.kubernetes.io/aws-load-balancer-type: nlb
+            service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+            service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-oauthonprem-kafka-nlb
+            service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
+            service.beta.kubernetes.io/load-balancer-source-ranges: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
+            service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
+          domain: iris-streaming-sb.devtest.aws.scania.com
+          bootstrapPrefix: kafka-oauth-clientonprem-sbox
+          brokerPrefix: s-oauthonprem-sbox
     - name: internaleks
       port: 9094
       authentication:
