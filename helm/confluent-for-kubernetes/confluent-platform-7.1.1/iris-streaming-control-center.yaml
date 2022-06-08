@@ -51,8 +51,8 @@ spec:
         enabled: true
       authentication:
         type: basic
-          basic:
-            secretRef: c3-access
+        basic:
+          secretRef: c3-access
   externalAccess:
     type: loadBalancer
     loadBalancer:
