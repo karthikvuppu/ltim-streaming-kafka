@@ -1,0 +1,89 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+  license:
+    secretRef: confluent-license
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center:7.1.1
+    init: confluentinc/confluent-init-container:2.3.0
+  dataVolumeCapacity: 30Gi
+  configOverrides:
+    server:
+  authorization:
+    type: rbac
+  tls:
+    secretRef: tls-group
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: mds-client
+      tls:
+        enabled: true
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      tls:
+        enabled: true
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      annotations:
+        kubernetes.io/ingress.class: alb
+        alb.ingress.kubernetes.io/scheme: internet-facing
+        alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-north-1:858242954753:certificate/cee9c9fe-bb1c-4087-a109-de8f49148301
+        alb.ingress.kubernetes.io/load-balancer-name: iris-streaming-sb-controlcenter-alb
+        alb.ingress.kubernetes.io/target-type: instance
+        alb.ingress.kubernetes.io/subnets: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
+        alb.ingress.kubernetes.io/inbound-cidrs: 13.48.228.240/32, 13.51.129.156/32, 13.51.76.45/32
+        external-dns.alpha.kubernetes.io/hostname: controlcenter.iris-streaming-sb.devtest.aws.scania.com
+      domain: iris-streaming-sb.devtest.aws.scania.com
+      prefix: controlcenter
+  storageClass:
+    name: standard
+     
+  oneReplicaPerNode: true
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    probe:
+      liveness:
+        periodSeconds: 10
+        failureThreshold: 5
+        timeoutSeconds: 500
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - k2
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - zookeeper
+                    - kafka
+            topologyKey: kubernetes.io/hostname
