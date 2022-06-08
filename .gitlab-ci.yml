@@ -227,16 +227,16 @@ schemaregistry:
 
 controlcenter:
   stage: confluent_deployment_sbox
-    script:
-      - "kubectl apply -f $CC"
-      - "kubectl get pods -n confluent"
-    environment:
-      name: sbox
-    tags:
-      - docker
-    only:
-      - master
-    when: manual
+  script:
+    - "kubectl apply -f $CC"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
 
 # Destroy sandbox components in below order
 zookeeper-destroy:
