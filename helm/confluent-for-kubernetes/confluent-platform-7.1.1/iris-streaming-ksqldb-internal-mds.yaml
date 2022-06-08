@@ -11,6 +11,11 @@ spec:
     application: confluentinc/cp-ksqldb-server:7.1.1
     init: confluentinc/confluent-init-container:2.3.0
   dataVolumeCapacity: 20Gi
+  configOverrides:
+    server:
+      - access.control.allow.origin=*
+      - access.control.allow.methods=GET,POST,HEAD
+      - access.control.allow.headers=X-Requested-With,Content-Type,Accept,Origin,Authorization
   authorization:
     type: rbac
   tls:
