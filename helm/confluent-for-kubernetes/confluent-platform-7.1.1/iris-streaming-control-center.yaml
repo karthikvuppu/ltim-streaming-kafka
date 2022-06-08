@@ -49,6 +49,7 @@ spec:
       url: https://connect.confluent.svc.cluster.local:8083
       tls:
         enabled: true
+      #test
       authentication:
         type: basic
         basic:
