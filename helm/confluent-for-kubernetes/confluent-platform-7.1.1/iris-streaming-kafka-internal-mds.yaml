@@ -98,9 +98,10 @@ spec:
         enabled: true
     internal:
       authentication:
-        type: plain
-        jaasConfig:
-          secretRef: credential
+        type: mtls
+        #type: plain
+        #jaasConfig:
+          #secretRef: credential
       tls:
         enabled: true
     external:
