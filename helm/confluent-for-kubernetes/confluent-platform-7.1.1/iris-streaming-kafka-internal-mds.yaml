@@ -54,6 +54,8 @@ spec:
         type: plain
         jaasConfig:
           secretRef: credential
+      tls:
+        enabled: true
       externalAccess:
         type: loadBalancer
         loadBalancer:
