@@ -30,13 +30,13 @@ spec:
       tls:
         enabled: true
     schemaRegistry:
-      # authentication:
-      #   basic:
-      #     secretRef: credential
-      #   type: basic
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
       tls:
         enabled: true
-      url: https://schemaregistry.operator.svc.cluster.local:8081
+      authentication:
+        type: basic
+        basic:
+          secretRef: c3-access
   image:
     application: confluentinc/cp-kafka-rest:7.1.1
     init: confluentinc/confluent-init-container:2.3.0
