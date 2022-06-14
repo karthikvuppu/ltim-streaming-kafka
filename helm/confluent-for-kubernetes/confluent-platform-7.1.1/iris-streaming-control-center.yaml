@@ -51,6 +51,15 @@ spec:
         type: basic
         basic:
           secretRef: c3-access
+    connect:
+    - name: connect-aws
+      url: https://connect-aws.confluent.svc.cluster.local:8083
+      tls:
+        enabled: true
+      authentication:
+        type: basic
+        basic:
+          secretRef: c3-access
   externalAccess:
     type: loadBalancer
     loadBalancer:
