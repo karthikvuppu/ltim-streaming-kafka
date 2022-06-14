@@ -49,7 +49,7 @@ spec:
   replicas: 1
   mountedVolumes:
     volumes:
-      - name: restproxy-client-jaas
+      - name: restproxy-basic-client-jaas
         secret:
           secretName: restproxy-basic-client-jaas
           items:
