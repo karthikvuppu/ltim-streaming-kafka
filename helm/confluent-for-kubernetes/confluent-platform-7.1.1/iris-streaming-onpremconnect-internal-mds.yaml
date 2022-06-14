@@ -30,13 +30,11 @@ spec:
     type: rbac
   dependencies:
     kafka:
-      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
-      authentication:
-        type: plain
-        jaasConfig:
-          secretRef: credential
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9094
       tls:
         enabled: true
+      authentication:
+        type: mtls
     mds:
       endpoint: https://kafka.confluent.svc.cluster.local:8090
       tokenKeyPair:

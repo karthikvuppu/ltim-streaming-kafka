@@ -35,13 +35,6 @@ spec:
         enabled: true
       authentication:
         type: mtls
-#      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
-#      authentication:
-#        type: plain
-#        jaasConfig:
-#          secretRef: credential
-#      tls:
-#        enabled: true
     mds:
       endpoint: https://kafka.confluent.svc.cluster.local:8090
       tokenKeyPair:
