@@ -65,7 +65,7 @@ spec:
       - name: restproxy-basic-client-jaas
         mountPath: /tmp/restproxy
       - name: restproxy-basic-users
-        mountPath: /tmp/restproxy
+        mountPath: /tmp/restproxy/users
   externalAccess:
     type: loadBalancer
     loadBalancer:
