@@ -4,7 +4,6 @@ metadata:
   name: schemaregistry
   namespace: confluent
 spec:
-
   replicas: 1
   image:
     application: confluentinc/cp-schema-registry:7.1.1
