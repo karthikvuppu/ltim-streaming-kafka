@@ -13,7 +13,9 @@ variables:
   #KSQLDB      : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-ksqldb.yaml'
   KSQLDB      : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-ksqldb-internal-mds.yaml'
   #CONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-connect.yaml'
-  CONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-connect-internal-mds.yaml'
+  AWSCONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-awsconnect-internal-mds.yaml'
+  SAPCONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-sapconnect-internal-mds.yaml'
+  ONPREMCONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-onpremconnect-internal-mds.yaml'
   #RESTPROXY   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy.yaml'
   RESTPROXY   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy-internal-mds.yaml'
   RESTCLASS   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restclass.yaml'
@@ -186,10 +188,36 @@ restclass:
     - master
   when: manual
 
-connect:
+awsconnect:
   stage: confluent_deployment_sbox
   script:
-    - "kubectl apply -f $CONNECT"
+    - "kubectl apply -f $AWSCONNECT"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+sapconnect:
+  stage: confluent_deployment_sbox
+  script:
+    - "kubectl apply -f $SAPCONNECT"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+onpremconnect:
+  stage: confluent_deployment_sbox
+  script:
+    - "kubectl apply -f $ONPREMCONNECT"
     - "kubectl get pods -n confluent"
   environment:
     name: sbox
@@ -307,10 +335,36 @@ restclass-destroy:
     - master
   when: manual
 
-connect-destroy:
+awsconnect-destroy:
   stage: confluent_destroy_sbox
   script:
-    - "kubectl delete -f $CONNECT"
+    - "kubectl delete -f $AWSCONNECT"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+sapconnect-destroy:
+  stage: confluent_destroy_sbox
+  script:
+    - "kubectl delete -f $SAPCONNECT"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+onpremconnect-destroy:
+  stage: confluent_destroy_sbox
+  script:
+    - "kubectl delete -f $ONPREMCONNECT"
     - "kubectl get pods -n confluent"
   environment:
     name: sbox

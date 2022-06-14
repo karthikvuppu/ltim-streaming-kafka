@@ -4,7 +4,7 @@ metadata:
   name: connect
   namespace: confluent
 spec:
-  replicas: 2
+  replicas: 1
   oneReplicaPerNode: true
   image:
     application: confluentinc/cp-server-connect:7.1.1
@@ -47,12 +47,19 @@ spec:
           secretRef: mds-client
       tls:
         enabled: true
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      tls:
+        enabled: true
+      authentication:
+        type: basic
+        basic:
+          secretRef: c3-access
   configOverrides:
     server:
       - key.converter=org.apache.kafka.connect.storage.StringConverter
       - value.converter=io.confluent.connect.avro.AvroConverter
-      - value.converter.schema.registry.url=http://schemaregistry:8081
-
+  enableSchemas: true
   externalAccess:
     type: loadBalancer
     loadBalancer:
@@ -65,7 +72,7 @@ spec:
         alb.ingress.kubernetes.io/inbound-cidrs: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
         external-dns.alpha.kubernetes.io/hostname: connect.iris-streaming-sb.devtest.aws.scania.com
       domain: iris-streaming-sb.devtest.aws.scania.com
-      prefix: connect-sbox
+      prefix: awsconnect-sbox
   podTemplate:
     podSecurityContext:
       fsGroup: 1000
@@ -79,7 +86,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - connect
+                    - awsconnect
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:

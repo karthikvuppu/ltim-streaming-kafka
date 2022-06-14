@@ -6,7 +6,7 @@ metadata:
 spec:
   license:
     secretRef: confluent-license
-  replicas: 3
+  replicas: 6
   image:
     application: confluentinc/cp-server:7.1.1
     init: confluentinc/confluent-init-container:2.3.0

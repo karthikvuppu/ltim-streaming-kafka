@@ -1,29 +1,33 @@
 apiVersion: platform.confluent.io/v1beta1
-kind: ControlCenter
+kind: Connect
 metadata:
-  name: controlcenter
+  name: connect-onprem
   namespace: confluent
 spec:
-  license:
-    secretRef: confluent-license
   replicas: 1
+  oneReplicaPerNode: true
   image:
-    application: confluentinc/cp-enterprise-control-center:7.1.1
+    application: confluentinc/cp-server-connect:7.1.1
     init: confluentinc/confluent-init-container:2.3.0
-  dataVolumeCapacity: 30Gi
-  configOverrides:
-    server:
-      - confluent.controlcenter.ksql.ksql.url=https://ksqldb.confluent.svc.cluster.local:8088
-      - confluent.controlcenter.ksql.ksql.advertised.url=https://ksqldb.iris-streaming-sb.devtest.aws.scania.com:443
-      - confluent.controlcenter.ksql.ksql.ssl.truststore.location=/mnt/sslcerts/truststore.p12
-      - confluent.controlcenter.ksql.ksql.ssl.truststore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
-      - confluent.controlcenter.ksql.ksql.ssl.keystore.location=/mnt/sslcerts/keystore.p12
-      - confluent.controlcenter.ksql.ksql.ssl.keystore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
-      - confluent.controlcenter.ksql.ksql.ssl.key.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
-  authorization:
-    type: rbac
+  build:
+    type: onDemand
+    onDemand:
+      plugins:
+        locationType: confluentHub                          #if the k8s have internet connection i.e to confluenthub
+        confluentHub:
+          - name: kafka-connect-datagen
+            owner: confluentinc
+            version: 0.5.3
+          - name: debezium-connector-mysql
+            owner: debezium
+            version: 1.8.1
+          - name: kafka-connect-hdfs3
+            owner: confluentinc
+            version: 1.1.10
   tls:
     secretRef: tls-group
+  authorization:
+    type: rbac
   dependencies:
     kafka:
       bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
@@ -51,34 +55,33 @@ spec:
         type: basic
         basic:
           secretRef: c3-access
+  configOverrides:
+    server:
+      - key.converter=org.apache.kafka.connect.storage.StringConverter
+      - value.converter=io.confluent.connect.avro.AvroConverter
+      - group.id=confluent.connect.onprem
+      - config.storage.topic=confluent.connect.onprem-configs
+      - offset.storage.topic=confluent.connect.onprem-offsets
+      - status.storage.topic=confluent.connect.onprem-status
+  enableSchemas: true
   externalAccess:
     type: loadBalancer
     loadBalancer:
       annotations:
         kubernetes.io/ingress.class: alb
         alb.ingress.kubernetes.io/scheme: internet-facing
-        alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-north-1:858242954753:certificate/cee9c9fe-bb1c-4087-a109-de8f49148301
-        alb.ingress.kubernetes.io/load-balancer-name: iris-streaming-sb-controlcenter-alb
+        alb.ingress.kubernetes.io/load-balancer-name: iris-streaming-sb-connect-alb
         alb.ingress.kubernetes.io/target-type: instance
         alb.ingress.kubernetes.io/subnets: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
-        alb.ingress.kubernetes.io/inbound-cidrs: 13.48.228.240/32, 13.51.129.156/32, 13.51.76.45/32
-        external-dns.alpha.kubernetes.io/hostname: controlcenter.iris-streaming-sb.devtest.aws.scania.com
+        alb.ingress.kubernetes.io/inbound-cidrs: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
+        external-dns.alpha.kubernetes.io/hostname: connect.iris-streaming-sb.devtest.aws.scania.com
       domain: iris-streaming-sb.devtest.aws.scania.com
-      prefix: controlcenter
-  storageClass:
-    name: standard
-     
-  oneReplicaPerNode: true
+      prefix: onpremconnect-sbox
   podTemplate:
     podSecurityContext:
       fsGroup: 1000
       runAsGroup: 1000
       runAsUser: 1000
-    probe:
-      liveness:
-        periodSeconds: 10
-        failureThreshold: 5
-        timeoutSeconds: 500
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -87,7 +90,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - cc
+                    - onpremconnect
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
@@ -95,6 +98,6 @@ spec:
                 - key: app
                   operator: In
                   values:
-                    - zookeeper
                     - kafka
+                    - zookeeper
             topologyKey: kubernetes.io/hostname
