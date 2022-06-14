@@ -62,6 +62,8 @@ spec:
             - key: basic.txt
               path: basic.txt
     volumeMounts:
+      - name: restproxy-basic-client-jaas
+        mountPath: /tmp/restproxy
       - name: restproxy-basic-users
         mountPath: /tmp/restproxy
   externalAccess:
