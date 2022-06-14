@@ -59,10 +59,6 @@ spec:
     server:
       - key.converter=org.apache.kafka.connect.storage.StringConverter
       - value.converter=io.confluent.connect.avro.AvroConverter
-      - group.id=confluent.connect.onprem
-      - config.storage.topic=confluent.connect.onprem-configs
-      - offset.storage.topic=confluent.connect.onprem-offsets
-      - status.storage.topic=confluent.connect.onprem-status
   enableSchemas: true
   externalAccess:
     type: loadBalancer
