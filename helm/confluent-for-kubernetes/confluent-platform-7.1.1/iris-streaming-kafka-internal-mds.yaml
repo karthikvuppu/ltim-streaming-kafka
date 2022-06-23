@@ -188,7 +188,7 @@ spec:
       provider:
         type: ldap
         ldap:
-          address: ldaps://sesodc0002.global.scd.scania.com:636
+          address: ldaps://SESOEGDC006.global.scd.scania.com:636
           authentication:
             type: simple
             simple:
