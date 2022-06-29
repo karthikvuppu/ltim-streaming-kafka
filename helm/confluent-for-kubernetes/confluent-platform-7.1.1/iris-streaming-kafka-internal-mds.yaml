@@ -97,8 +97,9 @@ spec:
       authentication:
         type: mtls
         principalMappingRules:
-          - RULE:.*OU=Scania CV AB,[\s]?CN[\s]?=[\s]?([a-zA-Z0-9]*)?.*/$1/
-          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9]*)?\..*\.scania\.com.*/$1/
+          # First rule may need to be altered to capture Scania-issued client certificates
+          - RULE:.*Scania.*CN[ ]?=[ ]?([a-zA-Z0-9]+).*/$1/
+          - RULE:.*CN[ ]?=[ ]?([a-zA-Z0-9]*).*\.scania\.com.*/$1/
       tls:
         enabled: true
       externalAccess:
@@ -127,9 +128,9 @@ spec:
       authentication:
         type: mtls
         principalMappingRules:
-          - RULE:.*OU=Scania CV AB,[\s]?CN[\s]?=[\s]?([a-zA-Z0-9]*)?.*/$1/
-          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9]*)?\..*\.scania\.com.*/$1/
-          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9]*)?\..*\.cpi\.hana\.ondemand\.com.*/$1/
+          # First rule may need to be altered to capture Scania-issued client certificates
+          - RULE:.*Scania.*CN[ ]?=[ ]?([a-zA-Z0-9]+).*/$1/
+          - RULE:.*CN[ ]?=[ ]?([a-zA-Z0-9]*).*\.scania\.com.*/$1/
       tls:
         enabled: true
         # Use provided certs in secret `tls-kafka`
