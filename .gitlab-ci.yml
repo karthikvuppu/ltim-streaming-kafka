@@ -9,13 +9,9 @@ variables:
   KAFKA       : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-kafka-internal-mds.yaml'
   SR          : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-schemaregistry-internal-mds.yaml'
   KSQLDB      : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-ksqldb-internal-mds.yaml'
-<<<<<<< HEAD
-  CONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-connect-internal-mds.yaml'
-=======
   AWSCONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-awsconnect-internal-mds.yaml'
   SAPCONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-sapconnect-internal-mds.yaml'
   ONPREMCONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-onpremconnect-internal-mds.yaml'
->>>>>>> cf017fe21d5845ed615f76003e3d3ce1bf8476e8
   RESTPROXY   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy-internal-mds.yaml'
   RESTPROXYMTLS   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy-mtls-internal-mds.yaml'
   RESTCLASS   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restclass.yaml'
