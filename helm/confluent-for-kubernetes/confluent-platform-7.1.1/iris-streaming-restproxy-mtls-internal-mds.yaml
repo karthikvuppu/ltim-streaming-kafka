@@ -4,18 +4,19 @@ metadata:
   name: kafkarestproxy
   namespace: confluent
 spec:
+  authentication:
+    type: mtls
   tls:
     secretRef: tls-group
   authorization:
     type: rbac
   configOverrides:
     server:
-      - authentication.method=BASIC
-      - authentication.realm=KafkaRest
-      - authentication.roles=Administrators
-      - confluent.rest.auth.propagate.method=JETTY_AUTH
-    jvm:
-      - "-Djava.security.auth.login.config=/tmp/restproxy/client.jaas"
+      ## Principal Propagation mTLS to SASL
+      - ssl.client.auth=true
+      - client.security.protocol=SASL_SSL
+      - confluent.rest.auth.propagate.method=SSL
+      - confluent.rest.auth.ssl.principal.mapping.rules=RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9]*)?.*/$1/
   dependencies:
     kafka:
       bootstrapEndpoint:  kafka.confluent.svc.cluster.local:9071
@@ -47,25 +48,6 @@ spec:
     application: confluentinc/cp-kafka-rest:7.1.1
     init: confluentinc/confluent-init-container:2.3.0
   replicas: 1
-  mountedVolumes:
-    volumes:
-      - name: restproxy-basic-client-jaas
-        secret:
-          secretName: restproxy-basic-client-jaas
-          items:
-            - key: client.jaas
-              path: client.jaas
-      - name: restproxy-basic-users
-        secret:
-          secretName: restproxy-basic-users
-          items:
-            - key: basic.txt
-              path: basic.txt
-    volumeMounts:
-      - name: restproxy-basic-client-jaas
-        mountPath: /tmp/restproxy
-      - name: restproxy-basic-users
-        mountPath: /tmp/restproxy/users
   externalAccess:
     type: loadBalancer
     loadBalancer:
