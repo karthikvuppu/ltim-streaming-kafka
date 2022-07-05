@@ -76,6 +76,11 @@ spec:
       fsGroup: 1000
       runAsGroup: 1000
       runAsUser: 1000
+    annotations:
+      ad.datadoghq.com/connect-aws.check_names: '["confluent_platform"]'
+      ad.datadoghq.com/connect-aws.init_configs: '[{"is_jmx": true, "collect_default_metrics": true}]'
+      ad.datadoghq.com/connect-aws.instances: '[{"host": "%%host%%","port":"7203"}]'
+      ad.datadoghq.com/connect-aws.logs: '[{"source":"confluent_platform","service":"confluent_platform"}]'
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:

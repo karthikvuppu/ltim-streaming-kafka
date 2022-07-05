@@ -2,24 +2,20 @@
 
 variables:
 
-  SC          : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-storage-class.yaml'
-  CRD         : 'helm/confluent-for-kubernetes/crds'
-  CRB         : 'helm/confluent-for-kubernetes/crds/platform.confluent.io_confluentrolebindings.yaml'
-  ZK          : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-zookeeper.yaml'
-  KAFKA       : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-kafka-internal-mds.yaml'
-  SR          : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-schemaregistry-internal-mds.yaml'
-  KSQLDB      : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-ksqldb-internal-mds.yaml'
-  AWSCONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-awsconnect-internal-mds.yaml'
-  SAPCONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-sapconnect-internal-mds.yaml'
-  ONPREMCONNECT     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-onpremconnect-internal-mds.yaml'
-  RESTPROXY   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy-internal-mds.yaml'
-  RESTPROXYMTLS   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy-mtls-internal-mds.yaml'
-  RESTCLASS   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restclass.yaml'
-  TOKEN0      : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/loadbalancer-token-kafka0.yaml'
-  TOKEN1      : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/loadbalancer-token-kafka1.yaml'
-  TOKEN2      : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/loadbalancer-token-kafka2.yaml'
-  CC          : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-control-center.yaml'
-  GIT_SUBMODULE_STRATEGY: recursive
+  SC                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-storage-class.yaml'
+  CRD                       : 'helm/confluent-for-kubernetes/crds'
+  CRB                       : 'helm/confluent-for-kubernetes/crds/platform.confluent.io_confluentrolebindings.yaml'
+  ZK                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-zookeeper.yaml'
+  KAFKA                     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-kafka-internal-mds.yaml'
+  SR                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-schemaregistry-internal-mds.yaml'
+  KSQLDB                    : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-ksqldb-internal-mds.yaml'
+  AWSCONNECT                : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-awsconnect-internal-mds.yaml'
+  MECONNECT                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-meconnect-internal-mds.yaml'
+  ONPREMCONNECT             : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-onpremconnect-internal-mds.yaml'
+  RESTPROXY                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy-internal-mds.yaml'
+  RESTCLASS                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restclass.yaml'
+  CC                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-control-center.yaml'
+  GIT_SUBMODULE_STRATEGY    : recursive
 
 
 stages:
@@ -69,39 +65,6 @@ Operator:
     - master
   when: manual
 
-# Ldap:
-#   stage: confluent_deployment_sbox
-#   script:
-#     - "helm upgrade --install -f secure-deploy/assets/openldap/ldaps-rbac.yaml test-ldap secure-deploy/assets/openldap --namespace confluent"
-#     - "kubectl get pods --namespace confluent"
-# #    - "kubectl create secret tls ca-pair-sslcerts --cert=$ca_cert --key=$key_pem --namespace confluent"
-#     - "kubectl create secret generic confluent-license --from-file=license.txt=secure-deploy/license.txt --namespace confluent"
-#     - "kubectl create secret generic credential --from-file=plain-users.json=secure-deploy/creds-kafka-sasl-users.json --from-file=digest-users.json=secure-deploy/creds-zookeeper-sasl-digest-users.json --from-file=digest.txt=secure-deploy/creds-kafka-zookeeper-credentials.txt --from-file=plain.txt=secure-deploy/creds-client-kafka-sasl-user.txt --from-file=basic.txt=secure-deploy/creds-control-center-users.txt --from-file=ldap.txt=secure-deploy/ldap.txt --namespace confluent"
-#     - "kubectl create secret generic mds-token --from-file=mdsPublicKey.pem=secure-deploy/assets/certs/mds-publickey.txt --from-file=mdsTokenKeyPair.pem=secure-deploy/assets/certs/mds-tokenkeypair.txt --namespace confluent"
-#     # Kafka RBAC credential
-#     - "kubectl create secret generic mds-client --from-file=bearer.txt=secure-deploy/bearer.txt --namespace confluent"
-#     # Control Center RBAC credential
-#     - "kubectl create secret generic c3-mds-client --from-file=bearer.txt=secure-deploy/c3-mds-client.txt --namespace confluent"
-#     # Connect RBAC credential
-#     - "kubectl create secret generic connect-mds-client --from-file=bearer.txt=secure-deploy/connect-mds-client.txt --namespace confluent"
-#     # Schema Registry RBAC credential
-#     - "kubectl create secret generic sr-mds-client --from-file=bearer.txt=secure-deploy/sr-mds-client.txt --namespace confluent"
-#     # Restproxy RBAC credential
-#     - "kubectl create secret generic rp-mds-client --from-file=bearer.txt=secure-deploy/rp-mds-client.txt --namespace confluent"
-#     # ksqlDB RBAC credential
-#     - "kubectl create secret generic ksqldb-mds-client --from-file=bearer.txt=secure-deploy/ksqldb-mds-client.txt --namespace confluent"
-#     # Kafka REST credential
-#     - "kubectl create secret generic rest-credential --from-file=bearer.txt=secure-deploy/bearer.txt --from-file=basic.txt=secure-deploy/bearer.txt --namespace confluent"
-#     # mds-client-plain
-#     - "kubectl create secret generic mds-client-plain --from-file=plain.txt=./plain.txt --namespace confluent"
-#   environment:
-#     name: sbox
-#   tags:
-#     - docker
-#   only:
-#     - master
-#   when: manual
-
 Zookeeper:
   stage: confluent_deployment_sbox
   script:
@@ -141,39 +104,10 @@ Kafka:
     - master
   when: manual
 
-Token:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $TOKEN0"
-    - "kubectl apply -f $TOKEN1"
-    - "kubectl apply -f $TOKEN2"
-    - "kubectl get pods -n confluent"
-    - "kubectl get services -n confluent | grep loadbalancer"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
 restproxy:
   stage: confluent_deployment_sbox
   script:
     - "kubectl apply -f $RESTPROXY"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-restproxymtls:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $RESTPROXYMTLS"
     - "kubectl get pods -n confluent"
   environment:
     name: sbox
@@ -209,10 +143,10 @@ awsconnect:
     - master
   when: manual
 
-sapconnect:
+meconnect:
   stage: confluent_deployment_sbox
   script:
-    - "kubectl apply -f $SAPCONNECT"
+    - "kubectl apply -f $MECONNECT"
     - "kubectl get pods -n confluent"
   environment:
     name: sbox
@@ -301,38 +235,10 @@ kafka-destroy:
     - master
   when: manual
 
-token-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $TOKEN0"
-    - "kubectl delete -f $TOKEN1"
-    - "kubectl delete -f $TOKEN2"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
 restproxy-destroy:
   stage: confluent_destroy_sbox
   script:
     - "kubectl delete -f $RESTPROXY"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-restproxymtls-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $RESTPROXYMTLS"
     - "kubectl get pods -n confluent"
   environment:
     name: sbox
@@ -368,10 +274,10 @@ awsconnect-destroy:
     - master
   when: manual
 
-sapconnect-destroy:
+meconnect-destroy:
   stage: confluent_destroy_sbox
   script:
-    - "kubectl delete -f $SAPCONNECT"
+    - "kubectl delete -f $MECONNECT"
     - "kubectl get pods -n confluent"
   environment:
     name: sbox
@@ -432,19 +338,6 @@ StorageClass-destroy:
   only:
     - master
   when: manual
-
-# ldap_destroy:
-#   stage: confluent_destroy_sbox
-#   script:
-#     - "kubectl delete sts ldap -n confluent"
-#     - "kubectl get pods -n confluent"
-#   environment:
-#     name: sbox
-#   tags:
-#     - docker
-#   only:
-#     - master
-#   when: manual
 
 operator_sbox_destroy:
   stage: confluent_destroy_sbox
