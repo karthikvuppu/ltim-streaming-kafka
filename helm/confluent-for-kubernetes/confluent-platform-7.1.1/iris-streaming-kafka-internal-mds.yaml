@@ -253,7 +253,6 @@ spec:
       runAsGroup: 1000
       runAsUser: 1000
     envVars:
-    items:
       - name: POD_IP
         valueFrom:
           fieldRef:
