@@ -19,10 +19,7 @@ spec:
   image:
     application: confluentinc/cp-server:7.1.1
     init: confluentinc/confluent-init-container:2.3.0
-  storageClass:
-    name: standard
-  dataVolumeCapacity: 50Gi
-  env:
+    env:
     - name: JAVA_OPTS
       value: >-
         -Xms256m -Xmx6144m
@@ -33,6 +30,10 @@ spec:
         -Dcom.sun.management.jmxremote.port=<JMX_PORT>
         -Dcom.sun.management.jmxremote.rmi.port=<JMX_PORT>
         -Djava.rmi.server.hostname=$(POD_IP)
+  storageClass:
+    name: standard
+  dataVolumeCapacity: 50Gi
+  
   mountedVolumes:
     volumes:
       - name: keytab
