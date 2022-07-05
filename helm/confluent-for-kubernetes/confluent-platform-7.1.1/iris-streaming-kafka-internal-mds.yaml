@@ -4,9 +4,14 @@ metadata:
   name: kafka
   namespace: confluent
   annotations:
-    ad.datadoghq.com/kafka.check_names: '["kafka"]'
+    # ad.datadoghq.com/kafka.check_names: '["kafka"]'
+    # ad.datadoghq.com/kafka.init_configs: '[{"is_jmx": true, "collect_default_metrics": true}]'
+    # ad.datadoghq.com/kafka.instances: '[{"host": "%%host%%","port":"7203"}]'
+    ad.datadoghq.com/kafka.check_names: '["confluent_platform"]'
     ad.datadoghq.com/kafka.init_configs: '[{"is_jmx": true, "collect_default_metrics": true}]'
     ad.datadoghq.com/kafka.instances: '[{"host": "%%host%%","port":"7203"}]'
+    ad.datadoghq.com/kafka.logs: '[{"source":"confluent_platform","service":"confluent_platform"}]'
+
 spec:
   license:
     secretRef: confluent-license
@@ -17,6 +22,17 @@ spec:
   storageClass:
     name: standard
   dataVolumeCapacity: 50Gi
+  env:
+    - name: JAVA_OPTS
+      value: >-
+        -Xms256m -Xmx6144m
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Dcom.sun.management.jmxremote.local.only=false
+        -Dcom.sun.management.jmxremote.port=<JMX_PORT>
+        -Dcom.sun.management.jmxremote.rmi.port=<JMX_PORT>
+        -Djava.rmi.server.hostname=$(POD_IP)
   mountedVolumes:
     volumes:
       - name: keytab
