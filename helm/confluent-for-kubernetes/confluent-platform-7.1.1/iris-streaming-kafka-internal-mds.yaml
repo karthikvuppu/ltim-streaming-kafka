@@ -19,7 +19,7 @@ spec:
   image:
     application: confluentinc/cp-server:7.1.1
     init: confluentinc/confluent-init-container:2.3.0
-  env:
+  envVars:
   - name: POD_IP
     valueFrom:
       fieldRef:
