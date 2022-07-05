@@ -19,21 +19,21 @@ spec:
   image:
     application: confluentinc/cp-server:7.1.1
     init: confluentinc/confluent-init-container:2.3.0
-    env:
-    - name: POD_IP
-      valueFrom:
-        fieldRef:
-          fieldPath: status.podIP
-    - name: JAVA_OPTS
-      value: >-
-        -Xms256m -Xmx6144m
-        -Dcom.sun.management.jmxremote
-        -Dcom.sun.management.jmxremote.authenticate=false
-        -Dcom.sun.management.jmxremote.ssl=false
-        -Dcom.sun.management.jmxremote.local.only=false
-        -Dcom.sun.management.jmxremote.port=7203
-        -Dcom.sun.management.jmxremote.rmi.port=7203
-        -Djava.rmi.server.hostname=$(POD_IP)
+  env:
+  - name: POD_IP
+    valueFrom:
+      fieldRef:
+        fieldPath: status.podIP
+  - name: JAVA_OPTS
+    value: >-
+      -Xms256m -Xmx6144m
+      -Dcom.sun.management.jmxremote
+      -Dcom.sun.management.jmxremote.authenticate=false
+      -Dcom.sun.management.jmxremote.ssl=false
+      -Dcom.sun.management.jmxremote.local.only=false
+      -Dcom.sun.management.jmxremote.port=7203
+      -Dcom.sun.management.jmxremote.rmi.port=7203
+      -Djava.rmi.server.hostname=$(POD_IP)
   storageClass:
     name: standard
   dataVolumeCapacity: 50Gi
