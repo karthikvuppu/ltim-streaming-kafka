@@ -15,6 +15,8 @@ variables:
   RESTPROXY                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy-internal-mds.yaml'
   RESTCLASS                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restclass.yaml'
   CC                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-control-center.yaml'
+  DATADOG                   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-datadog-agent.yaml'
+
   GIT_SUBMODULE_STRATEGY    : recursive
 
 
@@ -57,6 +59,20 @@ Operator:
     - "kubectl set env ds aws-node -n kube-system WARM_IP_TARGET=2"
     - "kubectl set env ds aws-node -n kube-system MINIMUM_IP_TARGET=2"
     - "kubectl rollout restart ds aws-node -n kube-system"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+Datadog:
+  stage: confluent_deployment_sbox
+  script:
+    - "kubectl create namespace datadog"
+    - "kubectl apply -f $DATADOG -n datadog"
+    - "kubectl get daemonset -n datadog"
   environment:
     name: sbox
   tags:
@@ -366,3 +382,16 @@ controlcenter-destroy:
     - master
   when: manual
 
+Datadog-destroy:
+  stage: confluent_destroy_sbox
+  script:
+    - "kubectl delete -f $DATADOG -n datadog"
+    - "kubectl get daemonset -n datadog"
+    - "kubectl delete namespace datadog"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
