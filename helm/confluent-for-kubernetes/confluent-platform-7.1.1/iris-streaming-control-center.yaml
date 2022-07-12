@@ -51,8 +51,8 @@ spec:
         enabled: true
       authentication:
         type: mtls
-    - name: connect-sap
-      url: https://connect-sap.confluent.svc.cluster.local:8083
+    - name: connect-me
+      url: https://connect-me.confluent.svc.cluster.local:8083
       tls:
         enabled: true
       authentication:
