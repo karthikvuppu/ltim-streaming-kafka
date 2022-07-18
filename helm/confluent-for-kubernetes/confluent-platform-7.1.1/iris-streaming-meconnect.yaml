@@ -1,7 +1,7 @@
 apiVersion: platform.confluent.io/v1beta1
 kind: Connect
 metadata:
-  name: connect-onprem
+  name: connect-me
   namespace: confluent
 spec:
   replicas: 1
@@ -70,17 +70,17 @@ spec:
         alb.ingress.kubernetes.io/inbound-cidrs: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
         external-dns.alpha.kubernetes.io/hostname: connect.iris-streaming-sb.devtest.aws.scania.com
       domain: iris-streaming-sb.devtest.aws.scania.com
-      prefix: onpremconnect-sbox
+      prefix: meconnect-sbox
   podTemplate:
     podSecurityContext:
       fsGroup: 1000
       runAsGroup: 1000
       runAsUser: 1000
     annotations:
-      ad.datadoghq.com/connect-onprem.check_names: '["confluent_platform"]'
-      ad.datadoghq.com/connect-onprem.init_configs: '[{"is_jmx": true, "collect_default_metrics": true}]'
-      ad.datadoghq.com/connect-onprem.instances: '[{"host": "%%host%%","port":"7203"}]'
-      ad.datadoghq.com/connect-onprem.logs: '[{"source":"confluent_platform","service":"confluent_platform"}]'
+      ad.datadoghq.com/connect-me.check_names: '["confluent_platform"]'
+      ad.datadoghq.com/schemaregistry.init_configs: '[{"is_jmx": true, "collect_default_metrics": true, "service_check_prefix": "confluent", "new_gc_metrics": true, "collect_default_jvm_metrics": true}]'
+      ad.datadoghq.com/connect-me.instances: '[{"host": "%%host%%","port":"7203"}]'
+      ad.datadoghq.com/connect-me.logs: '[{"source":"confluent_platform","service":"confluent_platform"}]'  
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -89,7 +89,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - onpremconnect
+                    - sapconnect
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:

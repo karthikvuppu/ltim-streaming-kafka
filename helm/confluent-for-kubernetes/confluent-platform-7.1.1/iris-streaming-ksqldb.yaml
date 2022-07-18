@@ -1,17 +1,25 @@
 apiVersion: platform.confluent.io/v1beta1
-kind: SchemaRegistry
+kind: KsqlDB
 metadata:
-  name: schemaregistry
+  name: ksqldb
   namespace: confluent
+  labels: 
+    admission.datadoghq.com/enabled: "true"
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-schema-registry:7.1.1
+    application: confluentinc/cp-ksqldb-server:7.1.1
     init: confluentinc/confluent-init-container:2.3.0
-  tls:
-    secretRef: tls-group
+  dataVolumeCapacity: 20Gi
+  configOverrides:
+    server:
+      - access.control.allow.origin=*
+      - access.control.allow.methods=GET,POST,HEAD
+      - access.control.allow.headers=X-Requested-With,Content-Type,Accept,Origin,Authorization
   authorization:
     type: rbac
+  tls:
+    secretRef: tls-group
   dependencies:
     kafka:
       bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
@@ -37,23 +45,25 @@ spec:
       annotations:
         kubernetes.io/ingress.class: alb
         alb.ingress.kubernetes.io/scheme: internet-facing
-        alb.ingress.kubernetes.io/load-balancer-name: iris-streaming-sb-schemaregistry-alb
+        alb.ingress.kubernetes.io/load-balancer-name: iris-streaming-sb-ksqldb-alb
         alb.ingress.kubernetes.io/target-type: instance
         alb.ingress.kubernetes.io/subnets: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
         alb.ingress.kubernetes.io/inbound-cidrs: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
-        external-dns.alpha.kubernetes.io/hostname: schemaregistry.iris-streaming-sb.devtest.aws.scania.com
+        external-dns.alpha.kubernetes.io/hostname: ksqldb.iris-streaming-sb.devtest.aws.scania.com
       domain: iris-streaming-sb.devtest.aws.scania.com
-      prefix: schemaregistry-sbox
+      prefix: ksqldb-sbox
+  storageClass:
+    name: standard
   podTemplate:
     podSecurityContext:
       fsGroup: 1000
       runAsGroup: 1000
       runAsUser: 1000
     annotations:
-      ad.datadoghq.com/schemaregistry.check_names: '["confluent_platform"]'
-      ad.datadoghq.com/schemaregistry.init_configs: '[{"is_jmx": true, "collect_default_metrics": true}]'
-      ad.datadoghq.com/schemaregistry.instances: '[{"host": "%%host%%","port":"7203"}]'
-      ad.datadoghq.com/schemaregistry.logs: '[{"source":"confluent_platform","service":"confluent_platform"}]'
+      ad.datadoghq.com/ksqldb.check_names: '["confluent_platform"]'
+      ad.datadoghq.com/schemaregistry.init_configs: '[{"is_jmx": true, "collect_default_metrics": true, "service_check_prefix": "confluent", "new_gc_metrics": true, "collect_default_jvm_metrics": true}]'
+      ad.datadoghq.com/ksqldb.instances: '[{"host": "%%host%%","port":"7203"}]'
+      ad.datadoghq.com/ksqldb.logs: '[{"source":"confluent_platform","service":"confluent_platform"}]'
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -62,7 +72,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - srrp
+                    - k2
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
