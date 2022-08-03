@@ -172,6 +172,14 @@ spec:
       - listener.name.clientonprem.sasl.oauthbearer.sub.claim.name=clientId
       - listener.name.clientonprem.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
       - listener.name.clientonprem.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
+      - listener.name.oauthaws.sasl.enabled.mechanisms=OAUTHBEARER
+      - listener.name.oauthaws.sasl.mechanism=PLAIN
+      - listener.name.oauthaws.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
+      - listener.name.oauthaws.sasl.oauthbearer.expected.audience=account
+      - listener.name.oauthaws.sasl.oauthbearer.sub.claim.name=clientId
+      - listener.name.oauthaws.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
+      - listener.name.oauthaws.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
+
     jvm:
       - "-Djava.security.krb5.conf=/etc/krb5.conf"
       #- "-Dsun.security.jgss.debug=true"
