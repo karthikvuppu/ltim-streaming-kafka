@@ -11,7 +11,7 @@ metadata:
     #            service.beta.kubernetes.io/aws-load-balancer-scheme: internal
     service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
     #external-dns.alpha.kubernetes.io/hostname: s-token-ext0.iris-streaming-sb.devtest.aws.scania.com
-    external-dns.alpha.kubernetes.io/hostname: s-token-sbox2.iris-streaming-sb.devtest.aws.scania.com
+    #external-dns.alpha.kubernetes.io/hostname: s-token-sbox2.iris-streaming-sb.devtest.aws.scania.com
 
 spec:
   selector:
