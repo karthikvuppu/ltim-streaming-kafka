@@ -165,20 +165,20 @@ spec:
       #- ldap.java.naming.security.principal=serviceirisssptest@GLOBAL.SCD.SCANIA.COM
       #- ldap.sasl.jaas.config=com.sun.security.auth.module.Krb5LoginModule required debug=true useKeyTab=true storeKey=true keyTab="/tmp/keytab/keytab" principal="serviceirisssptest@GLOBAL.SCD.SCANIA.COM";
       - listener.name.client.sasl.enabled.mechanisms=OAUTHBEARER
-      - listener.name.client.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
+      - listener.name.client.sasl.oauthbearer.jwks.endpoint.url=https://login.microsoftonline.com/3bc062e4-ac9d-4c17-b4dd-3aad637ff1ac/discovery/v2.0/keys
       - listener.name.client.sasl.oauthbearer.expected.audience=account
       - listener.name.client.sasl.oauthbearer.sub.claim.name=clientId
       - listener.name.client.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
       - listener.name.client.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
       - listener.name.clientonprem.sasl.enabled.mechanisms=OAUTHBEARER
-      - listener.name.clientonprem.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
+      - listener.name.clientonprem.sasl.oauthbearer.jwks.endpoint.url=https://login.microsoftonline.com/3bc062e4-ac9d-4c17-b4dd-3aad637ff1ac/discovery/v2.0/keys
       - listener.name.clientonprem.sasl.oauthbearer.expected.audience=account
       - listener.name.clientonprem.sasl.oauthbearer.sub.claim.name=clientId
       - listener.name.clientonprem.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
       - listener.name.clientonprem.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
       - listener.name.oauthaws.sasl.enabled.mechanisms=OAUTHBEARER
       - listener.name.oauthaws.sasl.mechanism=PLAIN
-      - listener.name.oauthaws.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
+      - listener.name.oauthaws.sasl.oauthbearer.jwks.endpoint.url=https://login.microsoftonline.com/3bc062e4-ac9d-4c17-b4dd-3aad637ff1ac/discovery/v2.0/keys
       - listener.name.oauthaws.sasl.oauthbearer.expected.audience=account
       - listener.name.oauthaws.sasl.oauthbearer.sub.claim.name=clientId
       - listener.name.oauthaws.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
