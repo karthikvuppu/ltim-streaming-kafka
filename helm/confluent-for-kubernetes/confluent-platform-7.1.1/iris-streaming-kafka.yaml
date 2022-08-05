@@ -68,7 +68,6 @@ spec:
             service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
             service.beta.kubernetes.io/load-balancer-source-ranges: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
             service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
-            external-dns.alpha.kubernetes.io/hostname: oauthaws.iris-streaming-sb.devtest.aws.scania.com
           domain: iris-streaming-sb.devtest.aws.scania.com
           bootstrapPrefix: oauthaws
           brokerPrefix: oauthaws
@@ -92,7 +91,6 @@ spec:
             service.beta.kubernetes.io/load-balancer-source-ranges: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
             service.beta.kubernetes.io/aws-load-balancer-internal: "true"
             service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
-            external-dns.alpha.kubernetes.io/hostname: oauthonprem.iris-streaming-sb.devtest.aws.scania.com
           domain: iris-streaming-sb.devtest.aws.scania.com
           bootstrapPrefix: oauthonprem
           brokerPrefix: oauthonprem
@@ -117,7 +115,6 @@ spec:
             service.beta.kubernetes.io/load-balancer-source-ranges: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
             service.beta.kubernetes.io/aws-load-balancer-internal: "true"
             service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
-            external-dns.alpha.kubernetes.io/hostname: mtlsonprem.iris-streaming-sb.devtest.aws.scania.com
           domain: iris-streaming-sb.devtest.aws.scania.com
           bootstrapPrefix: mtlsonprem
           brokerPrefix: mtlsonprem
@@ -149,7 +146,6 @@ spec:
             service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
             service.beta.kubernetes.io/load-balancer-source-ranges: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
             service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
-            external-dns.alpha.kubernetes.io/hostname: mtlsaws.iris-streaming-sb.devtest.aws.scania.com
           domain: iris-streaming-sb.devtest.aws.scania.com
           bootstrapPrefix: mtlsaws
           brokerPrefix: mtlsaws
