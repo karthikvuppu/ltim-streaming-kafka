@@ -67,6 +67,21 @@ Operator:
     - master
   when: manual
 
+Bitnami-Sealed-Secrets:
+  environment: 
+    name: sbox
+  only: 
+    - master
+  script:
+    - "kubectl apply -f secure-deploy/bitnami-sealed-secrets/sealed-secrets.yaml"
+    - "kubectl create configmap keytab-cm --from-file=kt-key=secure-deploy/bitnami-sealed-secrets/ServiceIrisSspTest.keytab"
+    - "kubectl create configmap krb-cm --from-file=krb5.conf=secure-deploy/bitnami-sealed-secrets/krb5.conf"
+  stage: confluent_deployment_sbox
+  tags: 
+    - docker
+  when: manual
+
+
 Datadog:
   stage: confluent_deployment_sbox
   script:
