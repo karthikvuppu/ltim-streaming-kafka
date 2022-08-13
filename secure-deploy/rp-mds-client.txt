@@ -1,2 +1,0 @@
-username=rp
-password=rp-secret

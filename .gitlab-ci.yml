@@ -96,6 +96,19 @@ Datadog:
     - master
   when: manual
 
+external-dns:
+  stage: confluent_deployment_sbox
+  script:
+    - "kubectl apply -f secure-deploy/external-dns/serviceaccount.yaml"
+    - "kubectl apply -f secure-deploy/external-dns/resources.yaml"
+  environment: 
+    name: sbox
+  tags: 
+    - docker
+  only: 
+    - master
+  when: manual
+
 Zookeeper:
   stage: confluent_deployment_sbox
   script:
@@ -403,6 +416,19 @@ Datadog-destroy:
     - "kubectl delete -f $DATADOG -n datadog"
     - "kubectl get daemonset -n datadog"
     - "kubectl delete namespace datadog"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+external-dns-destroy:
+  stage: confluent_destroy_sbox
+  script:
+    - "kubectl delete -f secure-deploy/external-dns/resources.yaml"
+    - "kubectl delete -f secure-deploy/external-dns/serviceaccount.yaml"
   environment:
     name: sbox
   tags:
