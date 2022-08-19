@@ -8,6 +8,7 @@ variables:
   ZK                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-zookeeper.yaml'
   KAFKA                     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-kafka.yaml'
   SR                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-schemaregistry.yaml'
+  SR-PRIV                   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-schemaregistry-priv.yaml'
   KSQLDB                    : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-ksqldb.yaml'
   AWSCONNECT                : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-awsconnect.yaml'
   MECONNECT                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-meconnect.yaml'
@@ -239,6 +240,19 @@ schemaregistry:
     - master
   when: manual
 
+schemaregistry-Priv:
+  stage: confluent_deployment_sbox
+  script:
+    - "kubectl apply -f $SR-PRIV"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
 controlcenter:
   stage: confluent_deployment_sbox
   script:
@@ -361,6 +375,19 @@ schemaregistry-destroy:
   stage: confluent_destroy_sbox
   script:
     - "kubectl delete -f $SR"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+schemaregistry-PRIV-destroy:
+  stage: confluent_destroy_sbox
+  script:
+    - "kubectl delete -f $SR-PRIV"
     - "kubectl get pods -n confluent"
   environment:
     name: sbox
