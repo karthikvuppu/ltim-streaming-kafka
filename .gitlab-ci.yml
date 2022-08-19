@@ -82,6 +82,21 @@ Bitnami-Sealed-Secrets:
     - docker
   when: manual
 
+external-secrets: 
+  environment: 
+    name: sbox
+  only: 
+    - master
+  script:
+    - "helm repo add external-secrets https://charts.external-secrets.io"
+    - "helm upgrade --namespace external-secrets --create-namespace --install --wait external-secrets external-secrets/external-secrets"
+    - "kubectl apply -f secure-deploy/external-secrets-operator/external-secrets.yaml"
+    - "kubectl create configmap keytab-cm --from-file=kt-key=secure-deploy/external-secrets-operator/ServiceIrisSsp.keytab"
+    - "kubectl create configmap krb-cm --from-file=krb5.conf=secure-deploy/external-secrets-operator/krb5.conf"
+  stage: confluent_deployment_sbox
+  tags: 
+    - docker
+  when: manual
 
 Datadog:
   stage: confluent_deployment_sbox
@@ -462,4 +477,19 @@ external-dns-destroy:
     - docker
   only:
     - master
+  when: manual
+
+external-secrets-destroy:
+  stage: confluent_destroy_sbox
+  script:
+    - "kubectl delete -f secure-deploy/external-secrets-operator/external-secrets.yaml"
+    - "kubectl delete configmap keytab-cm -n confluent"
+    - "kubectl delete configmap krb-cm -n confluent"
+    - "kubectl delete ns external-secrets"
+  environment: 
+    name: sbox
+  only: 
+    - master
+  tags: 
+    - docker
   when: manual
