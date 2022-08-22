@@ -21,7 +21,7 @@ data:
                 paths:
                   - /var/log/containers/*-${data.kubernetes.container.id}.log
     fields:
-      environment: sandbox-int
+      environment: sandbox-ext
     processors:
       - add_cloud_metadata:
       - add_host_metadata:
