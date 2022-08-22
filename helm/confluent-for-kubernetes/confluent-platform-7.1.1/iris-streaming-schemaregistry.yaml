@@ -54,6 +54,10 @@ spec:
       ad.datadoghq.com/schemaregistry.init_configs: '[{"is_jmx": true, "collect_default_metrics": true, "service_check_prefix": "confluent", "new_gc_metrics": true, "collect_default_jvm_metrics": true}]'
       ad.datadoghq.com/schemaregistry.instances: '[{"host": "%%host%%","port":"7203"}]'
       ad.datadoghq.com/schemaregistry.logs: '[{"source":"confluent_platform","service":"confluent_platform"}]'
+      co.elastic.logs/enabled: "true"
+      co.elastic.logs/multiline.pattern: '^\['
+      co.elastic.logs/multiline.negate: "true"
+      co.elastic.logs/multiline.match: "after"
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
