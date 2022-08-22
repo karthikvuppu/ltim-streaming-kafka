@@ -55,6 +55,7 @@ spec:
       ad.datadoghq.com/schemaregistry.instances: '[{"host": "%%host%%","port":"7203"}]'
       ad.datadoghq.com/schemaregistry.logs: '[{"source":"confluent_platform","service":"confluent_platform"}]'
       co.elastic.logs/enabled: "true"
+      co.elastic.logs/multiline.type: 'pattern'
       co.elastic.logs/multiline.pattern: '^\['
       co.elastic.logs/multiline.negate: "true"
       co.elastic.logs/multiline.match: "after"
