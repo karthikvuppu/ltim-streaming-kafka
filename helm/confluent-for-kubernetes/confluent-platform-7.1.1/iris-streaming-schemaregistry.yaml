@@ -58,7 +58,7 @@ spec:
       co.elastic.logs/multiline.type: 'pattern'
       co.elastic.logs/multiline.pattern: '^\['
       co.elastic.logs/multiline.negate: "false"
-      co.elastic.logs/multiline.match: "after"
+      co.elastic.logs/multiline.match: "before"
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
