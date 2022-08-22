@@ -56,7 +56,7 @@ spec:
       ad.datadoghq.com/schemaregistry.logs: '[{"source":"confluent_platform","service":"confluent_platform"}]'
       co.elastic.logs/enabled: "true"
       co.elastic.logs/multiline.type: 'pattern'
-      co.elastic.logs/multiline.pattern: '^\[+^[spaces]'
+      co.elastic.logs/multiline.pattern: '^\[+^[[:space:]]'
       co.elastic.logs/multiline.negate: 'true'
       co.elastic.logs/multiline.match: 'before'
     affinity:
