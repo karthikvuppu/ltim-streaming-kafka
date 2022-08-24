@@ -63,7 +63,7 @@ spec:
     loadBalancer:
       annotations:
         kubernetes.io/ingress.class: alb
-        alb.ingress.kubernetes.io/scheme: internal
+        #alb.ingress.kubernetes.io/scheme: internal
         alb.ingress.kubernetes.io/load-balancer-name: iris-streaming-sb-meconnect-alb
         alb.ingress.kubernetes.io/target-type: instance
         alb.ingress.kubernetes.io/subnets: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
