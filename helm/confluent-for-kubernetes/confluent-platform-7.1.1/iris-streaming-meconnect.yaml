@@ -69,7 +69,6 @@ spec:
         alb.ingress.kubernetes.io/subnets: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
         #alb.ingress.kubernetes.io/inbound-cidrs: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
         external-dns.alpha.kubernetes.io/hostname: meconnect.iris-streaming-sb.devtest.aws.scania.com
-        #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
       domain: iris-streaming-sb.devtest.aws.scania.com
       prefix: meconnect
   podTemplate:
