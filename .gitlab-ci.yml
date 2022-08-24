@@ -14,6 +14,7 @@ variables:
   MECONNECT                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-meconnect.yaml'
   ONPREMCONNECT             : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-onpremconnect.yaml'
   RESTPROXY                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy.yaml'
+  RPLOADB                   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy-int-lb.yaml'
   RESTCLASS                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restclass.yaml'
   CC                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-control-center.yaml'
   DATADOG                   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-datadog-agent.yaml'
@@ -181,6 +182,7 @@ restproxy:
   stage: confluent_deployment_sbox
   script:
     - "kubectl apply -f $RESTPROXY"
+    - "kubectl apply -f $RPLOADB"
     - "kubectl get pods -n confluent"
   environment:
     name: sbox
@@ -325,6 +327,7 @@ restproxy-destroy:
   stage: confluent_destroy_sbox
   script:
     - "kubectl delete -f $RESTPROXY"
+    - "kubectl delete -f $RPLOADB"
     - "kubectl get pods -n confluent"
   environment:
     name: sbox
