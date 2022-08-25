@@ -11,7 +11,7 @@ metadata:
     alb.ingress.kubernetes.io/subnets: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
     alb.ingress.kubernetes.io/inbound-cidrs: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
     external-dns.alpha.kubernetes.io/hostname: rp-onprem.iris-streaming-sb.devtest.aws.scania.com
-  name: rp-onprem-bootstrap-lb
+  name: rp-onprem.iris-streaming-sb.devtest.aws.scania.com
 spec:
   ports:
   - name: external
@@ -44,6 +44,6 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: rp-onprem-bootstrap-lb
+              name: rp-onprem.iris-streaming-sb.devtest.aws.scania.com
               port:
                 number: 443
