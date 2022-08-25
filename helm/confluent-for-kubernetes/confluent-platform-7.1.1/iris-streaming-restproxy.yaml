@@ -127,6 +127,6 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: restproxy.iris-streaming-sb.devtest.aws.scania.com
+              name: restproxy-bootstrap-lb
               port:
                 number: 443
