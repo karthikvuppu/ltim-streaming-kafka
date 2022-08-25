@@ -67,7 +67,7 @@ spec:
       - name: restproxy-basic-users
         mountPath: /tmp/restproxy/users
   externalAccess:
-    type: loadBalancer
+    type: nodePort
     loadBalancer:
        annotations:
          kubernetes.io/ingress.class: alb
