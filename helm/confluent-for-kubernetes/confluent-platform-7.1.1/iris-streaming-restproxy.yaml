@@ -109,24 +109,24 @@ spec:
                     - kafka
                     - zookeeper
             topologyKey: kubernetes.io/hostname
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  namespace: confluent
-  name: ingress-rp-public
-  annotations:
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/target-type: ip
-spec:
-  ingressClassName: alb
-  rules:
-    - http:
-        paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: kafkarestproxy-bootstrap-lb
-              port:
-                number: 80
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   namespace: confluent
+#   name: ingress-rp-public
+#   annotations:
+#     alb.ingress.kubernetes.io/scheme: internet-facing
+#     alb.ingress.kubernetes.io/target-type: ip
+# spec:
+#   ingressClassName: alb
+#   rules:
+#     - http:
+#         paths:
+#         - path: /
+#           pathType: Prefix
+#           backend:
+#             service:
+#               name: kafkarestproxy-bootstrap-lb
+#               port:
+#                 number: 80
