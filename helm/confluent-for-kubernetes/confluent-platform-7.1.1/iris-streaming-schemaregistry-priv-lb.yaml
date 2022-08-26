@@ -15,7 +15,7 @@ metadata:
 spec:
   ports:
   - name: external
-    port: 80
+    port: 443
     protocol: TCP
     targetPort: 8082
   selector:
@@ -46,7 +46,7 @@ spec:
             service:
               name: sr-onprem-bootstrap-lb
               port:
-                number: 80
+                number: 443
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

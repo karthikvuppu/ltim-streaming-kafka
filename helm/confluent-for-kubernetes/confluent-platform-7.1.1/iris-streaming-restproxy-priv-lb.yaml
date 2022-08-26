@@ -15,7 +15,7 @@ metadata:
 spec:
   ports:
   - name: external
-    port: 80
+    port: 443
     protocol: TCP
     targetPort: 8085
   selector:
@@ -47,7 +47,7 @@ spec:
             service:
               name: rp-onprem-bootstrap-lb
               port:
-                number: 80
+                number: 443
 
 ---
 apiVersion: networking.k8s.io/v1
