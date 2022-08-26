@@ -32,7 +32,7 @@ spec:
       tls:
         enabled: true
   externalAccess:
-    type: loadBalancer
+    type: nodePort
     loadBalancer:
       annotations:
         kubernetes.io/ingress.class: alb
@@ -96,6 +96,6 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: schemaregistry-bootstrap-lb
+              name: schemaregistry
               port:
                 number: 443
