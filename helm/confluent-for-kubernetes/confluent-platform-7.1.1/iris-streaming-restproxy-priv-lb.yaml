@@ -15,7 +15,7 @@ metadata:
 spec:
   ports:
   - name: external
-    port: 443
+    port: 80
     protocol: TCP
     targetPort: 8085
   selector:
