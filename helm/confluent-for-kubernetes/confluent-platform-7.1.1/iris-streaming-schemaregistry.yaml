@@ -98,4 +98,4 @@ spec:
             service:
               name: schemaregistry-bootstrap-lb
               port:
-                number: 80
+                number: 443
