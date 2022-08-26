@@ -46,4 +46,4 @@ spec:
             service:
               name: sr-onprem-bootstrap-lb
               port:
-                number: 443
+                number: 80

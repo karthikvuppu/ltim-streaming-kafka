@@ -127,6 +127,6 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: kafkarestproxy
+              name: kafkarestproxy-bootstrap-lb
               port:
-                number: 443
+                number: 80

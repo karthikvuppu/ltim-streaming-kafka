@@ -96,6 +96,6 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: schemaregistry
+              name: schemaregistry-bootstrap-lb
               port:
-                number: 443
+                number: 80s
