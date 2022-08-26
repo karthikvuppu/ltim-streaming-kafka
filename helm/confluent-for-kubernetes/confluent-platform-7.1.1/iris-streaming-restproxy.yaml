@@ -114,7 +114,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   namespace: confluent
-  name: ingress-rp
+  name: ingress-rp-public
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
@@ -127,6 +127,6 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: restproxy-bootstrap-lb
+              name: kafkarestproxy-bootstrap-lb
               port:
                 number: 443

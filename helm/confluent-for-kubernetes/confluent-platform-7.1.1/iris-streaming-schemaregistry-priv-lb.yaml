@@ -6,23 +6,23 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internal
-    alb.ingress.kubernetes.io/load-balancer-name: restproxy-onprem.iris-streaming-sb-schemaregistry-alb
+    alb.ingress.kubernetes.io/load-balancer-name: sr-onprem.iris-streaming-sb-schemaregistry-alb
     alb.ingress.kubernetes.io/target-type: instance
     alb.ingress.kubernetes.io/subnets: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
     alb.ingress.kubernetes.io/inbound-cidrs: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
-    external-dns.alpha.kubernetes.io/hostname: rp-onprem.iris-streaming-sb.devtest.aws.scania.com
-  name: rp-onprem-bootstrap-lb
+    external-dns.alpha.kubernetes.io/hostname: sr-onprem.iris-streaming-sb.devtest.aws.scania.com
+  name: sr-onprem-bootstrap-lb
 spec:
   ports:
   - name: external
     port: 443
     protocol: TCP
-    targetPort: 8085
+    targetPort: 8082
   selector:
-    app: KafkaRestProxy
+    app: schemaregistry
     clusterId: confluent
     confluent-platform: "true"
-    type: KafkaRestProxy
+    type: schemaregistry
   sessionAffinity: None
   type: NodePort
 
@@ -31,7 +31,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   namespace: confluent
-  name: ingress-rp-int
+  name: ingress-sr-private
   annotations:
     alb.ingress.kubernetes.io/scheme: internal
     alb.ingress.kubernetes.io/target-type: ip
@@ -44,6 +44,6 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: rp-onprem-bootstrap-lb
+              name: sr-onprem-bootstrap-lb
               port:
                 number: 443

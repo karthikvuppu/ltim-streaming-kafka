@@ -8,13 +8,13 @@ variables:
   ZK                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-zookeeper.yaml'
   KAFKA                     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-kafka.yaml'
   SR                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-schemaregistry.yaml'
-  SRP                       : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-schemaregistry-p.yaml'
+  SRLOAD                    : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-schemaregistry-priv-lb.yaml'
   KSQLDB                    : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-ksqldb.yaml'
   AWSCONNECT                : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-awsconnect.yaml'
   MECONNECT                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-meconnect.yaml'
   ONPREMCONNECT             : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-onpremconnect.yaml'
   RESTPROXY                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy.yaml'
-  RPLOADB                   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy-int-lb.yaml'
+  RPLOAD                    : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy-priv-lb.yaml'
   RESTCLASS                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restclass.yaml'
   CC                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-control-center.yaml'
   DATADOG                   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-datadog-agent.yaml'
@@ -182,7 +182,7 @@ restproxy:
   stage: confluent_deployment_sbox
   script:
     - "kubectl apply -f $RESTPROXY"
-    - "kubectl apply -f $RPLOADB"
+    - "kubectl apply -f $RPLOAD"
     - "kubectl get pods -n confluent"
   environment:
     name: sbox
@@ -261,19 +261,7 @@ schemaregistry:
   stage: confluent_deployment_sbox
   script:
     - "kubectl apply -f $SR"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-schemaregistry-Priv:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $SRP"
+    - "kubectl apply -f $SRLOAD"
     - "kubectl get pods -n confluent"
   environment:
     name: sbox
@@ -327,7 +315,7 @@ restproxy-destroy:
   stage: confluent_destroy_sbox
   script:
     - "kubectl delete -f $RESTPROXY"
-    - "kubectl delete -f $RPLOADB"
+    - "kubectl delete -f $RPLOAD"
     - "kubectl get pods -n confluent"
   environment:
     name: sbox
@@ -406,19 +394,7 @@ schemaregistry-destroy:
   stage: confluent_destroy_sbox
   script:
     - "kubectl delete -f $SR"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-schemaregistry-PRIV-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $SRP"
+    - "kubectl delete -f $SRLOAD"
     - "kubectl get pods -n confluent"
   environment:
     name: sbox
