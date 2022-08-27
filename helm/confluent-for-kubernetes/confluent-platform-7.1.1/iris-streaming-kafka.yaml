@@ -10,11 +10,9 @@ spec:
   image:
     application: confluentinc/cp-server:7.1.1
     init: confluentinc/confluent-init-container:2.3.0
-  
   storageClass:
     name: standard
   dataVolumeCapacity: 50Gi
-  
   mountedVolumes:
     volumes:
       - name: keytab
@@ -185,7 +183,8 @@ spec:
       - listener.name.oauthaws.sasl.oauthbearer.sub.claim.name=clientId
       - listener.name.oauthaws.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
       - listener.name.oauthaws.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
-
+      # Adding schemaregistry URL to the broker
+      - confluent.schema.registry.url=https://schemaregistry.confluent.svc.cluster.local:8081
     jvm:
       - "-Djava.security.krb5.conf=/etc/krb5.conf"
       #- "-Dsun.security.jgss.debug=true"
