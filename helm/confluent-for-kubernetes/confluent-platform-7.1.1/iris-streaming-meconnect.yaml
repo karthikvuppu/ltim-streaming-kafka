@@ -59,14 +59,13 @@ spec:
       - value.converter=io.confluent.connect.avro.AvroConverter
   enableSchemas: true
   externalAccess:
-    type: nodePort
+    type: loadBalancer
     loadBalancer:
       annotations:
-        kubernetes.io/ingress.class: alb
-        alb.ingress.kubernetes.io/scheme: internal
-        alb.ingress.kubernetes.io/load-balancer-name: iris-streaming-sb-meconnect-alb
-        alb.ingress.kubernetes.io/target-type: instance
-        alb.ingress.kubernetes.io/subnets: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
+        service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+        service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+        service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
+        external-dns.alpha.kubernetes.io/ttl: "300"
         external-dns.alpha.kubernetes.io/hostname: meconnect-onprem.iris-streaming-sb.devtest.aws.scania.com
       domain: iris-streaming-sb.devtest.aws.scania.com
       prefix: meconnect-onprem

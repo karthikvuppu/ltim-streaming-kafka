@@ -62,12 +62,10 @@ spec:
     type: loadBalancer
     loadBalancer:
       annotations:
-        kubernetes.io/ingress.class: alb
-        alb.ingress.kubernetes.io/scheme: internet-facing
-        alb.ingress.kubernetes.io/load-balancer-name: iris-streaming-sb-onpremconnect-alb
-        alb.ingress.kubernetes.io/target-type: instance
-        alb.ingress.kubernetes.io/subnets: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
-        alb.ingress.kubernetes.io/inbound-cidrs: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
+        service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+        service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+        service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
+        external-dns.alpha.kubernetes.io/ttl: "300"
         external-dns.alpha.kubernetes.io/hostname: onpremconnect.iris-streaming-sb.devtest.aws.scania.com
       domain: iris-streaming-sb.devtest.aws.scania.com
       prefix: onpremconnect

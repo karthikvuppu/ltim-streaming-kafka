@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
+    external-dns.alpha.kubernetes.io/hostname: restproxyonprem.iris-streaming-sb.devtest.aws.scania.com
+    external-dns.alpha.kubernetes.io/ttl: "300"
+  name: restproxyonprem
+  namespace: confluent
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: external
+    port: 443
+    protocol: TCP
+    targetPort: 8082
+  selector:
+    app: kafkarestproxy
+    clusterId: confluent
+    confluent-platform: "true"
+    type: kafkarestproxy
+  sessionAffinity: None
+  type: LoadBalancer
