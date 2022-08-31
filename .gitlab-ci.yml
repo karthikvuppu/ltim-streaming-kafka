@@ -79,8 +79,8 @@ external-secrets:
     - "helm repo add external-secrets https://charts.external-secrets.io"
     - "helm upgrade --namespace external-secrets --create-namespace --install --wait external-secrets external-secrets/external-secrets"
     - "kubectl apply -f secure-deploy/external-secrets-operator/external-secrets.yaml"
-    - "kubectl create configmap keytab-cm --from-file=kt-key=secure-deploy/external-secrets-operator/ServiceIrisSspTest.keytab"
-    - "kubectl create configmap krb-cm --from-file=krb5.conf=secure-deploy/external-secrets-operator/krb5.conf"
+    - "kubectl create configmap keytab-cm --from-file=kt-key=secure-deploy/external-secrets-operator/ServiceIrisSspTest.keytab -n confluent"
+    - "kubectl create configmap krb-cm --from-file=krb5.conf=secure-deploy/external-secrets-operator/krb5.conf -n confluent"
   stage: confluent_deployment_sbox
   tags: 
     - docker
