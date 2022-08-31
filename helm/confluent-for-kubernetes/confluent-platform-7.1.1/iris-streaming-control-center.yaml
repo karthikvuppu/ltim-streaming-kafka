@@ -78,7 +78,7 @@ spec:
          service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
          external-dns.alpha.kubernetes.io/hostname: controlcenter.iris-streaming-sb.devtest.aws.scania.com
          external-dns.alpha.kubernetes.io/ttl: "300"                     
-         service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=controlcenter
+         service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=cc
          service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-controlcenter
       domain: iris-streaming-sb.devtest.aws.scania.com
       prefix: controlcenter
