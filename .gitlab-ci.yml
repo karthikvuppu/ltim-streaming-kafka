@@ -70,20 +70,6 @@ Operator:
     - master
   when: manual
 
-Bitnami-Sealed-Secrets:
-  environment: 
-    name: sbox
-  only: 
-    - master
-  script:
-    - "kubectl apply -f secure-deploy/bitnami-sealed-secrets/sealed-secrets.yaml"
-    - "kubectl create configmap keytab-cm --from-file=kt-key=secure-deploy/bitnami-sealed-secrets/ServiceIrisSspTest.keytab"
-    - "kubectl create configmap krb-cm --from-file=krb5.conf=secure-deploy/bitnami-sealed-secrets/krb5.conf"
-  stage: confluent_deployment_sbox
-  tags: 
-    - docker
-  when: manual
-
 external-secrets: 
   environment: 
     name: sbox
@@ -286,6 +272,33 @@ controlcenter:
     - master
   when: manual
 
+# apply all components
+
+apply-all:
+  stage: confluent_deployment_sbox
+  script:
+    - "kubectl apply -f $ZK"
+    - "kubectl apply -f $RESTCLASS"
+    - "kubectl apply -f $KAFKA"
+    - "kubectl apply -f $RESTPROXY"
+    - "kubectl apply -f $RPONPREM"
+    - "kubectl apply -f $SR"
+    - "kubectl apply -f $SRONPREM"
+    - "kubectl apply -f $KSQLDB"
+    - "kubectl apply -f $KSQLONPREM"
+    - "kubectl apply -f $AWSCONNECT"
+    - "kubectl apply -f $MECONNECT"
+    - "kubectl apply -f $ONPREMCONNECT"
+    - "kubectl apply -f $CC"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
+
 # Destroy sandbox components in below order
 zookeeper-destroy:
   stage: confluent_destroy_sbox
@@ -449,17 +462,22 @@ controlcenter-destroy:
 
 #destroy all the services in one-go:
 
-destroy_all:
+destroy-all:
   stage: confluent_destroy_sbox
   script:
+    - "kubectl delete -f $RESTPROXY"
+    - "kubectl delete -f $RPONPREM"
     - "kubectl delete -f $SR"
+    - "kubectl delete -f $SRONPREM"
+    - "kubectl delete -f $KSQLDB"
+    - "kubectl delete -f $KSQLONPREM"
+    - "kubectl delete -f $AWSCONNECT"
+    - "kubectl delete -f $MECONNECT"
     - "kubectl delete -f $ONPREMCONNECT"
-    - "kubectl delete -f $RP"
     - "kubectl delete -f $CC"
+    - "kubectl delete -f $ZK"
     - "kubectl delete -f $RESTCLASS"
     - "kubectl delete -f $KAFKA"
-    - "kubectl delete -f $ZK"
-    - "kubectl get pods -n confluent"
   environment:
     name: sbox
   tags:
