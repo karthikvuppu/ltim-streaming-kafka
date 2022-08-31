@@ -70,14 +70,12 @@ spec:
     type: loadBalancer
     loadBalancer:
        annotations:
-         kubernetes.io/ingress.class: alb
-         alb.ingress.kubernetes.io/scheme: internet-facing
-         alb.ingress.kubernetes.io/load-balancer-name: iris-streaming-sb-restproxyaws-alb
-         alb.ingress.kubernetes.io/target-type: instance
-         alb.ingress.kubernetes.io/target-node-labels: service=restproxy
-         alb.ingress.kubernetes.io/subnets: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
-         alb.ingress.kubernetes.io/inbound-cidrs: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
+         service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+         service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
          external-dns.alpha.kubernetes.io/hostname: restproxyaws.iris-streaming-sb.devtest.aws.scania.com
+         external-dns.alpha.kubernetes.io/ttl: "300"                     
+         service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=srrp
+         service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-restproxyaws
        domain: iris-streaming-sb.devtest.aws.scania.com
        prefix: restproxyaws
   podTemplate:
@@ -98,7 +96,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - restproxy
+                    - srrp
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:

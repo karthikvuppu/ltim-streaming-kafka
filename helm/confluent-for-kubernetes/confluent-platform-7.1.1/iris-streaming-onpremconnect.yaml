@@ -67,6 +67,8 @@ spec:
         service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
         external-dns.alpha.kubernetes.io/ttl: "300"
         external-dns.alpha.kubernetes.io/hostname: onpremconnect.iris-streaming-sb.devtest.aws.scania.com
+        service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-onpremconnect
+        service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=onpremconnect
       domain: iris-streaming-sb.devtest.aws.scania.com
       prefix: onpremconnect
   podTemplate:
