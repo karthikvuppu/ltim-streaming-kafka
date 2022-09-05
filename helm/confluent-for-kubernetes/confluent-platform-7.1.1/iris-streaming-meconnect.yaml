@@ -24,6 +24,12 @@ spec:
           - name: kafka-connect-hdfs3
             owner: confluentinc
             version: 1.1.10
+          - name: kafka-connect-jdbc
+            owner: confluentinc
+            version: 10.3.3
+          - name: kafka-connect-oracle-cdc
+            owner: confluentinc
+            version: 2.1.0
   tls:
     secretRef: tls-group
   authorization:
