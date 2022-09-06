@@ -205,7 +205,7 @@ spec:
         type: ldap
         ldap:
           ##ADDRESS
-          address: ldaps://SESOEGDC001.global.scd.scania.com:636 ldaps://SESOEGDC002.global.scd.scania.com:636 ldaps://SESOEGDC003.global.scd.scania.com:636 ldaps://SESOEGDC004.global.scd.scania.com:636 ldaps://SESOEGDC005.global.scd.scania.com:636 ldaps://SESOEGDC006.global.scd.scania.com:636 ldaps://SESOEGDC007.global.scd.scania.com:636
+          address: ldaps://SESOEGDC001.global.scd.scania.com:636
           #address: ldaps://ldap.iris-streaming-sb.devtest.aws.scania.com:636
           authentication:
             type: simple
