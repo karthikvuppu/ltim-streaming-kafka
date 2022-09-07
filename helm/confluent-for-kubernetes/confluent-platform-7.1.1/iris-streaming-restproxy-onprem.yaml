@@ -12,11 +12,11 @@ metadata:
   namespace: confluent
 spec:
   externalTrafficPolicy: Cluster
-  ports:
-  - name: external
-    port: 443
-    protocol: TCP
-    targetPort: 8082
+  # ports:
+  # - name: external
+  #   port: 443
+  #   protocol: TCP
+  #   targetPort: 8082
   selector:
     app: kafkarestproxy
     clusterId: confluent
