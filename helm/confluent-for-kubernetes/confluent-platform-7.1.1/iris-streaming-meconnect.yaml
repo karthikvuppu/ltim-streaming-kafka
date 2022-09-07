@@ -7,7 +7,8 @@ spec:
   replicas: 1
   oneReplicaPerNode: true
   image:
-    application: confluentinc/cp-server-connect:7.1.1
+    #custom image containing the IBM MQ client library and IBM MQ Sink connector
+    application: 572663323550.dkr.ecr.eu-north-1.amazonaws.com/confluent:latest
     init: confluentinc/confluent-init-container:2.3.0
   build:
     type: onDemand
@@ -30,9 +31,7 @@ spec:
           - name: kafka-connect-oracle-cdc
             owner: confluentinc
             version: 2.1.0
-          - name: kafka-connect-ibmmq-sink
-            owner: confluentinc
-            version: 2.1.0
+
   tls:
     secretRef: tls-group
   authorization:
