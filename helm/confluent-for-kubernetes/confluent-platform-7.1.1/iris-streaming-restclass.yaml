@@ -8,4 +8,4 @@ spec:
     authentication:
       type: basic
       basic:
-        secretRef: restclass-credential
+        secretRef: rest-credential
