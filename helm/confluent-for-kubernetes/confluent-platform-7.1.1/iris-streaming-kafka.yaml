@@ -206,7 +206,7 @@ spec:
         ldap:
           ##ADDRESS
           #address: ldaps://SESOEGDC001.global.scd.scania.com:636
-          address: ldaps://internal-Ldap-26465864.eu-north-1.elb.amazonaws.com:636
+          address: https://internal-Ldap-26465864.eu-north-1.elb.amazonaws.com:443
           authentication:
             type: simple
             simple:
