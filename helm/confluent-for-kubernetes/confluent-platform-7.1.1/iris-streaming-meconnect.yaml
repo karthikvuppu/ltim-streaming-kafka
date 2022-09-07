@@ -30,6 +30,9 @@ spec:
           - name: kafka-connect-oracle-cdc
             owner: confluentinc
             version: 2.1.0
+          - name: kafka-connect-ibmmq-sink
+            owner: confluentinc
+            version: 2.1.0
   tls:
     secretRef: tls-group
   authorization:
