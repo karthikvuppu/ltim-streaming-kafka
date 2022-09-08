@@ -165,7 +165,9 @@ spec:
       # account is valid for Keycloak JWT
       #- listener.name.client.sasl.oauthbearer.expected.audience=account
       - listener.name.client.sasl.oauthbearer.expected.audience=api://9305de44-1206-44bf-b894-22a9811d9c43
-      - listener.name.client.sasl.oauthbearer.sub.claim.name=clientId
+      # this is valid for Keycloak JWT
+      #- listener.name.client.sasl.oauthbearer.sub.claim.name=clientId
+      - listener.name.client.sasl.oauthbearer.sub.claim.name=appid
       - listener.name.client.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
       - listener.name.client.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
       - listener.name.clientonprem.sasl.enabled.mechanisms=OAUTHBEARER
@@ -175,7 +177,9 @@ spec:
       # account is valid for Keycloak JWT
       #- listener.name.clientonprem.sasl.oauthbearer.expected.audience=account
       - listener.name.clientonprem.sasl.oauthbearer.expected.audience=api://9305de44-1206-44bf-b894-22a9811d9c43
-      - listener.name.clientonprem.sasl.oauthbearer.sub.claim.name=clientId
+      # this is valid for Keycloak JWT
+      #- listener.name.clientonprem.sasl.oauthbearer.sub.claim.name=clientId
+      - listener.name.clientonprem.sasl.oauthbearer.sub.claim.name=appid
       - listener.name.clientonprem.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
       - listener.name.clientonprem.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
       - listener.name.oauthaws.sasl.enabled.mechanisms=OAUTHBEARER
@@ -186,7 +190,9 @@ spec:
       # account is valid for Keycloak JWT
       #- listener.name.oauthaws.sasl.oauthbearer.expected.audience=account
       - listener.name.oauthaws.sasl.oauthbearer.expected.audience=api://9305de44-1206-44bf-b894-22a9811d9c43
-      - listener.name.oauthaws.sasl.oauthbearer.sub.claim.name=clientId
+      # this is valid for Keycloak JWT
+      #- listener.name.oauthaws.sasl.oauthbearer.sub.claim.name=clientId
+      - listener.name.oauthaws.sasl.oauthbearer.sub.claim.name=appid
       - listener.name.oauthaws.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
       - listener.name.oauthaws.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
       # Adding schemaregistry URL to the broker
