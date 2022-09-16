@@ -4,7 +4,7 @@ metadata:
   name: connect-onprem
   namespace: confluent
 spec:
-  replicas: 1
+  replicas: 3
   oneReplicaPerNode: true
   image:
     application: confluentinc/cp-server-connect:7.1.1

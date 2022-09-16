@@ -4,7 +4,7 @@ metadata:
   name: connect-me
   namespace: confluent
 spec:
-  replicas: 1
+  replicas: 3
   oneReplicaPerNode: true
   image:
     #custom image containing the IBM MQ client library and IBM MQ Sink connector
