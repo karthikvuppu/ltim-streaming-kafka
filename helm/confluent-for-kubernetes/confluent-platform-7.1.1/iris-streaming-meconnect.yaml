@@ -8,7 +8,7 @@ spec:
   oneReplicaPerNode: true
   image:
     #custom image containing the IBM MQ client library and IBM MQ Sink connector
-    application: 572663323550.dkr.ecr.eu-north-1.amazonaws.com/confluent:latest
+    application: 572663323550.dkr.ecr.eu-north-1.amazonaws.com/confluent:meconnect-1.0
     init: confluentinc/confluent-init-container:2.3.0
   build:
     type: onDemand
