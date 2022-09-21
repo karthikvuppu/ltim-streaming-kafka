@@ -223,7 +223,7 @@ spec:
         type: ldap
         ldap:
           ##ADDRESS
-          address: ldaps://ldap-proxy.confluent.svc.cluster.local:636
+          address: ldap://ldap-proxy.confluent.svc.cluster.local:636
           #address: ldaps://SESOEGDC001.global.scd.scania.com:636
           #address: https://internal-Ldap-26465864.eu-north-1.elb.amazonaws.com:443
           authentication:
