@@ -18,6 +18,7 @@ variables:
   RPONPREM                  : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy-onprem.yaml'
   RESTCLASS                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restclass.yaml'
   CC                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-control-center.yaml'
+  LDAP                      : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-ldap-HAproxy.yaml'       
   DATADOG                   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-datadog-agent.yaml'
 
   GIT_SUBMODULE_STRATEGY    : recursive
@@ -123,6 +124,19 @@ external-dns:
   tags: 
     - docker
   only: 
+    - master
+  when: manual
+
+LDAP:
+  stage: confluent_deployment_sbox
+  script:
+    - "kubectl apply -f $LDAP"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
     - master
   when: manual
 
@@ -300,6 +314,19 @@ apply-all:
 
 
 # Destroy sandbox components in below order
+LDAP-destroy:
+  stage: confluent_destroy_sbox
+  script:
+    - "kubectl delete -f $LDAP"
+    - "kubectl get pods -n confluent"
+  environment:
+    name: sbox
+  tags:
+    - docker
+  only:
+    - master
+  when: manual
+
 zookeeper-destroy:
   stage: confluent_destroy_sbox
   script:
