@@ -58,6 +58,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: ldap-nginx-config
+  namespace: confluent
 data:
   nginx.conf: |
     stream {
