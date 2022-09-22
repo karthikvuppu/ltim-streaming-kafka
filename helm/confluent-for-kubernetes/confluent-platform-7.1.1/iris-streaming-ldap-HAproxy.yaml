@@ -62,6 +62,15 @@ metadata:
 data:
   nginx.conf: |
     stream {
+      map $upstream_addr $name {
+       ~\Q138.106.102.244:636\E$ sesoegdc001.global.scd.scania.com;
+       ~\Q138.106.97.4:636\E$ sesoegdc002.global.scd.scania.com;
+       ~\Q138.106.97.12:636\E$ sesoegdc003.global.scd.scania.com;
+       ~\Q138.106.97.13:636\E$ sesoegdc004.global.scd.scania.com;
+       ~\Q138.106.97.1:636\E$ sesoegdc005.global.scd.scania.com;
+       ~\Q138.106.97.6:636\E$ sesoegdc006.global.scd.scania.com;
+       ~\Q138.106.97.10:636\E$ sesoegdc007.global.scd.scania.com;
+      }
       upstream ldapservers {
         server sesoegdc001.global.scd.scania.com:636;
         server sesoegdc002.global.scd.scania.com:636;
@@ -79,5 +88,6 @@ data:
         proxy_ssl_verify on;
         proxy_ssl_verify_depth 2;
         proxy_session_reuse on;
+        proxy_ssl_name $name;
       }
     }
