@@ -18,7 +18,7 @@ variables:
   RPONPREM                  : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy-onprem.yaml'
   RESTCLASS                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restclass.yaml'
   CC                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-control-center.yaml'
-  LDAP                      : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-ldap-HAproxy.yaml'       
+  LDAP                      : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-ldap-nginx.yaml'       
   DATADOG                   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-datadog-agent.yaml'
 
   GIT_SUBMODULE_STRATEGY    : recursive
