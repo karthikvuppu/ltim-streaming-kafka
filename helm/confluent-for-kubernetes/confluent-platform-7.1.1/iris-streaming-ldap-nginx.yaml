@@ -61,6 +61,9 @@ metadata:
   namespace: confluent
 data:
   nginx.conf: |
+    events {
+      worker_connections 1024;
+    }
     stream {
       map $upstream_addr $name {
        ~\Q138.106.102.244:636\E$ sesoegdc001.global.scd.scania.com;
@@ -84,10 +87,10 @@ data:
         listen 636;
         proxy_pass ldapservers;
         proxy_ssl on;
-        proxy_ssl_trusted_certificate /etc/ssl/certs/scania_ca.crt;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/cacerts.pem;
         proxy_ssl_verify on;
         proxy_ssl_verify_depth 2;
-        proxy_session_reuse on;
+        proxy_ssl_session_reuse on;
         proxy_ssl_name $name;
       }
     }
