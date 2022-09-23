@@ -203,6 +203,20 @@ spec:
       - listener.name.oauthaws.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
       # Adding schemaregistry URL to the broker
       - confluent.schema.registry.url=https://schemaregistry.confluent.svc.cluster.local:8081
+      # adding oauthbearer for oauthonprem
+      - listener.name.oauthonprem.sasl.enabled.mechanisms=OAUTHBEARER
+      # - listener.name.oauthonprem.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs 
+      # Below line is added to check Azure AD integration
+      - listener.name.oauthonprem.sasl.oauthbearer.jwks.endpoint.url=https://login.microsoftonline.com/3bc062e4-ac9d-4c17-b4dd-3aad637ff1ac/discovery/v2.0/keys
+      # account is valid for Keycloak JWT
+      #- listener.name.oauthonprem.sasl.oauthbearer.expected.audience=account
+      - listener.name.oauthonprem.sasl.oauthbearer.expected.audience=api://afa216a4-e644-461b-a06b-8f0e28574fac
+      # this is valid for Keycloak JWT
+      #- listener.name.oauthonprem.sasl.oauthbearer.sub.claim.name=clientId
+      - listener.name.oauthonprem.sasl.oauthbearer.sub.claim.name=appid
+      - listener.name.oauthonprem.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
+      - listener.name.oauthonprem.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
+     
     jvm:
       - "-Djava.security.krb5.conf=/etc/krb5.conf"
       #- "-Dsun.security.jgss.debug=true"

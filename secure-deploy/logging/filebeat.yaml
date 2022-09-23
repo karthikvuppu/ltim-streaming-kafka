@@ -20,15 +20,27 @@ data:
               - type: container
                 paths:
                   - /var/log/containers/*-${data.kubernetes.container.id}.log
+                multiline.pattern: '^\['
+                multiline.negate: true
+                multiline.match: after
+    filebeat.inputs:
+    - type: kafka
+      hosts:
+      - kafka.confluent.svc.cluster.local:9071
+      topics: ["test.topic"]
+      group_id: "test.topic"
+      username: "kafka"
+      password: "Streaming@123"
+      ssl.enabled: true
+      sasl.mechanism: plain
+      ssl.certificate_authorities: ["/etc/ssl/certs/cacerts.pem"]
     fields:
       environment: sandbox-ext
     processors:
       - add_cloud_metadata:
       - add_host_metadata:
-
     cloud.id: ${ELASTIC_CLOUD_ID}
     cloud.auth: ${ELASTIC_CLOUD_AUTH}
-
     output.logstash:
       hosts: ['x0204se.sss.se.scania.com:5061']
 
@@ -100,6 +112,8 @@ spec:
         - name: varlog
           mountPath: /var/log
           readOnly: true
+        - name: tls-group
+          mountPath: /etc/ssl/certs
       volumes:
       - name: config
         configMap:
@@ -117,3 +131,9 @@ spec:
           # When filebeat runs as non-root user, this directory needs to be writable by group (g+w).
           path: /var/lib/filebeat-data
           type: DirectoryOrCreate
+      - name: tls-group
+        secret:
+          secretName: tls-group
+          items:
+          - key: cacerts.pem
+            path: cacerts.pem
