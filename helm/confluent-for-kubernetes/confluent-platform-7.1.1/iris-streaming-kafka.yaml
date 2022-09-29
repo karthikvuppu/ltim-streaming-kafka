@@ -159,10 +159,10 @@ spec:
       #- ldap.java.naming.security.principal=serviceirisssptest@GLOBAL.SCD.SCANIA.COM
       #- ldap.sasl.jaas.config=com.sun.security.auth.module.Krb5LoginModule required debug=true useKeyTab=true storeKey=true keyTab="/tmp/keytab/keytab" principal="serviceirisssptest@GLOBAL.SCD.SCANIA.COM";
       - listener.name.client.sasl.enabled.mechanisms=OAUTHBEARER
-      - listener.name.client.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
+      #- listener.name.client.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
       
       # Below line is added to check Azure AD integration
-      #- listener.name.client.sasl.oauthbearer.jwks.endpoint.url=https://login.microsoftonline.com/3bc062e4-ac9d-4c17-b4dd-3aad637ff1ac/discovery/v2.0/keys
+      - listener.name.client.sasl.oauthbearer.jwks.endpoint.url=https://login.microsoftonline.com/3bc062e4-ac9d-4c17-b4dd-3aad637ff1ac/discovery/v2.0/keys
       
       # account is valid for Keycloak JWT
       #- listener.name.client.sasl.oauthbearer.expected.audience=account
@@ -173,10 +173,10 @@ spec:
       - listener.name.client.oauthbearer.sasl.server.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler
       - listener.name.client.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
       - listener.name.clientonprem.sasl.enabled.mechanisms=OAUTHBEARER
-      - listener.name.clientonprem.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
+      #- listener.name.clientonprem.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
       
       # Below line is added to check Azure AD integration
-      #- listener.name.clientonprem.sasl.oauthbearer.jwks.endpoint.url=https://login.microsoftonline.com/3bc062e4-ac9d-4c17-b4dd-3aad637ff1ac/discovery/v2.0/keys
+      - listener.name.clientonprem.sasl.oauthbearer.jwks.endpoint.url=https://login.microsoftonline.com/3bc062e4-ac9d-4c17-b4dd-3aad637ff1ac/discovery/v2.0/keys
       
       # account is valid for Keycloak JWT
       #- listener.name.clientonprem.sasl.oauthbearer.expected.audience=account
@@ -188,10 +188,10 @@ spec:
       - listener.name.clientonprem.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
       - listener.name.oauthaws.sasl.enabled.mechanisms=OAUTHBEARER
       - listener.name.oauthaws.sasl.mechanism=PLAIN
-      - listener.name.oauthaws.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
+      #- listener.name.oauthaws.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
       
       # Below line is added to check Azure AD integration
-      #- listener.name.oauthaws.sasl.oauthbearer.jwks.endpoint.url=https://login.microsoftonline.com/3bc062e4-ac9d-4c17-b4dd-3aad637ff1ac/discovery/v2.0/keys
+      - listener.name.oauthaws.sasl.oauthbearer.jwks.endpoint.url=https://login.microsoftonline.com/3bc062e4-ac9d-4c17-b4dd-3aad637ff1ac/discovery/v2.0/keys
       
       # account is valid for Keycloak JWT
       #- listener.name.oauthaws.sasl.oauthbearer.expected.audience=account
@@ -205,9 +205,9 @@ spec:
       - confluent.schema.registry.url=https://schemaregistry.confluent.svc.cluster.local:8081
       # adding oauthbearer for oauthonprem
       - listener.name.oauthonprem.sasl.enabled.mechanisms=OAUTHBEARER
-      - listener.name.oauthonprem.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs 
+      #- listener.name.oauthonprem.sasl.oauthbearer.jwks.endpoint.url=https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs 
       # Below line is added to check Azure AD integration
-      #- listener.name.oauthonprem.sasl.oauthbearer.jwks.endpoint.url=https://login.microsoftonline.com/3bc062e4-ac9d-4c17-b4dd-3aad637ff1ac/discovery/v2.0/keys
+      - listener.name.oauthonprem.sasl.oauthbearer.jwks.endpoint.url=https://login.microsoftonline.com/3bc062e4-ac9d-4c17-b4dd-3aad637ff1ac/discovery/v2.0/keys
       # account is valid for Keycloak JWT
       #- listener.name.oauthonprem.sasl.oauthbearer.expected.audience=account
       - listener.name.oauthonprem.sasl.oauthbearer.expected.audience=api://afa216a4-e644-461b-a06b-8f0e28574fac
