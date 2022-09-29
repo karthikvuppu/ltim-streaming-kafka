@@ -166,7 +166,7 @@ spec:
       
       # account is valid for Keycloak JWT
       #- listener.name.client.sasl.oauthbearer.expected.audience=account
-      - listener.name.client.sasl.oauthbearer.expected.audience=api://afa216a4-e644-461b-a06b-8f0e28574fac
+      - listener.name.client.sasl.oauthbearer.expected.audience=afa216a4-e644-461b-a06b-8f0e28574fac
       # this is valid for Keycloak JWT
       #- listener.name.client.sasl.oauthbearer.sub.claim.name=clientId
       - listener.name.client.sasl.oauthbearer.sub.claim.name=ClientDisplayName
@@ -180,7 +180,7 @@ spec:
       
       # account is valid for Keycloak JWT
       #- listener.name.clientonprem.sasl.oauthbearer.expected.audience=account
-      - listener.name.clientonprem.sasl.oauthbearer.expected.audience=api://afa216a4-e644-461b-a06b-8f0e28574fac
+      - listener.name.clientonprem.sasl.oauthbearer.expected.audience=afa216a4-e644-461b-a06b-8f0e28574fac
       # this is valid for Keycloak JWT
       #- listener.name.clientonprem.sasl.oauthbearer.sub.claim.name=clientId
       - listener.name.clientonprem.sasl.oauthbearer.sub.claim.name=ClientDisplayName
@@ -195,7 +195,7 @@ spec:
       
       # account is valid for Keycloak JWT
       #- listener.name.oauthaws.sasl.oauthbearer.expected.audience=account
-      - listener.name.oauthaws.sasl.oauthbearer.expected.audience=api://afa216a4-e644-461b-a06b-8f0e28574fac
+      - listener.name.oauthaws.sasl.oauthbearer.expected.audience=afa216a4-e644-461b-a06b-8f0e28574fac
       # this is valid for Keycloak JWT
       #- listener.name.oauthaws.sasl.oauthbearer.sub.claim.name=clientId
       - listener.name.oauthaws.sasl.oauthbearer.sub.claim.name=ClientDisplayName
@@ -210,7 +210,7 @@ spec:
       - listener.name.oauthonprem.sasl.oauthbearer.jwks.endpoint.url=https://login.microsoftonline.com/3bc062e4-ac9d-4c17-b4dd-3aad637ff1ac/discovery/v2.0/keys
       # account is valid for Keycloak JWT
       #- listener.name.oauthonprem.sasl.oauthbearer.expected.audience=account
-      - listener.name.oauthonprem.sasl.oauthbearer.expected.audience=api://afa216a4-e644-461b-a06b-8f0e28574fac
+      - listener.name.oauthonprem.sasl.oauthbearer.expected.audience=afa216a4-e644-461b-a06b-8f0e28574fac
       # this is valid for Keycloak JWT
       #- listener.name.oauthonprem.sasl.oauthbearer.sub.claim.name=clientId
       - listener.name.oauthonprem.sasl.oauthbearer.sub.claim.name=ClientDisplayName
