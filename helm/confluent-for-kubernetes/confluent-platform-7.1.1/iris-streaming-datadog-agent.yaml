@@ -647,9 +647,6 @@ spec:
       labels:
         app: datadog
       name: datadog
-      annotations:
-        container.apparmor.security.beta.kubernetes.io/system-probe: unconfined
-        container.seccomp.security.alpha.kubernetes.io/system-probe: localhost/system-probe
     spec:
       securityContext:
         runAsUser: 0
@@ -685,8 +682,10 @@ spec:
               value: "8125"
             - name: DD_DOGSTATSD_NON_LOCAL_TRAFFIC
               value: "true"
-            - name: DD_CLUSTER_AGENT_ENABLED
+            - name: DD_LEADER_ELECTION
               value: "true"
+            - name: DD_CLUSTER_AGENT_ENABLED
+              value: "false"
             - name: DD_CLUSTER_AGENT_KUBERNETES_SERVICE_NAME
               value: datadog-cluster-agent
             - name: DD_CLUSTER_AGENT_AUTH_TOKEN
@@ -697,19 +696,17 @@ spec:
             - name: DD_APM_ENABLED
               value: "false"
             - name: DD_LOGS_ENABLED
-              value: "false" #making it false to stop logging in datadog as we are using ELK for logging
+              value: "false"
             - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
-              value: "false" #making it false to stop logging in datadog as we are using ELK for logging   
+              value: "false"
             - name: DD_LOGS_CONFIG_K8S_CONTAINER_USE_FILE
-              value: "false" #making it false to stop logging in datadog as we are using ELK for logging
+              value: "true"
             - name: DD_LOGS_CONFIG_AUTO_MULTI_LINE_DETECTION
               value: "false"
             - name: DD_HEALTH_PORT
               value: "5555"
             - name: DD_DOGSTATSD_SOCKET
               value: "/var/run/datadog/dsd.socket"
-            - name: DD_EXTRA_CONFIG_PROVIDERS
-              value: "clusterchecks endpointschecks"
             - name: DD_EXPVAR_PORT
               value: "6000"
             - name: DD_SITE
@@ -732,12 +729,6 @@ spec:
               readOnly: true
             - name: dsdsocket
               mountPath: /var/run/datadog
-            - name: sysprobe-socket-dir
-              mountPath: /var/run/sysprobe
-              readOnly: true
-            - name: sysprobe-config
-              mountPath: /etc/datadog-agent/system-probe.yaml
-              subPath: system-probe.yaml
             - name: procdir
               mountPath: /host/proc
               mountPropagation: None
@@ -761,11 +752,10 @@ spec:
               mountPath: /var/lib/docker/containers
               mountPropagation: None
               readOnly: true
-            
           livenessProbe:
             failureThreshold: 6
             httpGet:
-              path: /metrics
+              path: /live
               port: 5555
               scheme: HTTP
             initialDelaySeconds: 15
@@ -775,313 +765,16 @@ spec:
           readinessProbe:
             failureThreshold: 6
             httpGet:
-              path: /metrics
+              path: /ready
               port: 5555
               scheme: HTTP
             initialDelaySeconds: 15
             periodSeconds: 15
             successThreshold: 1
             timeoutSeconds: 5
-        - name: trace-agent
-          image: "gcr.io/datadoghq/agent:7.35.2"
-          imagePullPolicy: IfNotPresent
-          command: ["trace-agent", "-config=/etc/datadog-agent/datadog.yaml"]
-          resources: {}
-          ports:
-            - containerPort: 8126
-              hostPort: 8126
-              name: traceport
-              protocol: TCP
-          env:
-            # Needs to be removed when Agent N-2 is built with Golang 1.17
-            - name: GODEBUG
-              value: x509ignoreCN=0
-            - name: DD_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: "datadog"
-                  key: api-key
-            - name: DD_KUBERNETES_KUBELET_HOST
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.hostIP
-            - name: KUBERNETES
-              value: "yes"
-            - name: DD_CLUSTER_AGENT_ENABLED
-              value: "true"
-            - name: DD_CLUSTER_AGENT_KUBERNETES_SERVICE_NAME
-              value: datadog-cluster-agent
-            - name: DD_CLUSTER_AGENT_AUTH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: datadog-cluster-agent
-                  key: token
-            - name: DD_LOG_LEVEL
-              value: "INFO"
-            - name: DD_APM_ENABLED
-              value: "true"
-            - name: DD_APM_NON_LOCAL_TRAFFIC
-              value: "true"
-            - name: DD_APM_RECEIVER_PORT
-              value: "8126"
-            - name: DD_APM_RECEIVER_SOCKET
-              value: "/var/run/datadog/apm.socket"
-            - name: DD_DOGSTATSD_SOCKET
-              value: "/var/run/datadog/dsd.socket"
-          volumeMounts:
-            - name: config
-              mountPath: /etc/datadog-agent
-            - name: logdatadog
-              mountPath: /var/log/datadog
-            - name: tmpdir
-              mountPath: /tmp
-              readOnly: false
-            - name: dsdsocket
-              mountPath: /var/run/datadog
-            - name: runtimesocketdir
-              mountPath: /host/var/run
-              mountPropagation: None
-              readOnly: true
-          livenessProbe:
-            initialDelaySeconds: 15
-            periodSeconds: 15
-            tcpSocket:
-              port: 8126
-            timeoutSeconds: 5
-        - name: process-agent
-          image: "gcr.io/datadoghq/agent:7.35.2"
-          imagePullPolicy: IfNotPresent
-          command: ["process-agent", "-config=/etc/datadog-agent/datadog.yaml"]
-          resources: {}
-          env:
-            # Needs to be removed when Agent N-2 is built with Golang 1.17
-            - name: GODEBUG
-              value: x509ignoreCN=0
-            - name: DD_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: "datadog"
-                  key: api-key
-            - name: DD_KUBERNETES_KUBELET_HOST
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.hostIP
-            - name: KUBERNETES
-              value: "yes"
-            - name: DD_CLUSTER_AGENT_ENABLED
-              value: "true"
-            - name: DD_CLUSTER_AGENT_KUBERNETES_SERVICE_NAME
-              value: datadog-cluster-agent
-            - name: DD_CLUSTER_AGENT_AUTH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: datadog-cluster-agent
-                  key: token
-            - name: DD_PROCESS_AGENT_ENABLED
-              value: "true"
-            - name: DD_PROCESS_AGENT_DISCOVERY_ENABLED
-              value: "false"
-            - name: DD_LOG_LEVEL
-              value: "INFO"
-            - name: DD_SYSTEM_PROBE_ENABLED
-              value: "true"
-            - name: DD_SYSTEM_PROBE_NETWORK_ENABLED
-              value: "true"
-            - name: DD_DOGSTATSD_SOCKET
-              value: "/var/run/datadog/dsd.socket"
-            - name: DD_ORCHESTRATOR_EXPLORER_ENABLED
-              value: "true"
-          volumeMounts:
-            - name: config
-              mountPath: /etc/datadog-agent
-            - name: logdatadog
-              mountPath: /var/log/datadog
-            - name: tmpdir
-              mountPath: /tmp
-              readOnly: false
-            - name: runtimesocketdir
-              mountPath: /host/var/run
-              mountPropagation: None
-              readOnly: true
-            - name: cgroups
-              mountPath: /host/sys/fs/cgroup
-              mountPropagation: None
-              readOnly: true
-            - name: passwd
-              mountPath: /etc/passwd
-              readOnly: true
-            - name: procdir
-              mountPath: /host/proc
-              mountPropagation: None
-              readOnly: true
-            - name: dsdsocket
-              mountPath: /var/run/datadog
-              readOnly: true
-            - name: sysprobe-socket-dir
-              mountPath: /var/run/sysprobe
-              readOnly: true
-            - name: sysprobe-config
-              mountPath: /etc/datadog-agent/system-probe.yaml
-              subPath: system-probe.yaml
-        - name: system-probe
-          image: "gcr.io/datadoghq/agent:7.35.2"
-          imagePullPolicy: IfNotPresent
-          securityContext:
-            capabilities:
-              add:
-                - SYS_ADMIN
-                - SYS_RESOURCE
-                - SYS_PTRACE
-                - NET_ADMIN
-                - NET_BROADCAST
-                - NET_RAW
-                - IPC_LOCK
-                - CHOWN
-            privileged: false
-          command: ["/opt/datadog-agent/embedded/bin/system-probe", "--config=/etc/datadog-agent/system-probe.yaml"]
-          env:
-            # Needs to be removed when Agent N-2 is built with Golang 1.17
-            - name: GODEBUG
-              value: x509ignoreCN=0
-            - name: DD_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: "datadog"
-                  key: api-key
-            - name: DD_KUBERNETES_KUBELET_HOST
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.hostIP
-            - name: KUBERNETES
-              value: "yes"
-            - name: DD_LOG_LEVEL
-              value: "INFO"
-          resources: {}
-          volumeMounts:
-            - name: logdatadog
-              mountPath: /var/log/datadog
-            - name: tmpdir
-              mountPath: /tmp
-              readOnly: false
-            - name: debugfs
-              mountPath: /sys/kernel/debug
-              mountPropagation: None
-            - name: config
-              mountPath: /etc/datadog-agent
-            - name: sysprobe-config
-              mountPath: /etc/datadog-agent/system-probe.yaml
-              subPath: system-probe.yaml
-            - name: sysprobe-socket-dir
-              mountPath: /var/run/sysprobe
-            - name: procdir
-              mountPath: /host/proc
-              mountPropagation: None
-              readOnly: true
-            - name: etc-os-release
-              mountPath: /host/etc/os-release
-              mountPropagation: None
-              readOnly: true
-            - name: etc-redhat-release
-              mountPath: /host/etc/redhat-release
-              mountPropagation: None
-              readOnly: true
-            - name: etc-fedora-release
-              mountPath: /host/etc/fedora-release
-              mountPropagation: None
-              readOnly: true
-            - name: etc-lsb-release
-              mountPath: /host/etc/lsb-release
-              mountPropagation: None
-              readOnly: true
-        - name: security-agent
-          image: "gcr.io/datadoghq/agent:7.35.2"
-          imagePullPolicy: IfNotPresent
-          securityContext:
-            capabilities:
-              add: ["AUDIT_CONTROL", "AUDIT_READ"]
-          command: ["security-agent", "start", "-c=/etc/datadog-agent/datadog.yaml"]
-          resources: {}
-          env:
-            # Needs to be removed when Agent N-2 is built with Golang 1.17
-            - name: GODEBUG
-              value: x509ignoreCN=0
-            - name: DD_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: "datadog"
-                  key: api-key
-            - name: DD_KUBERNETES_KUBELET_HOST
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.hostIP
-            - name: KUBERNETES
-              value: "yes"
-            - name: DD_LOG_LEVEL
-              value: "INFO"
-            - name: DD_COMPLIANCE_CONFIG_ENABLED
-              value: "true"
-            - name: DD_COMPLIANCE_CONFIG_CHECK_INTERVAL
-              value: "20m"
-            - name: HOST_ROOT
-              value: /host/root
-            - name: DD_CLUSTER_AGENT_ENABLED
-              value: "true"
-            - name: DD_CLUSTER_AGENT_KUBERNETES_SERVICE_NAME
-              value: datadog-cluster-agent
-            - name: DD_CLUSTER_AGENT_AUTH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: datadog-cluster-agent
-                  key: token
-            - name: DD_RUNTIME_SECURITY_CONFIG_ENABLED
-              value: "true"
-            - name: DD_RUNTIME_SECURITY_CONFIG_POLICIES_DIR
-              value: "/etc/datadog-agent/runtime-security.d"
-            - name: DD_RUNTIME_SECURITY_CONFIG_SOCKET
-              value: /var/run/sysprobe/runtime-security.sock
-            - name: DD_RUNTIME_SECURITY_CONFIG_SYSCALL_MONITOR_ENABLED
-              value: "false"
-            - name: DD_DOGSTATSD_SOCKET
-              value: "/var/run/datadog/dsd.socket"
-          volumeMounts:
-            - name: config
-              mountPath: /etc/datadog-agent
-            - name: logdatadog
-              mountPath: /var/log/datadog
-            - name: tmpdir
-              mountPath: /tmp
-              readOnly: false
-            - name: dsdsocket
-              mountPath: /var/run/datadog
-              readOnly: true
-            - name: runtimesocketdir
-              mountPath: /host/var/run
-              mountPropagation: None
-              readOnly: true
-            - name: cgroups
-              mountPath: /host/sys/fs/cgroup
-              readOnly: true
-            - name: passwd
-              mountPath: /etc/passwd
-              readOnly: true
-            - name: group
-              mountPath: /etc/group
-              readOnly: true
-            - name: hostroot
-              mountPath: /host/root
-              readOnly: true
-            - name: procdir
-              mountPath: /host/proc
-              readOnly: true
-            - name: sysprobe-socket-dir
-              mountPath: /var/run/sysprobe
-              readOnly: true
-            - name: sysprobe-config
-              mountPath: /etc/datadog-agent/system-probe.yaml
-              subPath: system-probe.yaml
       initContainers:
         - name: init-volume
-          image: "gcr.io/datadoghq/agent:7.35.2"
+          image: "gcr.io/datadoghq/agent:latest"
           imagePullPolicy: IfNotPresent
           command: ["bash", "-c"]
           args:
@@ -1091,7 +784,7 @@ spec:
               mountPath: /opt/datadog-agent
           resources: {}
         - name: init-config
-          image: "gcr.io/datadoghq/agent:7.35.2"
+          image: "gcr.io/datadoghq/agent:latest"
           imagePullPolicy: IfNotPresent
           command: ["bash", "-c"]
           args:
@@ -1109,9 +802,6 @@ spec:
               mountPath: /host/var/run
               mountPropagation: None
               readOnly: true
-            - name: sysprobe-config
-              mountPath: /etc/datadog-agent/system-probe.yaml
-              subPath: system-probe.yaml
           env:
             # Needs to be removed when Agent N-2 is built with Golang 1.17
             - name: GODEBUG
@@ -1127,19 +817,6 @@ spec:
                   fieldPath: status.hostIP
             - name: KUBERNETES
               value: "yes"
-          resources: {}
-        - name: seccomp-setup
-          image: "gcr.io/datadoghq/agent:7.35.2"
-          command:
-            - cp
-            - /etc/config/system-probe-seccomp.json
-            - /host/var/lib/kubelet/seccomp/system-probe
-          volumeMounts:
-            - name: datadog-agent-security
-              mountPath: /etc/config
-            - name: seccomp-root
-              mountPath: /host/var/lib/kubelet/seccomp
-              mountPropagation: None
           resources: {}
       volumes:
         - name: installinfo
@@ -1158,18 +835,6 @@ spec:
             path: /sys/fs/cgroup
           name: cgroups
         - hostPath:
-            path: /etc/os-release
-          name: etc-os-release
-        - hostPath:
-            path: /etc/redhat-release
-          name: etc-redhat-release
-        - hostPath:
-            path: /etc/fedora-release
-          name: etc-fedora-release
-        - hostPath:
-            path: /etc/lsb-release
-          name: etc-lsb-release
-        - hostPath:
             path: /var/run/datadog/
             type: DirectoryOrCreate
           name: dsdsocket
@@ -1179,29 +844,6 @@ spec:
           name: apmsocket
         - name: s6-run
           emptyDir: {}
-        - name: sysprobe-config
-          configMap:
-            name: datadog-system-probe-config
-        - name: datadog-agent-security
-          configMap:
-            name: datadog-security
-        - hostPath:
-            path: /var/lib/kubelet/seccomp
-          name: seccomp-root
-        - hostPath:
-            path: /sys/kernel/debug
-          name: debugfs
-        - name: sysprobe-socket-dir
-          emptyDir: {}
-        - hostPath:
-            path: /etc/passwd
-          name: passwd
-        - hostPath:
-            path: /
-          name: hostroot
-        - hostPath:
-            path: /etc/group
-          name: group
         - hostPath:
             path: /var/lib/datadog-agent/logs
           name: pointerdir
@@ -1217,8 +859,6 @@ spec:
         - hostPath:
             path: /var/run
           name: runtimesocketdir
-        
-        
       tolerations:
       affinity: {}
       serviceAccountName: "datadog-agent"
