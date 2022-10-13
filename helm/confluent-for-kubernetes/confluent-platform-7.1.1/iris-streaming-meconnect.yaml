@@ -31,6 +31,9 @@ spec:
           - name: kafka-connect-oracle-cdc
             owner: confluentinc
             version: 2.1.0
+          - name: kafka-connect-http
+            owner: castorm
+            version: 0.8.11
 
   tls:
     secretRef: tls-group
