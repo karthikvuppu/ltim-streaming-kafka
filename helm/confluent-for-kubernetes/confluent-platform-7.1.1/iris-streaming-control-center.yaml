@@ -80,6 +80,7 @@ spec:
          external-dns.alpha.kubernetes.io/ttl: "300"                     
          service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=cc
          service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-controlcenter
+         service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy: ELBSecurityPolicy-TLS-1-2-2017-01
          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:eu-north-1:572663323550:certificate/a29562a2-f4a3-4c03-b9b5-f77960e0580a
       domain: iris-streaming-sb.devtest.aws.scania.com
       prefix: controlcenter
