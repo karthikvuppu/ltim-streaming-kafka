@@ -46,7 +46,7 @@ spec:
   image:
     application: confluentinc/cp-kafka-rest:7.1.1
     init: confluentinc/confluent-init-container:2.3.0
-  replicas: 3
+  replicas: 1
   mountedVolumes:
     volumes:
       - name: restproxy-basic-client-jaas
