@@ -56,13 +56,15 @@ before_script:
 Operator:
   stage: confluent_operator_sbox
   script:
-    - "kubectl create namespace confluent"
-    - "kubectl apply -f $CRD"
-    - "kubectl apply -f $CRB -n confluent"
-    - "helm upgrade --install confluent-operator helm/confluent-for-kubernetes --namespace confluent"
-    - "kubectl set env ds aws-node -n kube-system WARM_IP_TARGET=2"
-    - "kubectl set env ds aws-node -n kube-system MINIMUM_IP_TARGET=2"
-    - "kubectl rollout restart ds aws-node -n kube-system"
+    - 'helm upgrade 
+      --install 
+      confluent-operator 
+      confluent-for-kubernetes 
+      --repo https://packages.confluent.io/helm
+      --namespace confluent 
+      --create-namespace 
+      --values helm/confluent-for-kubernetes/values.yaml 
+      --version 0.517.43'
   environment:
     name: sbox
   tags:
