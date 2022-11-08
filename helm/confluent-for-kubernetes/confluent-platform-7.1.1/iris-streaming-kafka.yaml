@@ -13,6 +13,8 @@ spec:
   storageClass:
     name: standard
   dataVolumeCapacity: 50Gi
+  mountedSecrets:
+    - secretName: mtls-mapping
   mountedVolumes:
     volumes:
       - name: keytab
@@ -156,6 +158,8 @@ spec:
       - ldap.refresh.interval.ms=60000
       #- ldap.java.naming.security.authentication=GSSAPI
       - ldap.retry.timeout.ms=6600000
+      - listener.name.mtlsonprem.ssl.principal.mapping.rules=${file:/mnt/secrets/mtls-mapping/mapping.txt:mapping}
+      - listener.name.external.ssl.principal.mapping.rules=${file:/mnt/secrets/mtls-mapping/mapping.txt:mapping} 
       #- ldap.java.naming.security.principal=serviceirisssptest@GLOBAL.SCD.SCANIA.COM
       #- ldap.sasl.jaas.config=com.sun.security.auth.module.Krb5LoginModule required debug=true useKeyTab=true storeKey=true keyTab="/tmp/keytab/keytab" principal="serviceirisssptest@GLOBAL.SCD.SCANIA.COM";
       - listener.name.client.sasl.enabled.mechanisms=OAUTHBEARER
