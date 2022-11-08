@@ -71,6 +71,7 @@ spec:
         enabled: true
       authentication:
         type: mtls
+  nodePortOffset: 30282
   externalAccess:
     type: loadBalancer
     loadBalancer:
@@ -83,6 +84,7 @@ spec:
          service.beta.kubernetes.io/aws-load-balancer-name: iris-streaming-sb-controlcenter
          service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy: ELBSecurityPolicy-TLS-1-2-2017-01
          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:eu-north-1:572663323550:certificate/a29562a2-f4a3-4c03-b9b5-f77960e0580a
+         service.beta.kubernetes.io/aws-load-balancer-backend-protocol: ssl
       domain: iris-streaming-sb.devtest.aws.scania.com
       prefix: controlcenter
   storageClass:
