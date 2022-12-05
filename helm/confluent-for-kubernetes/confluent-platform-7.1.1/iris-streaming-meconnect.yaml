@@ -34,7 +34,9 @@ spec:
           - name: kafka-connect-http
             owner: castorm
             version: 0.8.11
-
+          - name: kafka-connect-ibmmq
+            owner: confluentinc
+            version: 10.2.0
   tls:
     secretRef: tls-group
   authorization:
