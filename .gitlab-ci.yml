@@ -24,10 +24,6 @@ stages:
     - "helm repo add stakater https://stakater.github.io/stakater-charts"
   script:
     - 'helm upgrade 
-      --install cluster-tools charts/cluster-tools 
-      --namespace confluent 
-      -f tooling/cluster-tools/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
-    - 'helm upgrade 
       --install 
       external-dns 
       bitnami/external-dns 
@@ -50,6 +46,10 @@ stages:
       stakater stakater/reloader 
       --namespace stakater-reloader 
       --create-namespace'
+    - 'helm upgrade 
+      --install cluster-tools charts/cluster-tools 
+      --namespace confluent 
+      -f tooling/cluster-tools/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
   when: manual
 
 sbox-external cluster-tools:
