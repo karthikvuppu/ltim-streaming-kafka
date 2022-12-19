@@ -39,10 +39,12 @@ stages:
       external-secrets external-secrets/external-secrets
       --namespace external-secrets 
       --create-namespace'
-    - | 
-      if [ "$ENVIRONMENT" != "sandbox" ]; then
-        helm upgrade --install filebeat elastic/filebeat --namespace filebeat --create-namespace --values tooling/filebeat/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
-      fi
+    - 'helm upgrade 
+      --install 
+      filebeat elastic/filebeat 
+      --namespace filebeat 
+      --create-namespace 
+      --values tooling/filebeat/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
     - 'helm upgrade 
       --install 
       stakater stakater/reloader 
