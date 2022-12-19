@@ -101,7 +101,7 @@ prod-external cluster-tools:
   extends:
   - .cluster-tools-deploy
   variables:
-    ENVIRONMENT: prod
+    ENVIRONMENT: production
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_PROD_EXT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
@@ -112,7 +112,7 @@ prod-internal cluster-tools:
   extends:
   - .cluster-tools-deploy
   variables:
-    ENVIRONMENT: prod
+    ENVIRONMENT: production
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_PROD_INT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
@@ -187,7 +187,7 @@ prod-external confluent-operator:
   extends:
   - .confluent-operator-deploy
   variables:
-    ENVIRONMENT: prod
+    ENVIRONMENT: production
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_PROD_EXT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
@@ -198,7 +198,7 @@ prod-internal confluent-operator:
   extends:
   - .confluent-operator-deploy
   variables:
-    ENVIRONMENT: prod
+    ENVIRONMENT: production
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_PROD_INT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
@@ -268,7 +268,7 @@ prod-external confluent-service:
   extends:
   - .confluent-services-deploy
   variables:
-    ENVIRONMENT: prod
+    ENVIRONMENT: production
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_PROD_EXT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
@@ -279,7 +279,7 @@ prod-internal confluent-service:
   extends:
   - .confluent-operator-deploy
   variables:
-    ENVIRONMENT: prod
+    ENVIRONMENT: production
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_PROD_INT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
