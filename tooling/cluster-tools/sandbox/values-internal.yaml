@@ -2,7 +2,7 @@ environment: sandbox
 clusterType: internal
 
 externalSecret:
-  enabled: false
+  enabled: true
   aws:
     roleArn: arn:aws:iam::572663323550:role/secrets_manager_sb_ext
 
