@@ -45,12 +45,11 @@ stages:
       --namespace filebeat
       --create-namespace
       --values tooling/filebeat/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
-    - | 
-      if [ "$ENVIRONMENT" == "sandbox" ]; then
-        helm upgrade --install stakater stakater/reloader --namespace stakater-reloader --create-namespace
-      fi
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
+    - 'helm upgrade 
+      --install 
+      stakater stakater/reloader 
+      --namespace stakater-reloader 
+      --create-namespace'
   when: manual
 
 sbox-external cluster-tools:
@@ -62,8 +61,6 @@ sbox-external cluster-tools:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_SBOX_EXT
     EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 sbox-internal cluster-tools:
@@ -75,8 +72,6 @@ sbox-internal cluster-tools:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_SBOX_INT
     EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 devtest-external cluster-tools:
@@ -88,8 +83,6 @@ devtest-external cluster-tools:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
     EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 devtest-internal cluster-tools:
@@ -101,8 +94,6 @@ devtest-internal cluster-tools:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_DEVTEST_INT
     EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 prod-external cluster-tools:
@@ -114,8 +105,6 @@ prod-external cluster-tools:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_PROD_EXT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 prod-internal cluster-tools:
@@ -127,8 +116,6 @@ prod-internal cluster-tools:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_PROD_INT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 # deploy confluent operator
@@ -149,8 +136,6 @@ prod-internal cluster-tools:
       --create-namespace 
       --values operator/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml 
       --version $CONF_OPERATOR_VERSION'
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 sbox-external confluent-operator:
@@ -162,8 +147,6 @@ sbox-external confluent-operator:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_SBOX_EXT
     EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 sbox-internal confluent-operator:
@@ -175,8 +158,6 @@ sbox-internal confluent-operator:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_SBOX_INT
     EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 devtest-external confluent-operator:
@@ -188,8 +169,6 @@ devtest-external confluent-operator:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
     EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 devtest-internal confluent-operator:
@@ -201,8 +180,6 @@ devtest-internal confluent-operator:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_DEVTEST_INT
     EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 prod-external confluent-operator:
@@ -214,8 +191,6 @@ prod-external confluent-operator:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_PROD_EXT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 prod-internal confluent-operator:
@@ -227,8 +202,6 @@ prod-internal confluent-operator:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_PROD_INT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 # deploy confluent services
@@ -244,8 +217,6 @@ prod-internal confluent-operator:
       --install confluent-services charts/confluent-services/ 
       --namespace confluent 
       -f confluent-services/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 sbox-external confluent-service:
@@ -257,8 +228,6 @@ sbox-external confluent-service:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_SBOX_EXT
     EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 sbox-internal confluent-service:
@@ -270,8 +239,6 @@ sbox-internal confluent-service:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_SBOX_INT
     EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 devtest-external confluent-service:
@@ -283,8 +250,6 @@ devtest-external confluent-service:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
     EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 devtest-internal confluent-service:
@@ -296,8 +261,6 @@ devtest-internal confluent-service:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_DEVTEST_INT
     EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 prod-external confluent-service:
@@ -309,8 +272,6 @@ prod-external confluent-service:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_PROD_EXT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
 prod-internal confluent-service:
@@ -322,6 +283,4 @@ prod-internal confluent-service:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_PROD_INT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
-  rules:
-  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
