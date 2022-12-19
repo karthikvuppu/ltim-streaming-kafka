@@ -1,571 +1,327 @@
----
-
 variables:
-
-  SC                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-storage-class.yaml'
-  CRD                       : 'helm/confluent-for-kubernetes/crds'
-  CRB                       : 'helm/confluent-for-kubernetes/crds/platform.confluent.io_confluentrolebindings.yaml'
-  ZK                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-zookeeper.yaml'
-  KAFKA                     : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-kafka.yaml'
-  SR                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-schemaregistry-aws.yaml'
-  SRONPREM                  : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-schemaregistry-onprem.yaml'
-  KSQLDB                    : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-ksqldb-aws.yaml'
-  KSQLONPREM                : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-ksqldb-onprem.yaml'
-  AWSCONNECT                : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-awsconnect.yaml'
-  MECONNECT                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-meconnect.yaml'
-  ONPREMCONNECT             : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-onpremconnect.yaml'
-  RESTPROXY                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy-aws.yaml'
-  RPONPREM                  : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restproxy-onprem.yaml'
-  RESTCLASS                 : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-restclass.yaml'
-  CC                        : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-control-center.yaml'
-  LDAP                      : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-ldap-nginx.yaml'       
-  DATADOG                   : 'helm/confluent-for-kubernetes/confluent-platform-7.1.1/iris-streaming-datadog-agent.yaml'
-
-  GIT_SUBMODULE_STRATEGY    : recursive
-
+  CONF_OPERATOR_VERSION: "0.517.43"
+  
 
 stages:
-  - confluent_operator_sbox
-  - confluent_deployment_sbox
-  - confluent_destroy_sbox
+  - cluster tools
+  - confluent operator
+  - confluent service
 
-image: dtzar/helm-kubectl
-before_script:
-  - chmod 700 /builds/streaming-iris/iris-streaming-confluent-platform/iris-streaming-service-deployment/iris-streaming-external-service
-  - apk update
-  - apk add zip jq python3 python3-dev py3-pip gcc linux-headers libffi-dev openssl-dev make musl-dev curl
-  - pip install --upgrade pip awscli
-  - mkdir ~/.aws
-  - touch ~/.aws/config
-  - echo "[default]" > ~/.aws/config
-  - echo "$region" >> ~/.aws/config
-  - echo "$role_arn" >> ~/.aws/config
-  - echo "$role_arn"
-  - echo "credential_source=Ec2InstanceMetadata" >> ~/.aws/config
-  - export EC2_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document  | jq  --raw-output '.region')
-  - export AWS_ACCOUNT=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq  --raw-output '.accountId')
-  - export AWS_PROFILE=default
-  #  - wget https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
-  #  - tar xf kubeval-linux-amd64.tar.gz
-  #  - cp kubeval /usr/local/bin
-  - aws sts get-caller-identity
-  - echo "$eks_cluster"
-  - aws eks --region "$cluster_region" update-kubeconfig --name "$eks_cluster"
-  - kubectl get nodes
+.helm-common:
+  image: dtzar/helm-kubectl:3.10
 
-Operator:
-  stage: confluent_operator_sbox
+# deploy cluster tools
+
+.cluster-tools-deploy:
+  stage: cluster tools
+  extends:
+  - .helm-common
+  before_script:
+    - . scripts/.gitlab-ci-helper.bash "$ROLE_ARN" "$EKS_CLUSTER"
+    - 'helm repo add bitnami https://charts.bitnami.com/bitnami'
+    - 'helm repo add external-secrets https://charts.external-secrets.io'
+    - "helm repo add elastic https://helm.elastic.co"
+    - "helm repo add stakater https://stakater.github.io/stakater-charts"
   script:
     - 'helm upgrade 
+      --install cluster-tools charts/cluster-tools 
+      --namespace confluent 
+      -f tooling/cluster-tools/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
+    - 'helm upgrade 
       --install 
+      external-dns 
+      bitnami/external-dns 
+      --namespace externaldns 
+      --create-namespace 
+      --values tooling/external-dns/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
+    - 'helm upgrade
+      --install  
+      external-secrets external-secrets/external-secrets
+      --namespace external-secrets 
+      --create-namespace'
+    - 'helm upgrade
+      --install
+      filebeat elastic/filebeat
+      --namespace filebeat
+      --create-namespace
+      --values tooling/filebeat/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
+    - | 
+      if [ "$ENVIRONMENT" == "sandbox" ]; then
+        helm upgrade --install stakater stakater/reloader --namespace stakater-reloader --create-namespace
+      fi
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
+  when: manual
+
+sbox-external cluster-tools:
+  stage: cluster tools
+  extends:
+  - .cluster-tools-deploy
+  variables:
+    ENVIRONMENT: sandbox
+    CLUSTER_TYPE: external
+    ROLE_ARN: $ROLE_ARN_SBOX_EXT
+    EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
+  when: manual
+
+sbox-internal cluster-tools:
+  stage: cluster tools
+  extends:
+  - .cluster-tools-deploy
+  variables:
+    ENVIRONMENT: sandbox
+    CLUSTER_TYPE: internal
+    ROLE_ARN: $ROLE_ARN_SBOX_INT
+    EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
+  when: manual
+
+devtest-external cluster-tools:
+  stage: cluster tools
+  extends:
+  - .cluster-tools-deploy
+  variables:
+    ENVIRONMENT: devtest
+    CLUSTER_TYPE: external
+    ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
+    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
+  when: manual
+
+devtest-internal cluster-tools:
+  stage: cluster tools
+  extends:
+  - .cluster-tools-deploy
+  variables:
+    ENVIRONMENT: devtest
+    CLUSTER_TYPE: internal
+    ROLE_ARN: $ROLE_ARN_DEVTEST_INT
+    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
+  when: manual
+
+prod-external cluster-tools:
+  stage: cluster tools
+  extends:
+  - .cluster-tools-deploy
+  variables:
+    ENVIRONMENT: prod
+    CLUSTER_TYPE: external
+    ROLE_ARN: $ROLE_ARN_PROD_EXT
+    EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
+  when: manual
+
+prod-internal cluster-tools:
+  stage: cluster tools
+  extends:
+  - .cluster-tools-deploy
+  variables:
+    ENVIRONMENT: prod
+    CLUSTER_TYPE: internal
+    ROLE_ARN: $ROLE_ARN_PROD_INT
+    EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
+  when: manual
+
+# deploy confluent operator
+
+.confluent-operator-deploy:
+  stage: confluent operator
+  extends:
+  - .helm-common
+  before_script:
+    - . scripts/.gitlab-ci-helper.bash "$ROLE_ARN" "$EKS_CLUSTER"
+    - 'helm repo add confluent https://packages.confluent.io/helm'
+  script:
+    - 'helm upgrade 
+      --install
       confluent-operator 
-      confluent-for-kubernetes 
-      --repo https://packages.confluent.io/helm
+      confluent/confluent-for-kubernetes 
       --namespace confluent 
       --create-namespace 
-      --values helm/confluent-for-kubernetes/values.yaml 
-      --version 0.517.43'
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
+      --values operator/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml 
+      --version $CONF_OPERATOR_VERSION'
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
-external-secrets: 
-  environment: 
-    name: sbox
-  only: 
-    - master
-  script:
-    - "helm repo add external-secrets https://charts.external-secrets.io"
-    - "helm upgrade --namespace external-secrets --create-namespace --install --wait external-secrets external-secrets/external-secrets"
-    - "kubectl apply -f secure-deploy/external-secrets-operator/external-secrets.yaml"
-    - "kubectl create configmap keytab-cm --from-file=kt-key=secure-deploy/external-secrets-operator/ServiceIrisSspTest.keytab -n confluent"
-    - "kubectl create configmap krb-cm --from-file=krb5.conf=secure-deploy/external-secrets-operator/krb5.conf -n confluent"
-  stage: confluent_deployment_sbox
-  tags: 
-    - docker
+sbox-external confluent-operator:
+  stage: confluent operator
+  extends:
+  - .confluent-operator-deploy
+  variables:
+    ENVIRONMENT: sandbox
+    CLUSTER_TYPE: external
+    ROLE_ARN: $ROLE_ARN_SBOX_EXT
+    EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
-filebeat:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f secure-deploy/logging/serviceaccount.yaml"
-    - "kubectl apply -f secure-deploy/logging/filebeat.yaml"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
+sbox-internal confluent-operator:
+  stage: confluent operator
+  extends:
+  - .confluent-operator-deploy
+  variables:
+    ENVIRONMENT: sandbox
+    CLUSTER_TYPE: internal
+    ROLE_ARN: $ROLE_ARN_SBOX_INT
+    EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
-Datadog:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl create namespace datadog"
-    - "kubectl apply -f $DATADOG -n datadog"
-    - "kubectl get daemonset -n datadog"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
+devtest-external confluent-operator:
+  stage: confluent operator
+  extends:
+  - .confluent-operator-deploy
+  variables:
+    ENVIRONMENT: devtest
+    CLUSTER_TYPE: external
+    ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
+    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
-external-dns:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f secure-deploy/external-dns/serviceaccount.yaml"
-    - "kubectl apply -f secure-deploy/external-dns/resources.yaml"
-  environment: 
-    name: sbox
-  tags: 
-    - docker
-  only: 
-    - master
+devtest-internal confluent-operator:
+  stage: confluent operator
+  extends:
+  - .confluent-operator-deploy
+  variables:
+    ENVIRONMENT: devtest
+    CLUSTER_TYPE: internal
+    ROLE_ARN: $ROLE_ARN_DEVTEST_INT
+    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
-LDAP:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $LDAP"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
+prod-external confluent-operator:
+  stage: confluent operator
+  extends:
+  - .confluent-operator-deploy
+  variables:
+    ENVIRONMENT: prod
+    CLUSTER_TYPE: external
+    ROLE_ARN: $ROLE_ARN_PROD_EXT
+    EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
-Zookeeper:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $ZK"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
+prod-internal confluent-operator:
+  stage: confluent operator
+  extends:
+  - .confluent-operator-deploy
+  variables:
+    ENVIRONMENT: prod
+    CLUSTER_TYPE: internal
+    ROLE_ARN: $ROLE_ARN_PROD_INT
+    EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
-StorageClass:
-  stage: confluent_deployment_sbox
+# deploy confluent services
+
+.confluent-services-deploy:
+  stage: confluent service
+  extends:
+  - .helm-common
+  before_script:
+    - . scripts/.gitlab-ci-helper.bash "$ROLE_ARN" "$EKS_CLUSTER"
   script:
-    - "kubectl apply -f $SC"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
+    - 'helm upgrade 
+      --install confluent-services charts/confluent-services/ 
+      --namespace confluent 
+      -f confluent-services/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
-Kafka:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $KAFKA"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
+sbox-external confluent-service:
+  stage: confluent service
+  extends:
+  - .confluent-services-deploy
+  variables:
+    ENVIRONMENT: sandbox
+    CLUSTER_TYPE: external
+    ROLE_ARN: $ROLE_ARN_SBOX_EXT
+    EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
-restproxy:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $RESTPROXY"
-    - "kubectl apply -f $RPONPREM"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
+sbox-internal confluent-service:
+  stage: confluent service
+  extends:
+  - .confluent-services-deploy
+  variables:
+    ENVIRONMENT: sandbox
+    CLUSTER_TYPE: internal
+    ROLE_ARN: $ROLE_ARN_SBOX_INT
+    EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
-restclass:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $RESTCLASS"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
+devtest-external confluent-service:
+  stage: confluent service
+  extends:
+  - .confluent-services-deploy
+  variables:
+    ENVIRONMENT: devtest
+    CLUSTER_TYPE: external
+    ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
+    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
-awsconnect:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $AWSCONNECT"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
+devtest-internal confluent-service:
+  stage: confluent service
+  extends:
+  - .confluent-services-deploy
+  variables:
+    ENVIRONMENT: devtest
+    CLUSTER_TYPE: internal
+    ROLE_ARN: $ROLE_ARN_DEVTEST_INT
+    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
-meconnect:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $MECONNECT"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
+prod-external confluent-service:
+  stage: confluent service
+  extends:
+  - .confluent-services-deploy
+  variables:
+    ENVIRONMENT: prod
+    CLUSTER_TYPE: external
+    ROLE_ARN: $ROLE_ARN_PROD_EXT
+    EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
   when: manual
 
-onpremconnect:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $ONPREMCONNECT"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-ksqldb:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $KSQLDB"
-    - "kubectl apply -f $KSQLONPREM"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-schemaregistry:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $SR"
-    - "kubectl apply -f $SRONPREM"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-controlcenter:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $CC"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-# apply all components
-
-apply-all:
-  stage: confluent_deployment_sbox
-  script:
-    - "kubectl apply -f $ZK"
-    - "kubectl apply -f $RESTCLASS"
-    - "kubectl apply -f $KAFKA"
-    - "kubectl apply -f $RESTPROXY"
-    - "kubectl apply -f $RPONPREM"
-    - "kubectl apply -f $SR"
-    - "kubectl apply -f $SRONPREM"
-    - "kubectl apply -f $KSQLDB"
-    - "kubectl apply -f $KSQLONPREM"
-    - "kubectl apply -f $AWSCONNECT"
-    - "kubectl apply -f $MECONNECT"
-    - "kubectl apply -f $ONPREMCONNECT"
-    - "kubectl apply -f $CC"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-
-# Destroy sandbox components in below order
-LDAP-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $LDAP"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-zookeeper-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $ZK"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-kafka-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $KAFKA"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-restproxy-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $RESTPROXY"
-    - "kubectl delete -f $RPONPREM"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-restclass-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $RESTCLASS"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-awsconnect-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $AWSCONNECT"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-meconnect-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $MECONNECT"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-onpremconnect-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $ONPREMCONNECT"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-ksqldb-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $KSQLDB"
-    - "kubectl delete -f $KSQLONPREM"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-schemaregistry-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $SR"
-    - "kubectl delete -f $SRONPREM"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-StorageClass-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $SC"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-operator_sbox_destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete deploy confluent-operator -n confluent"
-    - "kubectl get pods -n confluent"
-    - "kubectl delete ns confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-controlcenter-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $CC"
-    - "kubectl get pods -n confluent"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-#destroy all the services in one-go:
-
-destroy-all:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $RESTPROXY"
-    - "kubectl delete -f $RPONPREM"
-    - "kubectl delete -f $SR"
-    - "kubectl delete -f $SRONPREM"
-    - "kubectl delete -f $KSQLDB"
-    - "kubectl delete -f $KSQLONPREM"
-    - "kubectl delete -f $AWSCONNECT"
-    - "kubectl delete -f $MECONNECT"
-    - "kubectl delete -f $ONPREMCONNECT"
-    - "kubectl delete -f $CC"
-    - "kubectl delete -f $ZK"
-    - "kubectl delete -f $RESTCLASS"
-    - "kubectl delete -f $KAFKA"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-Datadog-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f $DATADOG -n datadog"
-    - "kubectl get daemonset -n datadog"
-    - "kubectl delete namespace datadog"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-external-dns-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f secure-deploy/external-dns/resources.yaml"
-    - "kubectl delete -f secure-deploy/external-dns/serviceaccount.yaml"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
-  when: manual
-
-external-secrets-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f secure-deploy/external-secrets-operator/external-secrets.yaml"
-    - "kubectl delete configmap keytab-cm -n confluent"
-    - "kubectl delete configmap krb-cm -n confluent"
-    - "kubectl delete ns external-secrets"
-  environment: 
-    name: sbox
-  only: 
-    - master
-  tags: 
-    - docker
-  when: manual
-
-filebeat-destroy:
-  stage: confluent_destroy_sbox
-  script:
-    - "kubectl delete -f secure-deploy/logging/filebeat.yaml"
-    - "kubectl delete -f secure-deploy/logging/serviceaccount.yaml"
-  environment:
-    name: sbox
-  tags:
-    - docker
-  only:
-    - master
+prod-internal confluent-service:
+  stage: confluent service
+  extends:
+  - .confluent-operator-deploy
+  variables:
+    ENVIRONMENT: prod
+    CLUSTER_TYPE: internal
+    ROLE_ARN: $ROLE_ARN_PROD_INT
+    EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
+  rules:
+  - if: $CI_COMMIT_BRANCH == "main"
   when: manual

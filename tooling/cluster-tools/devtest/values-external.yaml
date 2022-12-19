@@ -1,0 +1,16 @@
+environment: devtest
+clusterType: external
+
+externalSecret:
+  enabled: true
+  aws:
+    roleArn: arn:aws:iam::858242954753:role/secrets_manager_dt_ext
+
+ldapProxy:
+  enabled: false
+
+datadogAgent:
+  enabled: false
+
+filebeat:
+  enabled: true

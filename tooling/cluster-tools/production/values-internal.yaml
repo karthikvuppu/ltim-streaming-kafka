@@ -1,0 +1,16 @@
+environment: production
+clusterType: internal
+
+externalSecret:
+  enabled: true
+  aws:
+    roleArn: arn:aws:iam::541662535189:role/secrets_manager_prod_role
+
+ldapProxy:
+  enabled: false
+
+datadogAgent:
+  enabled: false
+
+filebeat:
+  enabled: false

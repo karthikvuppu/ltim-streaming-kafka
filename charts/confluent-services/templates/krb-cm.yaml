@@ -1,0 +1,9 @@
+{{- with .Values.kerberos.configuration }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: krb-cm
+  namespace: confluent
+data:
+  krb5.conf: {{- . | toYaml | indent 1 }}
+{{- end }}

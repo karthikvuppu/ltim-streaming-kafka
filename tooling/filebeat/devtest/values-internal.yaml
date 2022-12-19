@@ -1,0 +1,62 @@
+fullnameOverride: filebeat
+
+daemonset:
+  #With Kafka consumer we hit default memory limit during startup. 
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "200Mi"
+    limits:
+      cpu: "1000m"
+      memory: "400Mi"
+  filebeatConfig:
+    filebeat.yml: |-
+      filebeat.autodiscover:
+        providers:
+        - type: kubernetes
+          hints.enabled: true
+          templates:
+            - condition:
+                equals:
+                  kubernetes.namespace: confluent
+              config:
+                - type: container
+                  paths:
+                    - /var/log/containers/*-${data.kubernetes.container.id}.log
+                  multiline.pattern: '^\['
+                  multiline.negate: true
+                  multiline.match: after
+      filebeat.inputs:
+      - type: kafka
+        hosts:
+        - kafka.confluent.svc.cluster.local:9071
+        topics: ["confluent-audit-log-events"]
+        group_id: "filebeat"
+        username: '${KAFKA_USERNAME}'
+        password: '${KAFKA_PASSWORD}'
+        ssl.enabled: true
+        sasl.mechanism: plain
+        ssl.certificate_authorities: ["/etc/ssl/certs/kafka-ca.pem"]
+      fields:
+        environment: devtest
+        clusterType: internal
+      processors:
+        - add_cloud_metadata:
+        - add_host_metadata:
+      output.logstash:
+        hosts: ['${LOGSTASH_HOST}']
+
+envFrom:
+  - secretRef:
+      name: filebeat-kafka-credentials
+
+extraEnvs:
+  - name: LOGSTASH_HOST
+    value: "x0181se.sss.se.scania.com:5061"
+
+
+#Mount Kafka CA certificate  
+secretMounts:
+  - name: kafka-ca-certificate
+    path: "/etc/ssl/certs"
+    secretName: kafka-certificates

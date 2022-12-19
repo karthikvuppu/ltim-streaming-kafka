@@ -1,0 +1,19 @@
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: c3-access
+  namespace: confluent
+spec:
+  refreshInterval: "1m"  # May be set to zero to fetch and create it once
+  secretStoreRef:
+    name: global-secret-store
+    kind: ClusterSecretStore
+  target:
+    name: c3-access
+    creationPolicy: Owner
+  data:
+    - secretKey: basic.txt
+      remoteRef:
+        key: {{ .Values.environment }}/{{ .Values.clusterType}}/c3-access
+        property: basic.txt

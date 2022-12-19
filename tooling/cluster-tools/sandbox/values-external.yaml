@@ -1,0 +1,16 @@
+environment: sandbox
+clusterType: external
+
+externalSecret:
+  enabled: false
+  aws:
+    roleArn: arn:aws:iam::572663323550:role/secrets_manager_sb_ext
+
+ldapProxy:
+  enabled: false
+
+datadogAgent:
+  enabled: false
+
+filebeat:
+  enabled: true

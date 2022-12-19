@@ -1,0 +1,20 @@
+{{ if .Values.filebeat.enabled}}
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: kafka-certificates
+  namespace: filebeat
+spec:
+  refreshInterval: "1m"  # May be set to zero to fetch and create it once
+  secretStoreRef:
+    name: global-secret-store
+    kind: ClusterSecretStore
+  target:
+    name: kafka-certificates
+    creationPolicy: Owner
+  data:
+    - secretKey: kafka-ca.pem
+      remoteRef:
+        key: {{ .Values.environment }}/{{ .Values.clusterType}}/tls-group
+        property: cacerts.pem
+{{- end }}

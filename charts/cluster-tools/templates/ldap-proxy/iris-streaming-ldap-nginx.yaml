@@ -1,0 +1,97 @@
+{{ if .Values.ldapProxy.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ldap-proxy
+  namespace: confluent
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ldap-proxy
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: ldap-proxy
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 636
+        volumeMounts:
+          - name: nginx-config
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+          - name: tls-group
+            mountPath: /etc/ssl/certs/
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: ldap-nginx-config
+        - name: tls-group
+          secret:
+            secretName: tls-group
+            items:
+              - key: cacerts.pem
+                path: cacerts.pem
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ldap-proxy
+  namespace: confluent
+spec:
+  ports:
+  - name: external
+    port: 636
+    protocol: TCP
+    targetPort: 636
+  selector:
+    app: ldap-proxy
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ldap-nginx-config
+  namespace: confluent
+data:
+  nginx.conf: |
+    events {
+      worker_connections 1024;
+    }
+    stream {
+      map $upstream_addr $name {
+       ~\Q138.106.102.244:636\E$ sesoegdc001.global.scd.scania.com;
+       ~\Q138.106.97.4:636\E$ sesoegdc002.global.scd.scania.com;
+       ~\Q138.106.97.12:636\E$ sesoegdc003.global.scd.scania.com;
+       ~\Q138.106.97.13:636\E$ sesoegdc004.global.scd.scania.com;
+       ~\Q138.106.97.1:636\E$ sesoegdc005.global.scd.scania.com;
+       ~\Q138.106.97.6:636\E$ sesoegdc006.global.scd.scania.com;
+       ~\Q138.106.97.10:636\E$ sesoegdc007.global.scd.scania.com;
+      }
+      upstream ldapservers {
+        server sesoegdc001.global.scd.scania.com:636;
+        server sesoegdc002.global.scd.scania.com:636;
+        server sesoegdc003.global.scd.scania.com:636;
+        server sesoegdc004.global.scd.scania.com:636;
+        server sesoegdc005.global.scd.scania.com:636;
+        server sesoegdc006.global.scd.scania.com:636;
+        server sesoegdc007.global.scd.scania.com:636;
+      }
+      server {
+        listen 636;
+        proxy_pass ldapservers;
+        proxy_ssl on;
+        proxy_ssl_trusted_certificate /etc/ssl/certs/cacerts.pem;
+        proxy_ssl_verify on;
+        proxy_ssl_verify_depth 2;
+        proxy_ssl_session_reuse on;
+        proxy_ssl_name $name;
+      }
+    }
+{{- end }}

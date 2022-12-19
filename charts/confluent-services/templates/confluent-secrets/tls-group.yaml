@@ -1,0 +1,26 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: tls-group
+  namespace: confluent
+spec:
+  refreshInterval: "1m"  # May be set to zero to fetch and create it once
+  secretStoreRef:
+    name: global-secret-store
+    kind: ClusterSecretStore
+  target:
+    name: tls-group
+    creationPolicy: Owner
+  data:
+    - secretKey: fullchain.pem
+      remoteRef:
+        key: {{ .Values.environment }}/{{ .Values.clusterType}}/tls-group
+        property: fullchain.pem
+    - secretKey: cacerts.pem
+      remoteRef:
+        key: {{ .Values.environment }}/{{ .Values.clusterType}}/tls-group
+        property: cacerts.pem
+    - secretKey: privkey.pem
+      remoteRef:
+        key: {{ .Values.environment }}/{{ .Values.clusterType}}/tls-group
+        property: privkey.pem

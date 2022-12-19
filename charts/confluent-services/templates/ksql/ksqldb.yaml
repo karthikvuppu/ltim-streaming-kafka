@@ -1,0 +1,85 @@
+{{ if .Values.ksql.enabled }}
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksqldb
+  namespace: confluent
+  labels: 
+    admission.datadoghq.com/enabled: "true"
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-ksqldb-server:7.1.1
+    init: confluentinc/confluent-init-container:2.3.0
+  dataVolumeCapacity: {{ .Values.ksql.dataVolumeCapacity }}
+  configOverrides:
+    server:
+      - access.control.allow.origin=*
+      - access.control.allow.methods=GET,POST,HEAD
+      - access.control.allow.headers=X-Requested-With,Content-Type,Accept,Origin,Authorization
+  authorization:
+    type: rbac
+  tls:
+    secretRef: tls-group
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: mds-client
+      tls:
+        enabled: true
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+        service.beta.kubernetes.io/aws-load-balancer-subnets: {{ .Values.subnets.public }}
+        service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=k2
+        service.beta.kubernetes.io/aws-load-balancer-name: {{ .Values.ksql.loadbalancer.name }}
+      domain: {{ .Values.domain }}
+      prefix: {{ .Values.ksql.dns.prefix }}
+  storageClass:
+    name: standard
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    annotations:
+      ad.datadoghq.com/ksqldb.check_names: '["confluent_platform"]'
+      ad.datadoghq.com/ksqldb.init_configs: '[{"is_jmx": true, "collect_default_metrics": true, "service_check_prefix": "confluent", "new_gc_metrics": true, "collect_default_jvm_metrics": true}]'
+      ad.datadoghq.com/ksqldb.instances: '[{"host": "%%host%%","port":"7203"}]'
+      ad.datadoghq.com/ksqldb.logs: '[{"source":"confluent_platform","service":"confluent_platform"}]'
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - k2
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - kafka
+                    - zookeeper
+            topologyKey: kubernetes.io/hostname
+{{- end }}

@@ -1,0 +1,133 @@
+{{- range $name, $value := .Values.connect.instances}}
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: {{ $name }}
+  namespace: confluent
+  finalizers:
+  - connect.finalizers.platform.confluent.io
+spec:
+  replicas: {{ .replicas}}
+  oneReplicaPerNode: true
+  image:
+    application: {{ .image.application }}
+    init: confluentinc/confluent-init-container:2.3.0
+  build:
+    type: onDemand
+    onDemand:
+      plugins:
+        locationType: confluentHub                          #if the k8s have internet connection i.e to confluenthub
+        confluentHub:
+        {{- range .plugins }}
+          - name: {{ .name }}
+            owner: {{ .owner}}
+            version: {{ .version}}
+        {{- end}}
+  {{ with $.Values.connect.license}}
+  license: 
+{{ toYaml . | indent 4}}
+  {{- end }}
+  tls:
+    secretRef: tls-group
+  authorization:
+    type: rbac
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9094
+      tls:
+        enabled: true
+      authentication:
+        type: mtls
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: mds-client
+      tls:
+        enabled: true
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      tls:
+        enabled: true
+      authentication:
+        type: basic
+        basic:
+          secretRef: c3-access
+  {{ with .configOverrides }}
+  configOverrides:
+    {{- with .log4j }}
+    log4j:
+      {{- range $key, $value := .}}
+      - {{ $key }}={{ $value }}
+      {{- end }}
+    {{- end }} 
+    jvm:
+      {{- range $key, $value := .jvm}}
+      - "{{ $key }}={{ $value }}"
+      {{- end }} 
+    server:
+      #Server configuration
+      {{- range $key, $value := .server}}
+      - {{ $key }}={{ $value }}
+      {{- end }}
+     {{- end }} 
+      
+  enableSchemas: true
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      annotations:
+        external-dns.alpha.kubernetes.io/ttl: "300"
+        external-dns.alpha.kubernetes.io/hostname: {{.dns.prefix}}.{{ $.Values.domain}}
+        service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service={{ .loadbalancer.nodeLabels }}
+        service.beta.kubernetes.io/aws-load-balancer-name: {{ .loadbalancer.name }}
+        {{- if .loadbalancer.internal }}
+        service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+        service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+        service.beta.kubernetes.io/aws-load-balancer-subnets:  {{ $.Values.subnets.private}}
+        {{- else }}
+        service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+        service.beta.kubernetes.io/aws-load-balancer-subnets: {{ $.Values.subnets.public}}
+        {{- end}}
+      domain: {{ $.Values.domain}}
+      prefix: {{ .dns.prefix }}
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    annotations:
+      ad.datadoghq.com/{{ $name }}.check_names: '["confluent_platform"]'
+      ad.datadoghq.com/{{ $name }}.init_configs: '[{"is_jmx": true, "collect_default_metrics": true, "service_check_prefix": "confluent", "new_gc_metrics": true, "collect_default_jvm_metrics": true}]'
+      ad.datadoghq.com/{{ $name }}.instances: '[{"host": "%%host%%","port":"7203", "max_returned_metrics":1800}]'
+      ad.datadoghq.com/{{ $name }}.logs: '[{"source":"confluent_platform","service":"confluent_platform"}]'
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - {{ required "Affinity service name is required" .nodeAffinityServiceName }}
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - kafka
+                    - zookeeper
+            topologyKey: kubernetes.io/hostname
+  {{ with .mountedSecrets}}
+  mountedSecrets:
+  {{- range . }}
+  - secretRef: {{ . }}
+  {{- end }}
+  {{- end }}
+{{- end }}
