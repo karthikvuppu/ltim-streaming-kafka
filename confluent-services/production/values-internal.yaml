@@ -1,0 +1,224 @@
+environment: prod
+clusterType: internal
+
+domain: iris-streaming.prod.aws.scania.com
+
+subnets:
+  private: subnet-0afeb4522b2ed064b, subnet-0fddbd8a941de3b4e, subnet-01f1630c12ec7f40c
+  public: subnet-0423b8b8775463560, subnet-0c0586ccf00d51272, subnet-0c34899861e8035bc
+
+kerberos:
+  activatedInKafka: false
+  configuration: |
+    [libdefaults]
+    dns_lookup_realm = true
+    ticket_lifetime = 24h
+    renew_lifetime = 7d
+    forwardable = true
+    rdns = false
+    default_ccache_name = KEYRING:persistent:%{uid}
+    verify_ap_req_nofail = false
+
+
+
+    default_realm = GLOBAL.SCD.SCANIA.COM
+    dns_lookup_kdc = true
+    [realms]
+
+
+
+    GLOBAL.SCD.SCANIA.COM = {
+    }
+
+
+
+    [domain_realm]
+    global.scd.scania.com = GLOBAL.SCD.SCANIA.COM
+    .global.scd.scania.com = GLOBAL.SCD.SCANIA.COM
+
+schemaRegistry:
+  internalService:
+    enabled: false
+  loadbalancer:
+    internal: true
+    name: iris-streaming-prod-ischemaregistry
+  replicas: 1
+  dns:  
+    prefix: ischemaregistry
+  podAntiAffinity:
+    - kafka
+    - zookeeper
+    - controlcenter
+
+restProxy:
+  dependencies:
+    schemaRegistry:
+      authentication:
+        basic:
+          secretRef: c3-access
+        type: basic
+  configOverrides:
+    server:
+      - authentication.method=BASIC
+      - authentication.realm=KafkaRest
+      - authentication.roles=Administrators
+      - confluent.rest.auth.propagate.method=JETTY_AUTH
+    jvm:
+      - "-Djava.security.auth.login.config=/tmp/restproxy/client.jaas"
+  mountedVolumes:
+    volumes:
+      - name: restproxy-basic-client-jaas
+        secret:
+          secretName: restproxy-basic-client-jaas
+          items:
+            - key: client.jaas
+              path: client.jaas
+      - name: restproxy-basic-users
+        secret:
+          secretName: restproxy-basic-users
+          items:
+            - key: basic.txt
+              path: basic.txt
+    volumeMounts:
+      - name: restproxy-basic-client-jaas
+        mountPath: /tmp/restproxy
+      - name: restproxy-basic-users
+        mountPath: /tmp/restproxy/users
+  loadbalancer:
+    internal: true
+    name: iris-streaming-prod-irestproxy
+  dns: 
+    prefix: irestproxy
+  podAntiAffinity:
+  - kafka
+  - zookeeper
+  - controlcenter
+
+ksql:
+  enabled: false
+
+connect:
+  license:
+    secretRef: confluent-license
+  instances:
+    connect-onprem:
+      replicas: 1
+      image:
+        application: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/confluent:meconnect-1.0
+      dns:
+        prefix: ionpremconnect
+
+      loadbalancer:
+        internal: true
+        name: iris-streaming-prod-ionpremconnect
+        nodeLabels: onpremconnect
+      nodeAffinityServiceName: onpremconnect
+      plugins:
+      - name: kafka-connect-datagen
+        owner: confluentinc
+        version: 0.5.3
+      - name: debezium-connector-mysql
+        owner: debezium
+        version: 1.8.1
+      - name: kafka-connect-hdfs3
+        owner: confluentinc
+        version: 1.1.10
+      configOverrides:
+        server:
+          'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
+          'value.converter': 'io.confluent.connect.avro.AvroConverter'
+
+zookeeper:
+  podAntiAffinity:
+  - kafka
+  - controlcenter
+  - srrp
+  logVolumeCapacity: 90Gi
+  dataVolumeCapacity: 120Gi
+
+controlCenter:
+  dataVolumeCapacity: 60Gi
+  configOverrides:
+    server:
+      'confluent.controlcenter.internal.topics.partitions': '4'
+      'confluent.controlcenter.mds.client.idle.timeout': '30000'
+      'confluent.controlcenter.mds.client.max.requests.queued.per.destination': '2048'
+  loadbalancer:
+    internal: false
+    name:  iris-streaming-prod-icontrolcenter
+    nodeLabel: controlcenter
+    certificateArn: arn:aws:acm:eu-north-1:541662535189:certificate/3bce9083-3ec7-4f63-9c12-48abca958621
+  nodeAffinityServiceName: controlcenter
+  dns:
+    prefix: icontrolcenter
+
+kafka:
+  replicas: 3
+  dataVolumeCapacity: 2500Gi
+  configOverrides:
+    log4j:
+      'log4j.logger.io.confluent.security.auth.provider.ldap': 'TRACE'
+    server:
+      'delete.topic.enable': 'false'
+      'confluent.balancer.enable': 'true'
+      'ldap.com.sun.jndi.ldap.read.timeout': '60000'
+      'ldap.refresh.interval.ms': '60000'
+      'ldap.retry.timeout.ms': '6600000'
+    jvm:
+      '-Djava.security.krb5.conf': '/etc/krb5.conf'
+      '-Dcom.sun.jndi.ldap.debug': 'true'
+  authorization:
+    superUsers:
+    - User:kafka
+    - User:serviceirisssp
+  dependencies:
+    kafkaRest:
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: rest-credential
+  oneReplicaPerNode: true
+  podAntiAffinity:
+    - zookeeper
+    - srrp
+    - controlcenter
+
+  listeners:
+    internal:
+      enabled: true
+    external:
+      enabled: true
+      authentication:
+        type: mtls
+        principalMappingRules:
+          # First rule may need to be altered to capture Scania-issued client certificates
+          - RULE:CN[ ]?=[ ]?([a-zA-Z0-9-_]+),.*Scania.*/$1/
+          - RULE:.*CN[ ]?=[ ]?([a-zA-Z0-9-_]+).*\.scania\.com.*/$1/
+      loadbalancer:
+        bootstrapPrefix: imtlsaws #TODO check if this is correct 
+        brokerPrefix: imtlsaws
+        internal: true
+        name: iris-streaming-prod-imtlsaws
+
+    custom:
+      internaleks:
+        port: 9094
+        loadbalancer:
+          enabled: false
+        authentication:
+          type: mtls
+          principalMappingRules:
+            # First rule may need to be altered to capture Scania-issued client certificates
+            - RULE:.*CN[ ]?=[ ]?([a-zA-Z0-9-_]+).*\.scania\.com.*/$1/
+            - RULE:CN[ ]?=[ ]?([a-zA-Z0-9-_]+),.*Scania.*/$1/
+      internalldap:
+        port: 9093
+        authentication:
+          type: ldap
+        loadbalancer:
+          enabled: true
+          internal: true
+          internalScheme: true
+          name: iris-streaming-prod-ildaponprem-ldap-nlb
+          bootstrapPrefix: ildaponprem
+          brokerPrefix: ildaponprem

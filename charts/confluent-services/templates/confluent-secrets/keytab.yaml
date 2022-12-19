@@ -1,0 +1,18 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: keytab
+  namespace: confluent
+spec:
+  refreshInterval: "1m"
+  secretStoreRef:
+    name: global-secret-store
+    kind: ClusterSecretStore
+  target:
+    name: keytab
+    creationPolicy: Owner
+  data:
+    - secretKey: kt-key
+      remoteRef:
+        key: {{ .Values.environment }}/{{ .Values.clusterType }}/keytab
+        property: kt-key

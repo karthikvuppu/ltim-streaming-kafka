@@ -1,0 +1,20 @@
+fullnameOverride: external-dns
+
+provider: aws
+aws:
+  zoneType: public
+  region: eu-north-1
+
+policy: upsert-only
+registry: txt
+txtOwnerId: external-dns
+txtSuffix: "_externaldns"
+serviceAccount:
+  annotations: 
+    eks.amazonaws.com/role-arn: arn:aws:iam::858242954753:role/external-dns-irsa-role-for-ext-cluster
+
+sources:
+  - service
+  - ingress
+domainFilters:
+  - 'iris-streaming.devtest.aws.scania.com'

@@ -1,0 +1,270 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  license:
+    secretRef: confluent-license
+  replicas: {{ .Values.kafka.replicas }}
+  image:
+    application: confluentinc/cp-server:7.1.1
+    init: confluentinc/confluent-init-container:2.3.0
+  storageClass:
+    name: standard
+  dataVolumeCapacity: {{ .Values.kafka.dataVolumeCapacity }}
+  
+  {{ with .Values.kafka.mountedSecrets }}
+  mountedSecrets:
+  {{ range .}}
+  - secretRef: {{ .secretRef }}
+  {{- end }}
+  {{- end }}
+  mountedVolumes:
+    volumes:
+      {{- if .Values.kerberos.activatedInKafka }}
+      - name: krb
+        configMap:
+          name: krb-cm
+          items:
+            - key: krb5.conf
+              path: krb5.conf
+      - name: keytab
+        secret:
+          secretName: keytab
+          items:
+            - key: kt-key
+              path: kt-key
+      {{- end }}
+      - name: digest-jaas
+        secret:
+          secretName: digest-jaas
+          items:
+            - key: digest-jaas.conf
+              path: digest-jaas.conf
+    volumeMounts:
+      - name: keytab
+        mountPath: /tmp/keytab
+        readOnly: true
+      - name: krb
+        mountPath: /etc/krb5.conf
+        subPath: krb5.conf
+        readOnly: true
+      - name: digest-jaas
+        mountPath: /tmp/zookeeper
+  tls:
+    secretRef: tls-group
+  listeners:
+  {{- with .Values.kafka.listeners}}
+    {{- with .custom}}
+    custom:
+    {{- range $name, $value := . }}
+    - name: {{ $name }}
+      port: {{ .port }}
+      authentication: 
+{{toYaml .authentication | indent 8}}
+      tls:
+        enabled: true
+      {{ if .loadbalancer.enabled}}
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: {{ $.Values.domain }}
+          bootstrapPrefix: {{ .loadbalancer.bootstrapPrefix | default $name }}
+          brokerPrefix: {{ .loadbalancer.brokerPrefix | default $name }}
+          annotations:
+            service.beta.kubernetes.io/aws-load-balancer-type: nlb
+            service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+            service.beta.kubernetes.io/aws-load-balancer-name: {{ .loadbalancer.name }}
+            {{- with.loadbalancer.sourceRanges }}
+            service.beta.kubernetes.io/load-balancer-source-ranges: {{ . }}
+            {{- end }}
+            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
+            {{- if .loadbalancer.internal }}
+            service.beta.kubernetes.io/aws-load-balancer-subnets: {{ $.Values.subnets.private}}
+            service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+            
+            {{- if .loadbalancer.internalScheme }}
+            service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+            {{- end }}
+            {{- else }}
+            service.beta.kubernetes.io/aws-load-balancer-subnets: {{ $.Values.subnets.public }} 
+            {{- end}}
+      {{- end}}
+    {{- end }}
+    {{- end }}
+    {{- if .internal.enabled }}
+    internal:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+    {{- end }}
+    {{- if .external.enabled }}
+    external:
+      authentication:
+{{toYaml .external.authentication | indent 8}}
+      tls:
+        enabled: true
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          annotations:
+            {{ if .external.loadbalancer.internal}}
+            service.beta.kubernetes.io/aws-load-balancer-subnets: {{ $.Values.subnets.private }}
+            service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+            service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+            {{- else }}
+            service.beta.kubernetes.io/aws-load-balancer-subnets: {{ $.Values.subnets.public }} 
+            {{- end }}
+            service.beta.kubernetes.io/aws-load-balancer-type: nlb
+            service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+            service.beta.kubernetes.io/aws-load-balancer-name: {{ .external.loadbalancer.name }} 
+            {{- with .external.loadbalancer.sourceRanges }}
+            service.beta.kubernetes.io/load-balancer-source-ranges: {{ . }}
+            {{- end }}
+            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
+          domain: {{ $.Values.domain }}
+          bootstrapPrefix: {{ .external.loadbalancer.bootstrapPrefix }} 
+          brokerPrefix: {{ .external.loadbalancer.brokerPrefix }} ##TODO check this is correct
+    {{- end }}
+  {{- end }}
+  {{- with .Values.kafka.configOverrides }}
+  configOverrides:
+    {{- with .log4j }}
+    log4j:
+      {{- range $key, $value := .}}
+      - {{ $key }}={{ $value }}
+      {{- end }}
+    {{- end }} 
+    jvm:
+      {{- range $key, $value := .jvm}}
+      - "{{ $key }}={{ $value }}"
+      {{- end }} 
+    server:
+      #Server configuration
+      {{- range $key, $value := .server}}
+      - {{ $key }}={{ $value }}
+      {{- end }} 
+     {{- end }} 
+
+      #Listener configuration
+      {{- with .Values.kafka.listeners.external.customServerConfiguration }}
+      #Configuration for listener external
+      {{- range $key, $value := . }}
+      - listener.name.external.{{$key}}={{$value}}
+      {{- end }}
+      {{- end }}
+      
+      {{- range $name, $nu := .Values.kafka.listeners.custom}}
+
+      {{- with .customServerConfiguration}}
+      #Configuration for listener {{ $name }}
+      {{- range $key, $value := .}}
+      - listener.name.{{$name}}.{{$key}}={{$value}}
+      {{- end}} 
+      {{- end}}
+      {{- end}} 
+
+  authorization:
+    type: rbac
+    {{- with .Values.kafka.authorization.superUsers }}
+    superUsers:
+      {{- range . }}
+      - {{ . }}
+      {{- end }}
+    {{- end }}
+  services:
+    mds:
+      tls:
+        enabled: true
+      tokenKeyPair:
+        secretRef: mds-token
+      provider:
+        type: ldap
+        ldap:
+          ##ADDRESS
+          address: ldap://ldap-proxy.confluent.svc.cluster.local:636
+          #address: ldaps://SESOEGDC001.global.scd.scania.com:636
+          #address: https://internal-Ldap-26465864.eu-north-1.elb.amazonaws.com:443
+          authentication:
+            type: simple
+            simple:
+              secretRef: credential
+          tls:
+            enabled: true
+            secretRef: tls-group
+          configurations:
+            groupNameAttribute: cn
+            groupObjectClass: group
+            groupSearchFilter: (objectclass=group)
+            groupMemberAttribute: member
+            groupMemberAttributePattern: CN=([^,]+).*,DC=global,DC=scd,DC=scania,DC=com
+            groupSearchBase: OU=Groups,OU=SSP,OU=Enterprise,DC=global,DC=scd,DC=scania,DC=com
+            userNameAttribute: sAMAccountName
+            userMemberOfAttributePattern: CN=(.*),OU=Groups,OU=SSP,OU=Enterprise,DC=global,DC=scd,DC=scania,DC=com
+            userObjectClass: user
+            userSearchBase: DC=global,DC=scd,DC=scania,DC=com
+            userSearchScope: 2
+  dependencies:
+    kafkaRest:
+      {{- with .Values.kafka.dependencies.kafkaRest.authentication}}
+      authentication:
+{{ toYaml . | indent 8 }}
+      {{- end }}
+        #type: bearer
+        #bearer:
+          #secretRef: rest-credential
+    zookeeper:
+      endpoint: zookeeper.confluent.svc.cluster.local:2182
+      authentication:
+        type: digest
+        jaasConfigPassThrough:
+          secretRef: digest-jaas
+          directoryPathInContainer: /tmp/zookeeper
+      tls:
+        enabled: true
+  metricReporter:
+    enabled: true
+    bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+    authentication:
+      jaasConfig:
+        secretRef: credential
+      type: plain
+    tls:
+      enabled: true
+  oneReplicaPerNode: {{ .Values.kafka.oneReplicaPerNode }}
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    annotations:
+      ad.datadoghq.com/kafka.check_names: '["confluent_platform"]'
+      ad.datadoghq.com/kafka.init_configs: '[{"is_jmx": true, "collect_default_metrics": true, "service_check_prefix": "confluent", "new_gc_metrics": true, "collect_default_jvm_metrics": true}]'
+      ad.datadoghq.com/kafka.instances: '[{"host": "%%host%%","port":"7203", "max_returned_metrics":1800}]'
+      ad.datadoghq.com/kafka.logs: '[{"source":"confluent_platform","service":"confluent_platform"}]'
+      secret.reloader.stakater.com/reload: mtls-mapping
+      co.elastic.logs/enabled: "true"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - kafka
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    {{- range .Values.kafka.podAntiAffinity }}
+                    - {{ . }}
+                    {{- end }}
+            topologyKey: kubernetes.io/hostname

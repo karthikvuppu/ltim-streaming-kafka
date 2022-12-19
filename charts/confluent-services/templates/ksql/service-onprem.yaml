@@ -1,0 +1,29 @@
+{{ if .Values.ksql.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    service.beta.kubernetes.io/aws-load-balancer-subnets: {{ .Values.subnets.private }}
+    external-dns.alpha.kubernetes.io/hostname: ksqldbonprem.{{ .Values.domain}}
+    service.beta.kubernetes.io/aws-load-balancer-name: {{ .Values.ksql.onprem.loadbalancer.name }}
+    external-dns.alpha.kubernetes.io/ttl: "300"
+  name: ksqldbonprem
+  namespace: confluent
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: external
+    port: 443
+    protocol: TCP
+    targetPort: 8088
+  selector:
+    app: ksqldb
+    clusterId: confluent
+    confluent-platform: "true"
+    type: ksqldb
+  sessionAffinity: None
+  type: LoadBalancer
+
+{{- end }}

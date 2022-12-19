@@ -1,0 +1,197 @@
+environment: devtest
+clusterType: internal
+
+domain: iris-streaming.devtest.aws.scania.com
+
+subnets:
+  public: subnet-03bb1df2bc15436b6, subnet-061b406bbac050fcb, subnet-0a71781428bea6c6e
+  private: subnet-0e18497ffe09aa1bc, subnet-0a3762c0ef8a83cf0, subnet-0869429a688c9e4ad
+  
+kerberos:
+  activatedInKafka: false
+  configuration: |
+    [libdefaults]
+    dns_lookup_realm = true
+    ticket_lifetime = 24h
+    renew_lifetime = 7d
+    forwardable = true
+    rdns = false
+    default_ccache_name = KEYRING:persistent:%{uid}
+    verify_ap_req_nofail = false
+
+
+
+    default_realm = GLOBAL.SCD.SCANIA.COM
+    dns_lookup_kdc = true
+    [realms]
+
+
+
+    GLOBAL.SCD.SCANIA.COM = {
+    }
+
+
+
+    [domain_realm]
+    global.scd.scania.com = GLOBAL.SCD.SCANIA.COM
+    .global.scd.scania.com = GLOBAL.SCD.SCANIA.COM
+
+controlCenter:
+  dataVolumeCapacity: 60Gi
+  configOverrides:
+    server:
+      'confluent.controlcenter.internal.topics.partitions': '4'
+      'confluent.controlcenter.mds.client.idle.timeout': '30000'
+      'confluent.controlcenter.mds.client.max.requests.queued.per.destination': '2048'
+  loadbalancer:
+    internal: false
+    name:  iris-streaming-devtest-icontrolcenter
+    nodeLabel: controlcenter
+    certificateArn: arn:aws:acm:eu-north-1:858242954753:certificate/57e103f8-aa1a-4cbc-ba9b-94a06299924c
+  nodeAffinityServiceName: controlcenter
+  dns:
+    prefix: icontrolcenter
+
+connect:
+  instances:
+    connect-onprem:
+      replicas: 1
+      image:
+        application: confluentinc/cp-server-connect:7.1.1
+      dns:
+        prefix: ionpremconnect
+      loadbalancer:
+        internal: true
+        name: iris-streaming-devtest-ionpremconnect
+        nodeLabels: onpremconnect
+      nodeAffinityServiceName: onpremconnect
+      plugins:
+      - name: kafka-connect-datagen
+        owner: confluentinc
+        version: 0.5.3
+      - name: debezium-connector-mysql
+        owner: debezium
+        version: 1.8.1
+      - name: kafka-connect-hdfs3
+        owner: confluentinc
+        version: 1.1.10
+      configOverrides:
+        server:
+          'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
+          'value.converter': 'io.confluent.connect.avro.AvroConverter'
+
+ksql:
+  enabled: false
+
+schemaRegistry:
+  internalService:
+    enabled: false
+  loadbalancer:
+    internal: true
+    name: iris-streaming-devtest-ischemaregistry
+  replicas: 1
+  dns:  
+    prefix: ischemaregistry
+  podAntiAffinity:
+    - kafka
+    - zookeeper
+    - controlcenter
+
+restProxy:
+  authentication:
+    type: mtls 
+  dependencies:
+    schemaRegistry: {}
+  loadbalancer:
+    internal: true
+    name: iris-streaming-devtest-irestproxy
+  dns: 
+    prefix: irestproxy
+  podAntiAffinity:
+  - kafka
+  - zookeeper
+  - controlcenter
+
+zookeeper:
+  podAntiAffinity:
+  - kafka
+  - controlcenter
+  - srrp
+  logVolumeCapacity: 90Gi
+  dataVolumeCapacity: 120Gi
+
+kafka:
+  replicas: 3
+  dataVolumeCapacity: 2500Gi
+  mountedSecrets:
+   - secretRef: password-encoder-secret
+  configOverrides:
+    log4j:
+      'log4j.logger.io.confluent.security.auth.provider.ldap': 'TRACE'
+    server:
+      'confluent.cluster.link.enable': 'true'
+      'password.encoder.secret': '${file:/mnt/secrets/password-encoder-secret/password_encoder_secret:secret}'
+      'confluent.balancer.enable': 'true'
+      'confluent.balancer.heal.uneven.load.trigger': 'ANY_UNEVEN_LOAD'
+      'ldap.com.sun.jndi.ldap.read.timeout': '60000'
+      'ldap.refresh.interval.ms': '60000'
+      'ldap.retry.timeout.ms': '6600000'
+    jvm:
+      '-Djava.security.krb5.conf': '/etc/krb5.conf'
+      '-Dcom.sun.jndi.ldap.debug': 'true'
+  authorization:
+    superUsers:
+    - User:kafka
+    - User:servicesspadmintest
+  dependencies:
+    kafkaRest:
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: mds-client
+  oneReplicaPerNode: false
+  podAntiAffinity:
+    - zookeeper
+    - srrp
+    - controlcenter
+
+  listeners:
+    internal:
+      enabled: true
+    external:
+      enabled: true
+      authentication:
+        type: mtls
+        principalMappingRules:
+          # First rule may need to be altered to capture Scania-issued client certificates
+          - RULE:CN[ ]?=[ ]?([a-zA-Z0-9-_]+),.*Scania.*/$1/
+          - RULE:.*CN[ ]?=[ ]?([a-zA-Z0-9-_]+).*\.scania\.com.*/$1/
+      loadbalancer:
+        bootstrapPrefix: imtlsonprem #TODO check if this is correct 
+        brokerPrefix: imtlsonprem
+        internal: true
+        name: iris-streaming-devtest-imtlsonprem
+        sourceRanges: "13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32" 
+
+    custom:
+      internaleks:
+        port: 9094
+        loadbalancer:
+          enabled: false
+        authentication:
+          type: mtls
+          principalMappingRules:
+            # First rule may need to be altered to capture Scania-issued client certificates
+            - RULE:.*CN[ ]?=[ ]?([a-zA-Z0-9-_]+).*\.scania\.com.*/$1/
+            - RULE:CN[ ]?=[ ]?([a-zA-Z0-9-_]+),.*Scania.*/$1/
+      internalldap:
+        port: 9093
+        authentication:
+          type: ldap
+        loadbalancer:
+          enabled: true
+          internal: true
+          name: iris-streaming-devtest-ildaponprem
+          sourceRanges: "13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32"
+          bootstrapPrefix: ildaponprem
+          brokerPrefix: ildaponprem

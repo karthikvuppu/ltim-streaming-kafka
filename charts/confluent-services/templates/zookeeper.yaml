@@ -1,0 +1,45 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper:7.1.1
+    init: confluentinc/confluent-init-container:2.3.0
+  dataVolumeCapacity: {{ .Values.zookeeper.dataVolumeCapacity }}
+  logVolumeCapacity: {{ .Values.zookeeper.logVolumeCapacity }}
+  authentication:
+    type: digest
+    jaasConfig:
+      secretRef: credential
+  tls:
+    secretRef: tls-group
+  storageClass:
+    name: standard
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsGroup: 1000
+      runAsUser: 1000
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: service
+                  operator: In
+                  values:
+                    - zookeeper
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+           - labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    {{- range .Values.zookeeper.podAntiAffinity }}
+                    - {{ . }}
+                    {{- end }}
+             topologyKey: kubernetes.io/hostname
