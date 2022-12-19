@@ -2,7 +2,7 @@ environment: sandbox
 clusterType: internal
 
 subnets:
-  private: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
+  private: subnet-0eaa3d5224991d32b, subnet-03014a32c6f8a7d25, subnet-0416c0196a2569646
   #There are some public facing services, eg. control-center that needs this. Or should probably be fixed.
   public: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
 
