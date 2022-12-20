@@ -3,6 +3,12 @@
 ---
 # Source: datadog/templates/cluster-agent-rbac.yaml
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: datadog
+
+# Source: datadog/templates/cluster-agent-rbac.yaml
+apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
