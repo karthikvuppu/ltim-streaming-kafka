@@ -1,4 +1,4 @@
-environment: production
+environment: prod
 clusterType: internal
 
 externalSecret:
@@ -13,4 +13,4 @@ datadogAgent:
   enabled: false
 
 filebeat:
-  enabled: false
+  enabled: true
