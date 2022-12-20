@@ -4,7 +4,7 @@ clusterType: internal
 externalSecret:
   enabled: true
   aws:
-    roleArn: arn:aws:iam::572663323550:role/secrets_manager_sb_ext
+    roleArn: arn:aws:iam::572663323550:role/secrets_manager_sb_int
 
 ldapProxy:
   enabled: false
