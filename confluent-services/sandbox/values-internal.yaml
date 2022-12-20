@@ -117,7 +117,7 @@ kafka:
   authorization:
     superUsers:
     - User:kafka
-    - User:servicesspadmintest  
+    - User:serviceirisssptest  
 
   mountedSecrets:
   - secretRef: password-encoder-secret

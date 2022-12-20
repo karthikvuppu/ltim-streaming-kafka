@@ -7,10 +7,10 @@ externalSecret:
     roleArn: arn:aws:iam::572663323550:role/secrets_manager_sb_int
 
 ldapProxy:
-  enabled: false
+  enabled: true
 
 datadogAgent:
-  enabled: false
+  enabled: true
 
 filebeat:
   enabled: true
