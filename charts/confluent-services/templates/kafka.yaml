@@ -13,11 +13,13 @@ spec:
   storageClass:
     name: standard
   dataVolumeCapacity: {{ .Values.kafka.dataVolumeCapacity }}
-  
-  {{ with .Values.kafka.mountedSecrets }}
+  {{ if or (.Values.kafka.mountedSecrets) (.Values.kerberos.activatedInKafka) }}
   mountedSecrets:
-  {{ range .}}
+  {{ range .Values.kafka.mountedSecrets }}
   - secretRef: {{ .secretRef }}
+  {{- end }}
+  {{ if .Values.kerberos.activatedInKafka }}
+  - secretRef: keytab
   {{- end }}
   {{- end }}
   mountedVolumes:
@@ -43,6 +45,7 @@ spec:
             - key: digest-jaas.conf
               path: digest-jaas.conf
     volumeMounts:
+      {{- if .Values.kerberos.activatedInKafka }}
       - name: keytab
         mountPath: /tmp/keytab
         readOnly: true
@@ -50,6 +53,7 @@ spec:
         mountPath: /etc/krb5.conf
         subPath: krb5.conf
         readOnly: true
+      {{- end }}
       - name: digest-jaas
         mountPath: /tmp/zookeeper
   tls:
