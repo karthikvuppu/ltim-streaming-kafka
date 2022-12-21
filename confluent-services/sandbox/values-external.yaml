@@ -234,8 +234,7 @@ kafka:
   oneReplicaPerNode: true
   authorization:
     superUsers:
-    - User:kafka
-    - User:servicesspadmintest  
+    - User:serviceirisssptest
 
   mountedSecrets:
   - secretRef: mtls-mapping
