@@ -116,7 +116,6 @@ kafka:
   oneReplicaPerNode: false
   authorization:
     superUsers:
-    - User:kafka
     - User:serviceirisssptest  
 
   podAntiAffinity:
