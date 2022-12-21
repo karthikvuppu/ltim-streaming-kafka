@@ -124,13 +124,11 @@ kafka:
   replicas: 3
   dataVolumeCapacity: 2500Gi
   mountedSecrets:
-   - secretRef: password-encoder-secret
   configOverrides:
     log4j:
       'log4j.logger.io.confluent.security.auth.provider.ldap': 'TRACE'
     server:
       'confluent.cluster.link.enable': 'true'
-      'password.encoder.secret': '${file:/mnt/secrets/password-encoder-secret/password_encoder_secret:secret}'
       'confluent.balancer.enable': 'true'
       'confluent.balancer.heal.uneven.load.trigger': 'ANY_UNEVEN_LOAD'
       'ldap.com.sun.jndi.ldap.read.timeout': '60000'
