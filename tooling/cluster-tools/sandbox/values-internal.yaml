@@ -10,7 +10,7 @@ ldapProxy:
   enabled: true
 
 datadogAgent:
-  enabled: true
+  enabled: false
 
 filebeat:
   enabled: true
