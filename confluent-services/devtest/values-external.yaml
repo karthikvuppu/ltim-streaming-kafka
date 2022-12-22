@@ -297,6 +297,7 @@ kafka:
         name: iris-streaming-devtest-mtlsaws
         brokerPrefix: mtlsaws
         bootstrapPrefix: mtlsaws 
+        sourceRanges: "13.51.132.182/32, 13.51.115.193/32, 	13.51.138.3/32"
       customServerConfiguration:
         'ssl.principal.mapping.rules': '${file:/mnt/secrets/mtls-mapping/mtls-mapping.txt:mapping}'
     custom:
@@ -311,6 +312,7 @@ kafka:
           internal: false
           bootstrapPrefix: oauthaws
           name: iris-streaming-devtest-oauthaws
+          sourceRanges: "13.51.132.182/32, 13.51.115.193/32, 	13.51.138.3/32"
         customServerConfiguration:
           'sasl.enabled.mechanisms': 'OAUTHBEARER'
           'sasl.mechanism': 'PLAIN'
@@ -330,6 +332,7 @@ kafka:
           internal: true
           name: iris-streaming-devtest-oauthonprem
           bootstrapPrefix: oauthonprem
+          sourceRanges: "13.51.132.182/32, 13.51.115.193/32, 	13.51.138.3/32"
         customServerConfiguration:
           'sasl.enabled.mechanisms': 'OAUTHBEARER'
           'sasl.oauthbearer.jwks.endpoint.url': 'https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs'
@@ -351,5 +354,6 @@ kafka:
           internal: true
           name: iris-streaming-devtest-mtlsonprem
           bootstrapPrefix: mtlsonprem
+          sourceRanges: "13.51.132.182/32, 13.51.115.193/32, 	13.51.138.3/32"
         customServerConfiguration:
           'ssl.principal.mapping.rules': '${file:/mnt/secrets/mtls-mapping/mtls-mapping.txt:mapping}'
