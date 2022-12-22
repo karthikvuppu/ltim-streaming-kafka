@@ -1,4 +1,4 @@
-{{ if .Values.datadogAgent.enabled}}
+#{{ if .Values.datadogAgent.enabled}}
 
 ---
 # Source: datadog/templates/cluster-agent-rbac.yaml
@@ -1007,4 +1007,4 @@ spec:
                 topologyKey: kubernetes.io/hostname
       nodeSelector:
         kubernetes.io/os: linux
-{{- end }}
+#{{- end }}
