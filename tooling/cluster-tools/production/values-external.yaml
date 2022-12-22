@@ -9,8 +9,8 @@ externalSecret:
 ldapProxy:
   enabled: false
 
-datadogAgent:
-  enabled: false
+datadog:
+  enabled: true
 
 filebeat:
   enabled: true
