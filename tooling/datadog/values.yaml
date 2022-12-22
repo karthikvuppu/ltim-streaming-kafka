@@ -1,0 +1,20 @@
+datadog:
+  apiKeyExistingSecret: datadog-api-key
+  site: datadoghq.eu
+
+agents:
+  image:
+    # We have java application that expose JMX metrics in for example Kafka, so we need a agent image with JMX support.
+    # https://docs.datadoghq.com/integrations/java/?tab=host
+    tag: 7.41.1-jmx
+    
+  podSecurity:
+    # As Amazon Linux 2 images, which are used for the EKS nodes does not support apparmor we disable it
+    # https://github.com/kubearmor/KubeArmor/issues/58
+    apparmor:
+      enabled: false
+
+# We want to run the cluster-agent in high availability mode
+clusterAgent:
+  replicas: 2
+  createPodDisruptionBudget: true
