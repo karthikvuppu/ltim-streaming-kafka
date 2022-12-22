@@ -108,7 +108,6 @@ restProxy:
   loadbalancer:
     internal: false
     name: iris-streaming-devtest-restproxyaws
-    sourceRanges: "13.51.132.182/32, 13.51.115.193/32, 	13.51.138.3/32"
     nodeLabels: rp
   dns:
     prefix: restproxyaws
