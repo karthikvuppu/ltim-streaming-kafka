@@ -9,9 +9,6 @@ externalSecret:
 ldapProxy:
   enabled: true
 
-datadogAgent:
-  enabled: false
-
 datadog:
   enabled: true
 
