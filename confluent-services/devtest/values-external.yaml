@@ -338,7 +338,7 @@ kafka:
           'sasl.oauthbearer.expected.audience': 'account'
           'sasl.oauthbearer.sub.claim.name': 'clientId'
           'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
-          'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule'
+          'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
       
       mtlsonprem:
         port: 9094
