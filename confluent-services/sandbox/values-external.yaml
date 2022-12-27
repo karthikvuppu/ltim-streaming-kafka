@@ -1,10 +1,11 @@
 environment: sandbox
 clusterType: external
 
+domain: iris-streaming-sb.devtest.aws.scania.com
+
 subnets:
   public: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
   private: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
-domain: iris-streaming-sb.devtest.aws.scania.com
 
 kerberos:
   activatedInKafka: false
@@ -143,9 +144,9 @@ ksql:
     loadbalancer:
       name: iris-streaming-sb-ksqldbonprem
   loadbalancer:
-    name: iris-streaming-sb-ksqldb
+    name: iris-streaming-sb-ksqldbaws
   dns: 
-    prefix: ksqldb
+    prefix: ksqldbaws
   
 schemaRegistry:
   internalService:
