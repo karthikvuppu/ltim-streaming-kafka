@@ -4,7 +4,7 @@ clusterType: internal
 domain: iris-streaming.prod.aws.scania.com
 
 subnets:
-  private: subnet-0afeb4522b2ed064b, subnet-0fddbd8a941de3b4e, subnet-01f1630c12ec7f40c
+  private: subnet-005c1da2972d73a6d, subnet-0cef31b5097ba44e9, subnet-0bce55c50b5bfb104
   public: subnet-0423b8b8775463560, subnet-0c0586ccf00d51272, subnet-0c34899861e8035bc
 
 kerberos:
