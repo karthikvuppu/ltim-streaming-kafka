@@ -52,7 +52,7 @@ envFrom:
 
 extraEnvs:
   - name: LOGSTASH_HOST
-    value: "x0204se.sss.se.scania.com:5061"
+    value: "x0181se.sss.se.scania.com:5061"
 
 
 #Mount Kafka CA certificate  
