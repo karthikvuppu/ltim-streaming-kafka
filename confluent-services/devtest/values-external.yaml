@@ -273,6 +273,7 @@ kafka:
     log4j:
       'log4j.logger.io.confluent.security.auth.provider.ldap': 'TRACE'
     server:
+      'confluent.balancer.heal.uneven.load.trigger': 'ANY_UNEVEN_LOAD'
       'confluent.cluster.link.enable': 'true'
       'ldap.com.sun.jndi.ldap.read.timeout': '60000'
       'ldap.refresh.interval.ms': '60000'
