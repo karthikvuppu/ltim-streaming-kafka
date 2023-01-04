@@ -80,7 +80,8 @@ connect:
         server:
           'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
           'value.converter': 'io.confluent.connect.avro.AvroConverter'
-    
+      mountedSecrets:
+        - connect-clients
     connect-onprem:
       replicas: 3
       image:
@@ -110,7 +111,8 @@ connect:
         server:
           'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
           'value.converter': 'io.confluent.connect.avro.AvroConverter'
-
+      mountedSecrets:
+        - connect-clients
   connect-aws:
     replicas: 3
     image:
@@ -136,6 +138,8 @@ connect:
       server:
         'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
         'value.converter': 'io.confluent.connect.avro.AvroConverter'
+    mountedSecrets:
+      - connect-clients
 
 ksql:
   enabled: true
