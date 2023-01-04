@@ -1,0 +1,19 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: connect-clients
+  namespace: confluent
+spec:
+  dataFrom:
+  - extract:
+      conversionStrategy: Default
+      decodingStrategy: None
+      key: {{ .Values.environment }}/{{ .Values.clusterType }}/connect-clients
+  refreshInterval: 1m
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: global-secret-store
+  target:
+    creationPolicy: Owner
+    deletionPolicy: Retain
+    name: connect-clients
