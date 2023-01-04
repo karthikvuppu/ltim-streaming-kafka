@@ -256,6 +256,7 @@ kafka:
       loadbalancer:
         internal: false
         name: iris-streaming-prod-mtlsaws
+        sourceRanges: "13.48.14.192/32"
         brokerPrefix: mtlsaws
         bootstrapPrefix: mtlsaws 
       customServerConfiguration:
@@ -272,6 +273,7 @@ kafka:
           internal: false
           bootstrapPrefix: oauthaws
           name: iris-streaming-prod-oauthaws
+          sourceRanges: "13.48.14.192/32"
         customServerConfiguration:
           'sasl.enabled.mechanisms': 'OAUTHBEARER'
           'sasl.mechanism': 'PLAIN'
@@ -291,6 +293,7 @@ kafka:
           internal: true
           internalScheme: true
           name: iris-streaming-prod-oauthonprem
+          sourceRanges: "13.48.14.192/32"
           bootstrapPrefix: oauthonprem
         customServerConfiguration:
           'sasl.enabled.mechanisms': 'OAUTHBEARER'
@@ -312,6 +315,7 @@ kafka:
           enabled: true
           internal: true
           name: iris-streaming-prod-mtlsonprem
+          sourceRanges: "13.48.14.192/32"
           bootstrapPrefix: mtlsonprem
         customServerConfiguration:
           'ssl.principal.mapping.rules': '${file:/mnt/secrets/mtls-mapping/mtls-mapping.txt:mapping}'
