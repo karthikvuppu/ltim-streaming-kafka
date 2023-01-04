@@ -48,12 +48,14 @@ stages:
       --create-namespace'
     - 'helm upgrade 
       --install cluster-tools charts/cluster-tools 
-      --namespace confluent 
+      --namespace confluent
+      --create-namespace
       -f tooling/cluster-tools/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
     - 'helm upgrade
       --install
       datadog datadog/datadog
       --namespace datadog
+      --create-namespace
       -f tooling/datadog/values.yaml'
   when: manual
 
