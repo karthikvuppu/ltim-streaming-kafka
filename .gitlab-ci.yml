@@ -283,7 +283,7 @@ prod-external confluent-service:
 prod-internal confluent-service:
   stage: confluent service
   extends:
-  - .confluent-operator-deploy
+  - .confluent-services-deploy
   variables:
     ENVIRONMENT: production
     CLUSTER_TYPE: internal
