@@ -8,7 +8,7 @@ metadata:
   labels: 
     admission.datadoghq.com/enabled: "true"
 spec:
-  replicas: 1
+  replicas: 3
   image:
     application: confluentinc/cp-ksqldb-server:7.1.1
     init: confluentinc/confluent-init-container:2.3.0
