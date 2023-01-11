@@ -187,6 +187,7 @@ controlCenter:
   configOverrides:
     server:
       'confluent.controlcenter.internal.topics.partitions': '4'
+      'confluent.controlcenter.disk.skew.warning.min.bytes': '16106127360' # 15Gb
   loadbalancer:
     internal: false
     name: iris-streaming-prod-controlcenter
