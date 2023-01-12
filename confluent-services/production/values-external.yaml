@@ -217,7 +217,6 @@ kafka:
   authorization:
     superUsers:
       - User:serviceirisssp
-      - User:kafka
   dependencies:
     kafkaRest:
       authentication:

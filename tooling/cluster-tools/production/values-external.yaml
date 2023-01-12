@@ -7,7 +7,7 @@ externalSecret:
     roleArn: arn:aws:iam::541662535189:role/secrets_manager_prod_ext 
 
 ldapProxy:
-  enabled: false
+  enabled: true
 
 datadog:
   enabled: true
