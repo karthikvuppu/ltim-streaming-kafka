@@ -134,7 +134,7 @@ kafka:
       'ldap.com.sun.jndi.ldap.read.timeout': '60000'
       'ldap.refresh.interval.ms': '60000'
       'ldap.retry.timeout.ms': '6600000'
-      'connections.max.reauth.ms': '300000'
+      'connections.max.reauth.ms': '3600000'
     jvm:
       '-Djava.security.krb5.conf': '/etc/krb5.conf'
       '-Dcom.sun.jndi.ldap.debug': 'true'
