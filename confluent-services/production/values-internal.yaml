@@ -169,7 +169,6 @@ kafka:
       '-Dcom.sun.jndi.ldap.debug': 'true'
   authorization:
     superUsers:
-    - User:kafka
     - User:serviceirisssp
   dependencies:
     kafkaRest:
