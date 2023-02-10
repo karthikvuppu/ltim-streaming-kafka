@@ -61,21 +61,23 @@ spec:
   configOverrides:
     {{- with .log4j }}
     log4j:
-      {{- range $key, $value := .}}
+      {{- range $key, $value := . }}
       - {{ $key }}={{ $value }}
       {{- end }}
-    {{- end }} 
+    {{- end }}
+    {{- with .jvm }}
     jvm:
-      {{- range $key, $value := .jvm}}
+      {{- range $key, $value := . }}
       - "{{ $key }}={{ $value }}"
-      {{- end }} 
+      {{- end }}
+    {{- end }}
+    {{- with .server }}
     server:
-      #Server configuration
-      {{- range $key, $value := .server}}
+      {{- range $key, $value := . }}
       - {{ $key }}={{ $value }}
       {{- end }}
-     {{- end }} 
-      
+     {{- end }}
+    {{- end }}
   enableSchemas: true
   externalAccess:
     type: loadBalancer

@@ -23,9 +23,17 @@ daemonset:
                 - type: container
                   paths:
                     - /var/log/containers/*-${data.kubernetes.container.id}.log
-                  multiline.pattern: '^\['
+                  multiline.pattern: '^(\[|{)'
                   multiline.negate: true
                   multiline.match: after
+                  processors:
+                    - decode_json_fields:
+                        fields: ["message"]
+                        process_array: true
+                        target: "log"
+                        keys_under_root: true
+                        overwrite_keys: false
+                        add_error_key: false
       filebeat.inputs:
       - type: kafka
         hosts:
@@ -37,12 +45,16 @@ daemonset:
         ssl.enabled: true
         sasl.mechanism: plain
         ssl.certificate_authorities: ["/etc/ssl/certs/kafka-ca.pem"]
+        parsers:
+          - ndjson:
+              target: "log"
+              addErrorKey: true
+              message_key: message
+              expand_keys: true
       fields:
         environment: sandbox
         clusterType: external
-      processors:
-        - add_cloud_metadata:
-        - add_host_metadata:
+      
       output.logstash:
         hosts: ['${LOGSTASH_HOST}']
 

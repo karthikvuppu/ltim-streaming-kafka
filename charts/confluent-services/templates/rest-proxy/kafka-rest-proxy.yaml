@@ -14,8 +14,25 @@ spec:
     type: rbac
   {{ with .Values.restProxy.configOverrides }}
   configOverrides:
-{{ toYaml . | indent 4 }}
-  {{- end}}
+    {{- with .log4j }}
+    log4j:
+      {{- range $key, $value := . }}
+      - {{ $key }}={{ $value }}
+      {{- end }}
+    {{- end }}
+    {{- with .jvm }}
+    jvm:
+      {{- range $key, $value := . }}
+      - "{{ $key }}={{ $value }}"
+      {{- end }}
+    {{- end }}
+    {{- with .server }}
+    server:
+      {{- range $key, $value := . }}
+      - {{ $key }}={{ $value }}
+      {{- end }}
+    {{- end }}
+    {{- end }}
   dependencies:
     kafka:
       bootstrapEndpoint:  kafka.confluent.svc.cluster.local:9071
