@@ -13,10 +13,18 @@ spec:
   dataVolumeCapacity: {{.Values.controlCenter.dataVolumeCapacity}}
   {{ with .Values.controlCenter.configOverrides}}
   configOverrides:
+    {{- with .server }}
     server:
-      {{- range $key, $value := .server }}
+      {{- range $key, $value := . }}
       - "{{ $key }}={{ $value }}"
       {{- end }}
+    {{- end }}
+    {{- with .log4j }}
+    log4j:
+      {{- range $key, $value := . }}
+      - {{ $key }}={{ $value }}
+      {{- end }}
+    {{- end }}
   {{- end }}
   authorization:
     type: rbac

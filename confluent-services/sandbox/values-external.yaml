@@ -151,7 +151,16 @@ ksql:
     name: iris-streaming-sb-ksqldbaws
   dns: 
     prefix: ksqldbaws
-  
+  configOverrides:
+    log4j:
+      'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
+      'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+    server:
+      'access.control.allow.origin': '*'
+      'access.control.allow.methods': 'GET,POST,HEAD'
+      'access.control.allow.headers': 'X-Requested-With,Content-Type,Accept,Origin,Authorization'
+
 schemaRegistry:
   internalService:
     enabled: true
@@ -166,16 +175,28 @@ schemaRegistry:
   podAntiAffinity:
   - kafka
   - zookeeper
+  configOverrides:
+    log4j:
+      'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
+      'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+    server:
+      'confluent.schema.registry.anonymous.principal': 'true'
+      'authentication.skip.paths': '/*'
 
 restProxy:
   configOverrides:
+    log4j:
+      'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
+      'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
     server:
-      - authentication.method=BASIC
-      - authentication.realm=KafkaRest
-      - authentication.roles=Administrators
-      - confluent.rest.auth.propagate.method=JETTY_AUTH
+      'authentication.method': 'BASIC'
+      'authentication.realm': 'KafkaRest'
+      'authentication.roles': 'Administrators'
+      'confluent.rest.auth.propagate.method': 'JETTY_AUTH'
     jvm:
-      - "-Djava.security.auth.login.config=/tmp/restproxy/client.jaas"
+      '-Djava.security.auth.login.config': '/tmp/restproxy/client.jaas'
   dependencies:
     schemaRegistry:
       authentication:
@@ -214,6 +235,10 @@ restProxy:
 controlCenter:
   dataVolumeCapacity: 30Gi
   configOverrides:
+    log4j:
+      'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
+      'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
     server:
       'confluent.controlcenter.internal.topics.partitions': '4'
   loadbalancer:
@@ -232,6 +257,13 @@ zookeeper:
   - connect
   - k2
   - srrp
+  configOverrides:
+    log4j:
+      'log4j.logger.io.confluent.security.auth.provider.ldap': 'TRACE'
+      'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
+      'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+
 
 kafka:
   replicas: 6
@@ -263,7 +295,10 @@ kafka:
       '-Dcom.sun.jndi.ldap.debug': 'true'
     log4j:
       'log4j.logger.io.confluent.security.auth.provider.ldap': 'TRACE'
-      
+      'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
+      'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+
   dependencies:
     kafkaRest:
       authentication:

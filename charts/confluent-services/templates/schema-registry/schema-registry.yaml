@@ -10,8 +10,25 @@ spec:
     init: confluentinc/confluent-init-container:2.3.0
   {{ with .Values.schemaRegistry.configOverrides }}
   configOverrides:
-{{ toYaml . | indent 4 }}
-  {{- end}}
+    {{- with .log4j }}
+    log4j:
+      {{- range $key, $value := . }}
+      - {{ $key }}={{ $value }}
+      {{- end }}
+    {{- end }}
+    {{- with .jvm }}
+    jvm:
+      {{- range $key, $value := . }}
+      - "{{ $key }}={{ $value }}"
+      {{- end }}
+    {{- end }}
+    {{- with .server }}
+    server:
+      {{- range $key, $value := . }}
+      - {{ $key }}={{ $value }}
+      {{- end }}
+    {{- end }}
+    {{- end }}
   tls:
     secretRef: tls-group
   authorization:

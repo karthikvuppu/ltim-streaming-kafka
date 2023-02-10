@@ -14,6 +14,27 @@ spec:
     type: digest
     jaasConfig:
       secretRef: credential
+  {{- with .Values.zookeeper.configOverrides }}
+  configOverrides:
+    {{- with .log4j }}
+    log4j:
+      {{- range $key, $value := . }}
+      - {{ $key }}={{ $value }}
+      {{- end }}
+    {{- end }}
+    {{- with .jvm }}
+    jvm:
+      {{- range $key, $value := . }}
+      - "{{ $key }}={{ $value }}"
+      {{- end }}
+    {{- end }}
+    {{- with .server }}
+    server:
+      {{- range $key, $value := . }}
+      - {{ $key }}={{ $value }}
+      {{- end }}
+    {{- end }}
+    {{- end }}
   tls:
     secretRef: tls-group
   storageClass:
