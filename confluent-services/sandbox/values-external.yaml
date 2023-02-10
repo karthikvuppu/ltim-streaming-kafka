@@ -80,6 +80,11 @@ connect:
         server:
           'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
           'value.converter': 'io.confluent.connect.avro.AvroConverter'
+        log4j:
+          'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
+          'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
+          'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+          'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
       mountedSecrets:
         - connect-clients
     connect-onprem:
@@ -111,6 +116,11 @@ connect:
         server:
           'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
           'value.converter': 'io.confluent.connect.avro.AvroConverter'
+        log4j:
+          'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
+          'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
+          'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+          'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
       mountedSecrets:
         - connect-clients
   connect-aws:
@@ -138,6 +148,11 @@ connect:
       server:
         'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
         'value.converter': 'io.confluent.connect.avro.AvroConverter'
+      log4j:
+        'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
+        'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
+        'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+        'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
     mountedSecrets:
       - connect-clients
 
