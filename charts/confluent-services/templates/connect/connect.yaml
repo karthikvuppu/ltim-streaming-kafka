@@ -13,15 +13,15 @@ spec:
   image:
     application: {{ .image.application }}
     init: confluentinc/confluent-init-container:2.3.0
-  mountedVolumes:
-    volumes:
-      - name: config-volume
-        configMap:
-          name: cert-test
-    volumeMounts:
-      - name: config-volume
-        mountPath: /mnt
-        readOnly: true   
+  # mountedVolumes:
+  #   volumes:
+  #     - name: config-volume
+  #       configMap:
+  #         name: cert-test
+  #   volumeMounts:
+  #     - name: config-volume
+  #       mountPath: /mnt
+  #       readOnly: true   
   build:
     type: onDemand
     onDemand:

@@ -97,6 +97,5 @@ spec:
                   values:
                     - kafka
                     - zookeeper
-                    - ksqldb
             topologyKey: kubernetes.io/hostname
 {{- end }}
