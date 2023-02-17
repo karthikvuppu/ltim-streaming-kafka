@@ -1,3 +1,6 @@
+include: 
+  - 'cicd/templates/authenticate.yml'
+
 variables:
   CONF_OPERATOR_VERSION: "0.517.43"
   
