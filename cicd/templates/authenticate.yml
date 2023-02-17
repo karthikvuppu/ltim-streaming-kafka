@@ -1,0 +1,32 @@
+.authenticate:
+  stage: authenticate
+  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+  script:
+    - >
+      STS=($(aws sts assume-role-with-web-identity
+      --role-arn ${AWS_ROLE_ARN}
+      --role-session-name "GitLabRunner-${CI_PROJECT_ID}-${CI_PIPELINE_ID}"
+      --web-identity-token $CI_JOB_JWT_V2
+      --duration-seconds 3600
+      --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]'
+      --output text))
+    - export AWS_ACCESS_KEY_ID="${STS[0]}"
+    - export AWS_SECRET_ACCESS_KEY="${STS[1]}"
+    - export AWS_SESSION_TOKEN="${STS[2]}"
+    - echo "AWS_ACCESS_KEY_ID="${STS[0]}"" >> .env
+    - echo "AWS_SECRET_ACCESS_KEY="${STS[1]}"" >> .env
+    - echo "AWS_SESSION_TOKEN="${STS[2]}"" >> .env
+    - aws eks --region "$CLUSTER_REGION" update-kubeconfig --name "$EXTERNAL_EKS_CLUSTER" --kubeconfig .kubeconfig-${ENVIRONMENT}.yaml --alias external
+    - aws eks --region "$CLUSTER_REGION" update-kubeconfig --name "$INTERNAL_EKS_CLUSTER" --kubeconfig .kubeconfig-${ENVIRONMENT}.yaml --alias internal
+    - echo "KUBECONFIG=.kubeconfig-${ENVIRONMENT}.yaml" >> .env
+
+  artifacts:
+    reports: 
+      dotenv: .env
+    paths:
+      - .kubeconfig-${ENVIRONMENT}.yaml
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - env/${VALUES_ROOT_DIR}/**/**/*

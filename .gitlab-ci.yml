@@ -3,6 +3,7 @@ variables:
   
 
 stages:
+  - authenticate
   - cluster tools
   - confluent operator
   - confluent service
@@ -10,14 +11,66 @@ stages:
 .helm-common:
   image: dtzar/helm-kubectl:3.10
 
-# deploy cluster tools
+################################################ Environments ###############################################
+.sandbox:
+  variables:
+    ENVIRONMENT: sandbox
+    AWS_ROLE_ARN: $AWS_ROLE_ARN_SANDBOX
+    EXTERNAL_EKS_CLUSTER: $EKS_CLUSTER_SBOX_DEV_EXT
+    INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_SBOX_DEV_INT
+    CLUSTER_REGION: eu-north-1
 
+.dev-test:
+  variables:
+    ENVIRONMENT: devtest
+    AWS_ROLE_ARN: $AWS_ROLE_ARN_DEVTEST
+    EXTERNAL_EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
+    INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
+    CLUSTER_REGION: eu-north-1
+
+.production:
+  variables: 
+    ENVIRONMENT: production
+    AWS_ROLE_ARN: $AWS_ROLE_ARN_PRODUCTION
+    EXTERNAL_EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
+    INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
+    CLUSTER_REGION: eu-north-1
+
+################################################ ClusterType ###############################################
+
+.external:
+  variables:
+    CLUSTER_TYPE: external
+
+.internal:
+  variables:
+    CLUSTER_TYPE: internal
+
+# ################################################ Authentication ###############################################
+authenticate-sandbox:
+  extends: 
+  - .sandbox
+  - .authenticate
+
+authenticate-devtest:
+  extends:
+  - .dev-test
+  - .authenticate
+
+authenticate-production:
+  extends:
+  - .production
+  - .authenticate
+
+# deploy cluster tools
 .cluster-tools-deploy:
   stage: cluster tools
+  variables:
+    GIT_CLEAN_FLAGS: -ffdx -e .kubeconfig-${ENVIRONMENT}.yaml
   extends:
   - .helm-common
   before_script:
-    - . scripts/.gitlab-ci-helper.bash "$ROLE_ARN" "$EKS_CLUSTER"
+    - . cicd/scripts/.install-aws.bash
     - 'helm repo add bitnami https://charts.bitnami.com/bitnami'
     - 'helm repo add external-secrets https://charts.external-secrets.io'
     - "helm repo add elastic https://helm.elastic.co"
@@ -30,32 +83,38 @@ stages:
       bitnami/external-dns 
       --namespace externaldns 
       --create-namespace 
-      --values tooling/external-dns/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
+      --values tooling/external-dns/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
+      --kube-context $CLUSTER_TYPE'
     - 'helm upgrade
       --install  
       external-secrets external-secrets/external-secrets
       --namespace external-secrets 
-      --create-namespace'
+      --create-namespace
+      --kube-context $CLUSTER_TYPE'
     - 'helm upgrade 
       --install 
       filebeat elastic/filebeat 
       --namespace filebeat 
       --create-namespace 
-      --values tooling/filebeat/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
+      --values tooling/filebeat/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
+      --kube-context $CLUSTER_TYPE'
     - 'helm upgrade 
       --install 
       stakater stakater/reloader 
       --namespace stakater-reloader 
-      --create-namespace'
+      --create-namespace
+      --kube-context $CLUSTER_TYPE'
     - 'helm upgrade
       --install
       datadog datadog/datadog
       --namespace datadog
-      -f tooling/datadog/values.yaml'
+      -f tooling/datadog/values.yaml
+      --kube-context $CLUSTER_TYPE'
     - 'helm upgrade 
       --install cluster-tools charts/cluster-tools 
       --namespace confluent 
-      -f tooling/cluster-tools/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
+      -f tooling/cluster-tools/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
+      --kube-context $CLUSTER_TYPE'
   when: manual
 
 sbox-external cluster-tools:
@@ -67,6 +126,7 @@ sbox-external cluster-tools:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_SBOX_EXT
     EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
+  needs: ["authenticate-sandbox"]
   when: manual
 
 sbox-internal cluster-tools:
@@ -78,6 +138,7 @@ sbox-internal cluster-tools:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_SBOX_INT
     EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
+  needs: ["authenticate-sandbox"]
   when: manual
 
 devtest-external cluster-tools:
@@ -89,6 +150,7 @@ devtest-external cluster-tools:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
     EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
+  needs: ["authenticate-devtest"]
   when: manual
 
 devtest-internal cluster-tools:
@@ -100,6 +162,7 @@ devtest-internal cluster-tools:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_DEVTEST_INT
     EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
+  needs: ["authenticate-devtest"]
   when: manual
 
 prod-external cluster-tools:
@@ -111,6 +174,7 @@ prod-external cluster-tools:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_PROD_EXT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
+  needs: ["authenticate-production"]
   when: manual
 
 prod-internal cluster-tools:
@@ -122,6 +186,7 @@ prod-internal cluster-tools:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_PROD_INT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
+  needs: ["authenticate-production"]
   when: manual
 
 # deploy confluent operator
