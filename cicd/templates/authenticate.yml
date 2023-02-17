@@ -21,7 +21,7 @@
     - echo "KUBECONFIG=.kubeconfig-${ENVIRONMENT}.yaml" >> .env
 
   artifacts:
-    reports: 
+    reports:
       dotenv: .env
     paths:
       - .kubeconfig-${ENVIRONMENT}.yaml
