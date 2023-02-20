@@ -2,10 +2,7 @@
   stage: confluent service
   extends:
     - .helm-common
-  variables:
-    GIT_CLEAN_FLAGS: -ffdx -e .kubeconfig-${ENVIRONMENT}.yaml
-  before_script:
-    - . cicd/scripts/.install-aws.bash
+    - .authenticate
   script:
     - "helm upgrade
       --install confluent-services charts/confluent-services/

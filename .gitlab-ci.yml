@@ -47,98 +47,60 @@ stages:
 .external:
   variables:
     CLUSTER_TYPE: external
+    EKS_CLUSTER: $EXTERNAL_EKS_CLUSTER
 
 .internal:
   variables:
     CLUSTER_TYPE: internal
-
-# ################################################ Authentication ###############################################
-#authenticate-sandbox:
-#  extends: 
-#  - .sandbox
-#  - .authenticate
-
-#authenticate-devtest:
-#  extends:
-#  - .dev-test
-#  - .authenticate
-
-#authenticate-production:
-#  extends:
-#  - .production
-#  - .authenticate
+    EKS_CLUSTER: "$INTERNAL_EKS_CLUSTER"
 
 ################################################# Cluster Tools ###############################################
 sbox-external cluster-tools:
   stage: cluster tools
   extends:
   - .cluster-tools-deploy
-  variables:
-    ENVIRONMENT: sandbox
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_SBOX_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
-  #needs: ["authenticate-sandbox"]
+  - .sandbox
+  - .external
   when: manual
 
 sbox-internal cluster-tools:
   stage: cluster tools
   extends:
   - .cluster-tools-deploy
-  variables:
-    ENVIRONMENT: sandbox
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_SBOX_INT
-    EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
-  #needs: ["authenticate-sandbox"]
+  - .sandbox
+  - .internal
   when: manual
 
 devtest-external cluster-tools:
   stage: cluster tools
   extends:
   - .cluster-tools-deploy
-  variables:
-    ENVIRONMENT: devtest
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
-  #needs: ["authenticate-devtest"]
+  - .dev-test
+  - .external
   when: manual
 
 devtest-internal cluster-tools:
   stage: cluster tools
   extends:
   - .cluster-tools-deploy
-  variables:
-    ENVIRONMENT: devtest
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_DEVTEST_INT
-    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
-  #needs: ["authenticate-devtest"]
+  - .dev-test
+  - .internal
   when: manual
 
 prod-external cluster-tools:
   stage: cluster tools
   extends:
   - .cluster-tools-deploy
-  variables:
-    ENVIRONMENT: production
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_PROD_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
-  #needs: ["authenticate-production"]
+  - .production
+  - .external
   when: manual
 
 prod-internal cluster-tools:
   stage: cluster tools
   extends:
   - .cluster-tools-deploy
-  variables:
-    ENVIRONMENT: production
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_PROD_INT
-    EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
-  #needs: ["authenticate-production"]
+  - .production
+  - .internal
   when: manual
 
 ################################################# Confluent Operator ###############################################
@@ -146,72 +108,47 @@ sbox-external confluent-operator:
   stage: confluent operator
   extends:
   - .confluent-operator-deploy
-  variables:
-    ENVIRONMENT: sandbox
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_SBOX_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
-  #needs: ["authenticate-sandbox"]
+  - .sandbox
+  - .external
   when: manual
 
 sbox-internal confluent-operator:
   stage: confluent operator
   extends:
   - .confluent-operator-deploy
-  variables:
-    ENVIRONMENT: sandbox
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_SBOX_INT
-    EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
-  #needs: ["authenticate-sandbox"]
+  - .sandbox
+  - .internal
   when: manual
 
 devtest-external confluent-operator:
   stage: confluent operator
   extends:
   - .confluent-operator-deploy
-  variables:
-    ENVIRONMENT: devtest
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
-  #needs: ["authenticate-devtest"]
+  - .dev-test
+  - .external
   when: manual
 
 devtest-internal confluent-operator:
   stage: confluent operator
   extends:
   - .confluent-operator-deploy
-  variables:
-    ENVIRONMENT: devtest
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_DEVTEST_INT
-    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
-  #needs: ["authenticate-devtest"]
-  when: manual
+  - .dev-test
+  - .internal
 
 prod-external confluent-operator:
   stage: confluent operator
   extends:
   - .confluent-operator-deploy
-  variables:
-    ENVIRONMENT: production
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_PROD_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
-  #needs: ["authenticate-production"]
+  - .production
+  - .external
   when: manual
 
 prod-internal confluent-operator:
   stage: confluent operator
   extends:
   - .confluent-operator-deploy
-  variables:
-    ENVIRONMENT: production
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_PROD_INT
-    EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
-  #needs: ["authenticate-production"]
+  - .production
+  - .internal
   when: manual
 
 ################################################# Confluent Services ###############################################
@@ -219,70 +156,46 @@ sbox-external confluent-service:
   stage: confluent service
   extends:
   - .confluent-services-deploy
-  variables:
-    ENVIRONMENT: sandbox
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_SBOX_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
-  #needs: ["authenticate-sandbox"]
+  - .sandbox
+  - .external
   when: manual
 
 sbox-internal confluent-service:
   stage: confluent service
   extends:
   - .confluent-services-deploy
-  variables:
-    ENVIRONMENT: sandbox
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_SBOX_INT
-    EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
-  #needs: ["authenticate-sandbox"]
+  - .sandbox
+  - .internal
   when: manual
 
 devtest-external confluent-service:
   stage: confluent service
   extends:
   - .confluent-services-deploy
-  variables:
-    ENVIRONMENT: devtest
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
-  #needs: ["authenticate-devtest"]
+  - .dev-test
+  - .external
   when: manual
 
 devtest-internal confluent-service:
   stage: confluent service
   extends:
   - .confluent-services-deploy
-  variables:
-    ENVIRONMENT: devtest
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_DEVTEST_INT
-    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
-  #needs: ["authenticate-devtest"]
+  - .dev-test
+  - .internal
   when: manual
 
 prod-external confluent-service:
   stage: confluent service
   extends:
   - .confluent-services-deploy
-  variables:
-    ENVIRONMENT: production
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_PROD_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
-  #needs: ["authenticate-production"]
+  - .production
+  - .external
   when: manual
 
 prod-internal confluent-service:
   stage: confluent service
   extends:
   - .confluent-services-deploy
-  variables:
-    ENVIRONMENT: production
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_PROD_INT
-    EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
-  #needs: ["authenticate-production"]
+  - .production
+  - .internal
   when: manual

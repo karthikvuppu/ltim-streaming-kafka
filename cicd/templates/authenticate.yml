@@ -13,18 +13,8 @@
     - export AWS_ACCESS_KEY_ID="${STS[0]}"
     - export AWS_SECRET_ACCESS_KEY="${STS[1]}"
     - export AWS_SESSION_TOKEN="${STS[2]}"
-    - echo "AWS_ACCESS_KEY_ID="${STS[0]}"" >> .env
-    - echo "AWS_SECRET_ACCESS_KEY="${STS[1]}"" >> .env
-    - echo "AWS_SESSION_TOKEN="${STS[2]}"" >> .env
-    - aws eks --region "$CLUSTER_REGION" update-kubeconfig --name "$EXTERNAL_EKS_CLUSTER" --kubeconfig .kubeconfig-${ENVIRONMENT}.yaml --alias external
-    - aws eks --region "$CLUSTER_REGION" update-kubeconfig --name "$INTERNAL_EKS_CLUSTER" --kubeconfig .kubeconfig-${ENVIRONMENT}.yaml --alias internal
-    - echo "KUBECONFIG=.kubeconfig-${ENVIRONMENT}.yaml" >> .env
+    - aws eks --region "$CLUSTER_REGION" update-kubeconfig --name "$EKS_CLUSTER" --kubeconfig .kubeconfig-${ENVIRONMENT}.yaml --alias $EKS_CLUSTER
     - export "KUBECONFIG=.kubeconfig-${ENVIRONMENT}.yaml"
 
-  artifacts:
-    reports:
-      dotenv: .env
-    paths:
-      - .kubeconfig-${ENVIRONMENT}.yaml
   rules:
     - when: manual

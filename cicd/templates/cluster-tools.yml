@@ -1,8 +1,6 @@
 # deploy cluster tools
 .cluster-tools-deploy:
   stage: cluster tools
-  variables:
-    GIT_CLEAN_FLAGS: -ffdx -e .kubeconfig-${ENVIRONMENT}.yaml
   extends:
   - .helm-common
   - .authenticate
@@ -19,35 +17,35 @@
       --namespace externaldns 
       --create-namespace 
       --values tooling/external-dns/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
-      --kube-context $CLUSTER_TYPE'
+      --kube-context $EKS_CLUSTER'
     - 'helm upgrade
       --install  
       external-secrets external-secrets/external-secrets
       --namespace external-secrets 
       --create-namespace
-      --kube-context $CLUSTER_TYPE'
+      --kube-context $EKS_CLUSTER'
     - 'helm upgrade 
       --install 
       filebeat elastic/filebeat 
       --namespace filebeat 
       --create-namespace 
       --values tooling/filebeat/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
-      --kube-context $CLUSTER_TYPE'
+      --kube-context $EKS_CLUSTER'
     - 'helm upgrade 
       --install 
       stakater stakater/reloader 
       --namespace stakater-reloader 
       --create-namespace
-      --kube-context $CLUSTER_TYPE'
+      --kube-context $EKS_CLUSTER'
     - 'helm upgrade
       --install
       datadog datadog/datadog
       --namespace datadog
       -f tooling/datadog/values.yaml
-      --kube-context $CLUSTER_TYPE'
+      --kube-context $EKS_CLUSTER'
     - 'helm upgrade 
       --install cluster-tools charts/cluster-tools 
       --namespace confluent 
       -f tooling/cluster-tools/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
-      --kube-context $CLUSTER_TYPE'
+      --kube-context $EKS_CLUSTER'
   when: manual
