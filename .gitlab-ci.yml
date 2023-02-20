@@ -1,5 +1,7 @@
 include: 
   - 'cicd/templates/authenticate.yml'
+  - 'cicd/templates/cluster-tools.yml'
+  - 'cicd/templates/confluent-operator.yml'
 
 variables:
   CONF_OPERATOR_VERSION: "0.517.43"
@@ -65,61 +67,7 @@ authenticate-production:
   - .production
   - .authenticate
 
-# deploy cluster tools
-.cluster-tools-deploy:
-  stage: cluster tools
-  variables:
-    GIT_CLEAN_FLAGS: -ffdx -e .kubeconfig-${ENVIRONMENT}.yaml
-  extends:
-  - .helm-common
-  before_script:
-    - . cicd/scripts/.install-aws.bash
-    - 'helm repo add bitnami https://charts.bitnami.com/bitnami'
-    - 'helm repo add external-secrets https://charts.external-secrets.io'
-    - "helm repo add elastic https://helm.elastic.co"
-    - "helm repo add stakater https://stakater.github.io/stakater-charts"
-    - "helm repo add datadog https://helm.datadoghq.com"
-  script:
-    - 'helm upgrade 
-      --install 
-      external-dns 
-      bitnami/external-dns 
-      --namespace externaldns 
-      --create-namespace 
-      --values tooling/external-dns/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
-      --kube-context $CLUSTER_TYPE'
-    - 'helm upgrade
-      --install  
-      external-secrets external-secrets/external-secrets
-      --namespace external-secrets 
-      --create-namespace
-      --kube-context $CLUSTER_TYPE'
-    - 'helm upgrade 
-      --install 
-      filebeat elastic/filebeat 
-      --namespace filebeat 
-      --create-namespace 
-      --values tooling/filebeat/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
-      --kube-context $CLUSTER_TYPE'
-    - 'helm upgrade 
-      --install 
-      stakater stakater/reloader 
-      --namespace stakater-reloader 
-      --create-namespace
-      --kube-context $CLUSTER_TYPE'
-    - 'helm upgrade
-      --install
-      datadog datadog/datadog
-      --namespace datadog
-      -f tooling/datadog/values.yaml
-      --kube-context $CLUSTER_TYPE'
-    - 'helm upgrade 
-      --install cluster-tools charts/cluster-tools 
-      --namespace confluent 
-      -f tooling/cluster-tools/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
-      --kube-context $CLUSTER_TYPE'
-  when: manual
-
+################################################# Cluster Tools ###############################################
 sbox-external cluster-tools:
   stage: cluster tools
   extends:
@@ -192,26 +140,7 @@ prod-internal cluster-tools:
   needs: ["authenticate-production"]
   when: manual
 
-# deploy confluent operator
-
-.confluent-operator-deploy:
-  stage: confluent operator
-  extends:
-  - .helm-common
-  before_script:
-    - . scripts/.gitlab-ci-helper.bash "$ROLE_ARN" "$EKS_CLUSTER"
-    - 'helm repo add confluent https://packages.confluent.io/helm'
-  script:
-    - 'helm upgrade 
-      --install
-      confluent-operator 
-      confluent/confluent-for-kubernetes 
-      --namespace confluent 
-      --create-namespace 
-      --values operator/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml 
-      --version $CONF_OPERATOR_VERSION'
-  when: manual
-
+################################################# Confluent Operator ###############################################
 sbox-external confluent-operator:
   stage: confluent operator
   extends:
@@ -278,8 +207,7 @@ prod-internal confluent-operator:
     EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
   when: manual
 
-# deploy confluent services
-
+################################################# Confluent Services ###############################################
 .confluent-services-deploy:
   stage: confluent service
   extends:
