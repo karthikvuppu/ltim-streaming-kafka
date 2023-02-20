@@ -1,7 +1,7 @@
 .authenticate:
   stage: authenticate
-  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
-  script:
+  before_script:
+    - . cicd/scripts/.install-aws.bash
     - >
       STS=($(aws sts assume-role-with-web-identity
       --role-arn ${AWS_ROLE_ARN}
