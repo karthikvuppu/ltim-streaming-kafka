@@ -13,5 +13,5 @@
       --create-namespace
       --values operator/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
       --version $CONF_OPERATOR_VERSION
-      --kube-context $CLUSTER_TYPE"
+      --kube-context $EKS_CLUSTER"
   when: manual
