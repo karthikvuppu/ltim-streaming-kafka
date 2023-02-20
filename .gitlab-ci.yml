@@ -2,6 +2,7 @@ include:
   - 'cicd/templates/authenticate.yml'
   - 'cicd/templates/cluster-tools.yml'
   - 'cicd/templates/confluent-operator.yml'
+  - 'cicd/templates/confluent-services.yml'
 
 variables:
   CONF_OPERATOR_VERSION: "0.517.43"
@@ -214,19 +215,6 @@ prod-internal confluent-operator:
   when: manual
 
 ################################################# Confluent Services ###############################################
-.confluent-services-deploy:
-  stage: confluent service
-  extends:
-  - .helm-common
-  before_script:
-    - . scripts/.gitlab-ci-helper.bash "$ROLE_ARN" "$EKS_CLUSTER"
-  script:
-    - 'helm upgrade 
-      --install confluent-services charts/confluent-services/ 
-      --namespace confluent 
-      -f confluent-services/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
-  when: manual
-
 sbox-external confluent-service:
   stage: confluent service
   extends:

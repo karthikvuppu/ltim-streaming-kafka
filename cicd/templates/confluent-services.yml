@@ -1,0 +1,14 @@
+.confluent-services-deploy:
+  stage: confluent service
+  extends:
+    - .helm-common
+  variables:
+    GIT_CLEAN_FLAGS: -ffdx -e .kubeconfig-${ENVIRONMENT}.yaml
+  before_script:
+    - . cicd/scripts/.install-aws.bash
+  script:
+    - "helm upgrade
+      --install confluent-services charts/confluent-services/
+      --namespace confluent
+      -f confluent-services/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml"
+  when: manual
