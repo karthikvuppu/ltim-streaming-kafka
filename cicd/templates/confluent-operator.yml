@@ -1,0 +1,17 @@
+.confluent-operator-deploy:
+  stage: confluent operator
+  extends:
+    - .helm-common
+    - .authenticate
+  script:
+    - "helm repo add confluent https://packages.confluent.io/helm"
+    - "helm upgrade
+      --install
+      confluent-operator
+      confluent/confluent-for-kubernetes
+      --namespace confluent
+      --create-namespace
+      --values operator/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
+      --version $CONF_OPERATOR_VERSION
+      --kube-context $EKS_CLUSTER"
+  when: manual

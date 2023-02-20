@@ -1,8 +1,15 @@
+include: 
+  - 'cicd/templates/authenticate.yml'
+  - 'cicd/templates/cluster-tools.yml'
+  - 'cicd/templates/confluent-operator.yml'
+  - 'cicd/templates/confluent-services.yml'
+
 variables:
   CONF_OPERATOR_VERSION: "0.517.43"
   
 
 stages:
+  - authenticate
   - cluster tools
   - confluent operator
   - confluent service
@@ -10,283 +17,185 @@ stages:
 .helm-common:
   image: dtzar/helm-kubectl:3.10
 
-# deploy cluster tools
+################################################ Environments ###############################################
+.sandbox:
+  variables:
+    ENVIRONMENT: sandbox
+    AWS_ROLE_ARN: $AWS_ROLE_ARN_SANDBOX
+    EXTERNAL_EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
+    INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
+    CLUSTER_REGION: eu-north-1
 
-.cluster-tools-deploy:
-  stage: cluster tools
-  extends:
-  - .helm-common
-  before_script:
-    - . scripts/.gitlab-ci-helper.bash "$ROLE_ARN" "$EKS_CLUSTER"
-    - 'helm repo add bitnami https://charts.bitnami.com/bitnami'
-    - 'helm repo add external-secrets https://charts.external-secrets.io'
-    - "helm repo add elastic https://helm.elastic.co"
-    - "helm repo add stakater https://stakater.github.io/stakater-charts"
-    - "helm repo add datadog https://helm.datadoghq.com"
-  script:
-    - 'helm upgrade 
-      --install 
-      external-dns 
-      bitnami/external-dns 
-      --namespace externaldns 
-      --create-namespace 
-      --values tooling/external-dns/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
-    - 'helm upgrade
-      --install  
-      external-secrets external-secrets/external-secrets
-      --namespace external-secrets 
-      --create-namespace'
-    - 'helm upgrade 
-      --install 
-      filebeat elastic/filebeat 
-      --namespace filebeat 
-      --create-namespace 
-      --values tooling/filebeat/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
-    - 'helm upgrade 
-      --install 
-      stakater stakater/reloader 
-      --namespace stakater-reloader 
-      --create-namespace'
-    - 'helm upgrade
-      --install
-      datadog datadog/datadog
-      --namespace datadog
-      -f tooling/datadog/values.yaml'
-    - 'helm upgrade 
-      --install cluster-tools charts/cluster-tools 
-      --namespace confluent 
-      -f tooling/cluster-tools/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
-  when: manual
+.dev-test:
+  variables:
+    ENVIRONMENT: devtest
+    AWS_ROLE_ARN: $AWS_ROLE_ARN_DEVTEST
+    EXTERNAL_EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
+    INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
+    CLUSTER_REGION: eu-north-1
 
+.production:
+  variables: 
+    ENVIRONMENT: production
+    AWS_ROLE_ARN: $AWS_ROLE_ARN_PRODUCTION
+    EXTERNAL_EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
+    INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
+    CLUSTER_REGION: eu-north-1
+
+################################################ ClusterType ###############################################
+
+.external:
+  variables:
+    CLUSTER_TYPE: external
+    EKS_CLUSTER: $EXTERNAL_EKS_CLUSTER
+
+.internal:
+  variables:
+    CLUSTER_TYPE: internal
+    EKS_CLUSTER: "$INTERNAL_EKS_CLUSTER"
+
+################################################# Cluster Tools ###############################################
 sbox-external cluster-tools:
   stage: cluster tools
   extends:
   - .cluster-tools-deploy
-  variables:
-    ENVIRONMENT: sandbox
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_SBOX_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
+  - .sandbox
+  - .external
   when: manual
 
 sbox-internal cluster-tools:
   stage: cluster tools
   extends:
   - .cluster-tools-deploy
-  variables:
-    ENVIRONMENT: sandbox
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_SBOX_INT
-    EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
+  - .sandbox
+  - .internal
   when: manual
 
 devtest-external cluster-tools:
   stage: cluster tools
   extends:
   - .cluster-tools-deploy
-  variables:
-    ENVIRONMENT: devtest
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
+  - .dev-test
+  - .external
   when: manual
 
 devtest-internal cluster-tools:
   stage: cluster tools
   extends:
   - .cluster-tools-deploy
-  variables:
-    ENVIRONMENT: devtest
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_DEVTEST_INT
-    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
+  - .dev-test
+  - .internal
   when: manual
 
 prod-external cluster-tools:
   stage: cluster tools
   extends:
   - .cluster-tools-deploy
-  variables:
-    ENVIRONMENT: production
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_PROD_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
+  - .production
+  - .external
   when: manual
 
 prod-internal cluster-tools:
   stage: cluster tools
   extends:
   - .cluster-tools-deploy
-  variables:
-    ENVIRONMENT: production
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_PROD_INT
-    EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
+  - .production
+  - .internal
   when: manual
 
-# deploy confluent operator
-
-.confluent-operator-deploy:
-  stage: confluent operator
-  extends:
-  - .helm-common
-  before_script:
-    - . scripts/.gitlab-ci-helper.bash "$ROLE_ARN" "$EKS_CLUSTER"
-    - 'helm repo add confluent https://packages.confluent.io/helm'
-  script:
-    - 'helm upgrade 
-      --install
-      confluent-operator 
-      confluent/confluent-for-kubernetes 
-      --namespace confluent 
-      --create-namespace 
-      --values operator/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml 
-      --version $CONF_OPERATOR_VERSION'
-  when: manual
-
+################################################# Confluent Operator ###############################################
 sbox-external confluent-operator:
   stage: confluent operator
   extends:
   - .confluent-operator-deploy
-  variables:
-    ENVIRONMENT: sandbox
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_SBOX_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
+  - .sandbox
+  - .external
   when: manual
 
 sbox-internal confluent-operator:
   stage: confluent operator
   extends:
   - .confluent-operator-deploy
-  variables:
-    ENVIRONMENT: sandbox
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_SBOX_INT
-    EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
+  - .sandbox
+  - .internal
   when: manual
 
 devtest-external confluent-operator:
   stage: confluent operator
   extends:
   - .confluent-operator-deploy
-  variables:
-    ENVIRONMENT: devtest
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
+  - .dev-test
+  - .external
   when: manual
 
 devtest-internal confluent-operator:
   stage: confluent operator
   extends:
   - .confluent-operator-deploy
-  variables:
-    ENVIRONMENT: devtest
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_DEVTEST_INT
-    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
-  when: manual
+  - .dev-test
+  - .internal
 
 prod-external confluent-operator:
   stage: confluent operator
   extends:
   - .confluent-operator-deploy
-  variables:
-    ENVIRONMENT: production
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_PROD_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
+  - .production
+  - .external
   when: manual
 
 prod-internal confluent-operator:
   stage: confluent operator
   extends:
   - .confluent-operator-deploy
-  variables:
-    ENVIRONMENT: production
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_PROD_INT
-    EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
+  - .production
+  - .internal
   when: manual
 
-# deploy confluent services
-
-.confluent-services-deploy:
-  stage: confluent service
-  extends:
-  - .helm-common
-  before_script:
-    - . scripts/.gitlab-ci-helper.bash "$ROLE_ARN" "$EKS_CLUSTER"
-  script:
-    - 'helm upgrade 
-      --install confluent-services charts/confluent-services/ 
-      --namespace confluent 
-      -f confluent-services/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
-  when: manual
-
+################################################# Confluent Services ###############################################
 sbox-external confluent-service:
   stage: confluent service
   extends:
   - .confluent-services-deploy
-  variables:
-    ENVIRONMENT: sandbox
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_SBOX_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
+  - .sandbox
+  - .external
   when: manual
 
 sbox-internal confluent-service:
   stage: confluent service
   extends:
   - .confluent-services-deploy
-  variables:
-    ENVIRONMENT: sandbox
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_SBOX_INT
-    EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
+  - .sandbox
+  - .internal
   when: manual
 
 devtest-external confluent-service:
   stage: confluent service
   extends:
   - .confluent-services-deploy
-  variables:
-    ENVIRONMENT: devtest
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
+  - .dev-test
+  - .external
   when: manual
 
 devtest-internal confluent-service:
   stage: confluent service
   extends:
   - .confluent-services-deploy
-  variables:
-    ENVIRONMENT: devtest
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_DEVTEST_INT
-    EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
+  - .dev-test
+  - .internal
   when: manual
 
 prod-external confluent-service:
   stage: confluent service
   extends:
   - .confluent-services-deploy
-  variables:
-    ENVIRONMENT: production
-    CLUSTER_TYPE: external
-    ROLE_ARN: $ROLE_ARN_PROD_EXT
-    EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
+  - .production
+  - .external
   when: manual
 
 prod-internal confluent-service:
   stage: confluent service
   extends:
   - .confluent-services-deploy
-  variables:
-    ENVIRONMENT: production
-    CLUSTER_TYPE: internal
-    ROLE_ARN: $ROLE_ARN_PROD_INT
-    EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
+  - .production
+  - .internal
   when: manual

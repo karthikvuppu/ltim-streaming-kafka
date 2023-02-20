@@ -1,0 +1,12 @@
+.confluent-services-deploy:
+  stage: confluent service
+  extends:
+    - .helm-common
+    - .authenticate
+  script:
+    - "helm upgrade
+      --install confluent-services charts/confluent-services/
+      --namespace confluent
+      -f confluent-services/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
+      --kube-context $EKS_CLUSTER"
+  when: manual
