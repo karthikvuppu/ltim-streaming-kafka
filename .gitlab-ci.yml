@@ -53,20 +53,20 @@ stages:
     CLUSTER_TYPE: internal
 
 # ################################################ Authentication ###############################################
-authenticate-sandbox:
-  extends: 
-  - .sandbox
-  - .authenticate
+#authenticate-sandbox:
+#  extends: 
+#  - .sandbox
+#  - .authenticate
 
-authenticate-devtest:
-  extends:
-  - .dev-test
-  - .authenticate
+#authenticate-devtest:
+#  extends:
+#  - .dev-test
+#  - .authenticate
 
-authenticate-production:
-  extends:
-  - .production
-  - .authenticate
+#authenticate-production:
+#  extends:
+#  - .production
+#  - .authenticate
 
 ################################################# Cluster Tools ###############################################
 sbox-external cluster-tools:
@@ -78,7 +78,7 @@ sbox-external cluster-tools:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_SBOX_EXT
     EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
-  needs: ["authenticate-sandbox"]
+  #needs: ["authenticate-sandbox"]
   when: manual
 
 sbox-internal cluster-tools:
@@ -90,7 +90,7 @@ sbox-internal cluster-tools:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_SBOX_INT
     EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
-  needs: ["authenticate-sandbox"]
+  #needs: ["authenticate-sandbox"]
   when: manual
 
 devtest-external cluster-tools:
@@ -102,7 +102,7 @@ devtest-external cluster-tools:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
     EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
-  needs: ["authenticate-devtest"]
+  #needs: ["authenticate-devtest"]
   when: manual
 
 devtest-internal cluster-tools:
@@ -114,7 +114,7 @@ devtest-internal cluster-tools:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_DEVTEST_INT
     EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
-  needs: ["authenticate-devtest"]
+  #needs: ["authenticate-devtest"]
   when: manual
 
 prod-external cluster-tools:
@@ -126,7 +126,7 @@ prod-external cluster-tools:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_PROD_EXT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
-  needs: ["authenticate-production"]
+  #needs: ["authenticate-production"]
   when: manual
 
 prod-internal cluster-tools:
@@ -138,7 +138,7 @@ prod-internal cluster-tools:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_PROD_INT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
-  needs: ["authenticate-production"]
+  #needs: ["authenticate-production"]
   when: manual
 
 ################################################# Confluent Operator ###############################################
@@ -151,7 +151,7 @@ sbox-external confluent-operator:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_SBOX_EXT
     EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
-  needs: ["authenticate-sandbox"]
+  #needs: ["authenticate-sandbox"]
   when: manual
 
 sbox-internal confluent-operator:
@@ -163,7 +163,7 @@ sbox-internal confluent-operator:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_SBOX_INT
     EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
-  needs: ["authenticate-sandbox"]
+  #needs: ["authenticate-sandbox"]
   when: manual
 
 devtest-external confluent-operator:
@@ -175,7 +175,7 @@ devtest-external confluent-operator:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
     EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
-  needs: ["authenticate-devtest"]
+  #needs: ["authenticate-devtest"]
   when: manual
 
 devtest-internal confluent-operator:
@@ -187,7 +187,7 @@ devtest-internal confluent-operator:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_DEVTEST_INT
     EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
-  needs: ["authenticate-devtest"]
+  #needs: ["authenticate-devtest"]
   when: manual
 
 prod-external confluent-operator:
@@ -199,7 +199,7 @@ prod-external confluent-operator:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_PROD_EXT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
-  needs: ["authenticate-production"]
+  #needs: ["authenticate-production"]
   when: manual
 
 prod-internal confluent-operator:
@@ -211,7 +211,7 @@ prod-internal confluent-operator:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_PROD_INT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
-  needs: ["authenticate-production"]
+  #needs: ["authenticate-production"]
   when: manual
 
 ################################################# Confluent Services ###############################################
@@ -224,7 +224,7 @@ sbox-external confluent-service:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_SBOX_EXT
     EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
-  needs: ["authenticate-sandbox"]
+  #needs: ["authenticate-sandbox"]
   when: manual
 
 sbox-internal confluent-service:
@@ -236,7 +236,7 @@ sbox-internal confluent-service:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_SBOX_INT
     EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
-  needs: ["authenticate-sandbox"]
+  #needs: ["authenticate-sandbox"]
   when: manual
 
 devtest-external confluent-service:
@@ -248,7 +248,7 @@ devtest-external confluent-service:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_DEVTEST_EXT
     EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
-  needs: ["authenticate-devtest"]
+  #needs: ["authenticate-devtest"]
   when: manual
 
 devtest-internal confluent-service:
@@ -260,7 +260,7 @@ devtest-internal confluent-service:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_DEVTEST_INT
     EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
-  needs: ["authenticate-devtest"]
+  #needs: ["authenticate-devtest"]
   when: manual
 
 prod-external confluent-service:
@@ -272,7 +272,7 @@ prod-external confluent-service:
     CLUSTER_TYPE: external
     ROLE_ARN: $ROLE_ARN_PROD_EXT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
-  needs: ["authenticate-production"]
+  #needs: ["authenticate-production"]
   when: manual
 
 prod-internal confluent-service:
@@ -284,5 +284,5 @@ prod-internal confluent-service:
     CLUSTER_TYPE: internal
     ROLE_ARN: $ROLE_ARN_PROD_INT
     EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
-  needs: ["authenticate-production"]
+  #needs: ["authenticate-production"]
   when: manual

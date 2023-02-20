@@ -19,6 +19,7 @@
     - aws eks --region "$CLUSTER_REGION" update-kubeconfig --name "$EXTERNAL_EKS_CLUSTER" --kubeconfig .kubeconfig-${ENVIRONMENT}.yaml --alias external
     - aws eks --region "$CLUSTER_REGION" update-kubeconfig --name "$INTERNAL_EKS_CLUSTER" --kubeconfig .kubeconfig-${ENVIRONMENT}.yaml --alias internal
     - echo "KUBECONFIG=.kubeconfig-${ENVIRONMENT}.yaml" >> .env
+    - export "KUBECONFIG=.kubeconfig-${ENVIRONMENT}.yaml"
 
   artifacts:
     reports:
