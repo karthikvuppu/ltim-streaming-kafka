@@ -87,6 +87,7 @@ connect:
           'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
       mountedSecrets:
         - connect-clients
+        - cert-test 
     connect-onprem:
       replicas: 3
       image:
