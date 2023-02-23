@@ -72,8 +72,8 @@ connect:
         log4j:
           'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
           'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-          'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
-          'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+          'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
+          'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
 
 ksql:
   enabled: false
@@ -95,7 +95,7 @@ schemaRegistry:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
     server:
       'confluent.schema.registry.anonymous.principal': 'true'
       'authentication.skip.paths': '/*'
@@ -118,7 +118,7 @@ restProxy:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
 
 zookeeper:
   dataVolumeCapacity: 40Gi
@@ -132,7 +132,7 @@ zookeeper:
       'log4j.logger.io.confluent.security.auth.provider.ldap': 'TRACE'
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
 
 kafka:
   replicas: 3
@@ -164,7 +164,7 @@ kafka:
       'log4j.logger.io.confluent.security.auth.provider.ldap': 'TRACE'
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
 
   dependencies:
     kafkaRest:
@@ -217,7 +217,7 @@ controlCenter:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
     server:
       'confluent.controlcenter.mds.client.idle.timeout': '30000'
       'confluent.controlcenter.mds.client.max.requests.queued.per.destination': '2048'

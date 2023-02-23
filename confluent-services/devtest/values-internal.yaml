@@ -42,7 +42,7 @@ controlCenter:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
     server:
       'confluent.controlcenter.internal.topics.partitions': '4'
       'confluent.controlcenter.mds.client.idle.timeout': '30000'
@@ -86,8 +86,8 @@ connect:
         log4j:
           'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
           'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-          'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
-          'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+          'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
+          'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
 
 ksql:
   enabled: false
@@ -109,7 +109,7 @@ schemaRegistry:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
     server:
       'confluent.schema.registry.anonymous.principal': 'true'
       'authentication.skip.paths': '/*'
@@ -132,7 +132,7 @@ restProxy:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
 
 zookeeper:
   podAntiAffinity:
@@ -145,7 +145,7 @@ zookeeper:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
 
 
 kafka:
@@ -157,7 +157,7 @@ kafka:
       'log4j.logger.io.confluent.security.auth.provider.ldap': 'TRACE'
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
     server:
       'confluent.cluster.link.enable': 'true'
       'confluent.balancer.enable': 'true'
