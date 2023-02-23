@@ -11,51 +11,98 @@ daemonset:
       memory: "400Mi"
   filebeatConfig:
     filebeat.yml: |-
-      filebeat.autodiscover:
-        providers:
-        - type: kubernetes
-          hints.enabled: true
-          templates:
-            - condition:
-                equals:
-                  kubernetes.namespace: confluent
-              config:
-                - type: container
-                  paths:
-                    - /var/log/containers/*-${data.kubernetes.container.id}.log
-                  multiline.pattern: '^(\[|{)'
-                  multiline.negate: true
-                  multiline.match: after
-                  processors:
-                    - decode_json_fields:
-                        fields: ["message"]
-                        process_array: true
-                        target: "log"
-                        keys_under_root: true
-                        overwrite_keys: false
-                        add_error_key: false
-      filebeat.inputs:
-      - type: kafka
-        hosts:
-        - kafka.confluent.svc.cluster.local:9071
-        topics: ["confluent-audit-log-events"]
-        group_id: "filebeat"
-        username: '${KAFKA_USERNAME}'
-        password: '${KAFKA_PASSWORD}'
-        ssl.enabled: true
-        sasl.mechanism: plain
-        ssl.certificate_authorities: ["/etc/ssl/certs/kafka-ca.pem"]
-        parsers:
-          - ndjson:
-              target: "log"
-              addErrorKey: true
-              message_key: message
-              expand_keys: true
-      fields:
-        environment: sandbox
-        clusterType: external
-      
-      output.logstash:
+      apiVersion: v1
+data:
+  filebeat.yml: |
+    filebeat.autodiscover:
+      providers:
+      - type: kubernetes
+        hints.enabled: true
+        templates:
+          - condition:
+              equals:
+                kubernetes.namespace: confluent
+            config:
+              - type: container
+                paths:
+                  - /var/log/containers/*-${data.kubernetes.container.id}.log
+                multiline.pattern: '^(\[|\{)'
+                multiline.negate: true
+                multiline.match: after
+    filebeat.inputs:
+    - type: kafka
+      hosts:
+      - kafka.confluent.svc.cluster.local:9071
+      topics: ['confluent-audit-log-events']
+      group_id: filebeat
+      username: '${KAFKA_USERNAME}'
+      password: '${KAFKA_PASSWORD}'
+      ssl.enabled: true
+      sasl.mechanism: plain
+      ssl.certificate_authorities: ['/etc/ssl/certs/kafka-ca.pem']
+      parsers:
+      - ndjson:
+          target: log
+          addErrorKey: true
+          message_key: message
+          expand_keys: true
+    fields:
+      environment: sandbox
+      clusterType: external
+    processors:
+      - dissect:
+          when:
+            and:
+              - regexp.message: '^{"timestamp.*context'
+              - has_fields: ['kubernetes.container.name']
+          tokenizer: '{"timestamp":"%{@timestamp}","level":"%{log.level}","context":"%{kafka.connect.context}","thread":"%{log.thread}","class":"%{log.class}","message":"%{log.message}"}'
+          field: message
+          target_prefix: ''
+          overwrite_keys: true
+          ignore_failure: true
+      - dissect:
+          when:
+            and:
+              - regexp.message: '^{"timestamp'
+              - has_fields: ['kubernetes.container.name']
+              - not:
+                  has_fields: ['log.message']
+          tokenizer: '{"timestamp":"%{@timestamp}","level":"%{log.level}","thread":"%{log.thread}","class":"%{log.class}","message":"%{log.message}"}'
+          field: message
+          target_prefix: ''
+          overwrite_keys: true
+          ignore_failure: true  
+      - copy_fields:
+          when:
+            and:
+              - has_fields: ['message', 'kubernetes.container.name']
+              - not:
+                  has_fields: ['log.message']
+          fields:
+            - from: message
+              to: log.message
+      - dissect:
+          when.regexp.log.message: '^\d+\.\d+\.\d+\.\d+ '
+          tokenizer: '%{host} %{ident} %{principal} [%{timestamp}] "%{verb} %{path} %{protocol}" %{response} %{bytes} "%{forwarded_ips}" "%{user_agent}"'
+          field: log.message
+          target_prefix: 'access'
+      - drop_event:
+          when.equals.kubernetes.container.name: filebeat
+      - add_fields:
+          when.has_fields: ['log.message']
+          target: ''
+          fields:
+            log.parsed: true
+      - drop_fields:
+          when.has_fields: ['log.message','message']
+          fields: ['message']
+      - copy_fields:
+          when.has_fields: ['log.message']
+          fields:
+            - from: log.message
+              to: message
+    output.logstash:
+        enabled: true
         hosts: ['${LOGSTASH_HOST}']
 
 envFrom:
