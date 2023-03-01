@@ -44,8 +44,8 @@ daemonset:
             message_key: message
             expand_keys: true
       fields:
-        environment: sandbox
-        clusterType: external
+        environment: devtest
+        clusterType: internal
       processors:
         - if:
             and:
