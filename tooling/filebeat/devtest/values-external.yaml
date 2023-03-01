@@ -44,60 +44,49 @@ daemonset:
             message_key: message
             expand_keys: true
       fields:
-        environment: devtest
+        environment: sandbox
         clusterType: external
       processors:
+        - if:
+            and:
+            - regexp.message: '^{"timestamp.*'
+            - has_fields: ['kubernetes.container.name']
+          then:
+            - dissect:
+                when:
+                  and:
+                    - regexp.message: '^{"timestamp.*context'
+                    - has_fields: ['kubernetes.container.name']
+                tokenizer: '{"timestamp":"%{@timestamp}","level":"%{log.level}","context":"%{kafka.connect.context}","thread":"%{log.thread}","class":"%{log.class}","message":"%{message}"}'
+                field: message
+                target_prefix: ''
+                overwrite_keys: true
+                ignore_failure: true
+            - dissect:
+                when:
+                  and:
+                    - regexp.message: '^{"timestamp'
+                    - has_fields: ['kubernetes.container.name']
+                    - not:
+                        has_fields: ['log.message']
+                tokenizer: '{"timestamp":"%{@timestamp}","level":"%{log.level}","thread":"%{log.thread}","class":"%{log.class}","message":"%{message}"}'
+                field: message
+                target_prefix: ''
+                overwrite_keys: true
+                ignore_failure: true  
+            - add_fields:
+                when.has_fields: ['log.class']
+                target: ''
+                fields:
+                  log.parsed: true
         - dissect:
-            when:
-              and:
-                - regexp.message: '^{"timestamp.*context'
-                - has_fields: ['kubernetes.container.name']
-            tokenizer: '{"timestamp":"%{@timestamp}","level":"%{log.level}","context":"%{kafka.connect.context}","thread":"%{log.thread}","class":"%{log.class}","message":"%{log.message}"}'
+            when.regexp.message: '^\d+\.\d+\.\d+\.\d+ '
+            tokenizer: '%{host} %{ident} %{principal} [%{timestamp}] "%{verb} %{path} %{protocol}" %{status} %{request_size} "%{referer}" "%{user_agent}"%{tail}'
             field: message
-            target_prefix: ''
-            overwrite_keys: true
-            ignore_failure: true
-        - dissect:
-            when:
-              and:
-                - regexp.message: '^{"timestamp'
-                - has_fields: ['kubernetes.container.name']
-                - not:
-                    has_fields: ['log.message']
-            tokenizer: '{"timestamp":"%{@timestamp}","level":"%{log.level}","thread":"%{log.thread}","class":"%{log.class}","message":"%{log.message}"}'
-            field: message
-            target_prefix: ''
-            overwrite_keys: true
-            ignore_failure: true  
-        - copy_fields:
-            when:
-              and:
-                - has_fields: ['message', 'kubernetes.container.name']
-                - not:
-                    has_fields: ['log.message']
-            fields:
-              - from: message
-                to: log.message
-        - dissect:
-            when.regexp.log.message: '^\d+\.\d+\.\d+\.\d+ '
-            tokenizer: '%{host} %{ident} %{principal} [%{timestamp}] "%{verb} %{path} %{protocol}" %{response} %{bytes} "%{forwarded_ips}" "%{user_agent}"'
-            field: log.message
             target_prefix: 'access'
+            ignore_failure: true
         - drop_event:
             when.equals.kubernetes.container.name: filebeat
-        - add_fields:
-            when.has_fields: ['log.message']
-            target: ''
-            fields:
-              log.parsed: true
-        - drop_fields:
-            when.has_fields: ['log.message','message']
-            fields: ['message']
-        - copy_fields:
-            when.has_fields: ['log.message']
-            fields:
-              - from: log.message
-                to: message
       output.logstash:
           enabled: true
           hosts: ['${LOGSTASH_HOST}']
