@@ -45,7 +45,7 @@ daemonset:
             expand_keys: true
       fields:
         environment: sandbox
-        clusterType: external
+        clusterType: internal
       processors:
         - if:
             and:
