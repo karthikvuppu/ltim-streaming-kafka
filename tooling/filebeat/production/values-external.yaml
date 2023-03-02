@@ -23,28 +23,73 @@ daemonset:
                 - type: container
                   paths:
                     - /var/log/containers/*-${data.kubernetes.container.id}.log
-                  multiline.pattern: '^\['
+                  multiline.pattern: '^(\[|\{)'
                   multiline.negate: true
                   multiline.match: after
       filebeat.inputs:
       - type: kafka
         hosts:
         - kafka.confluent.svc.cluster.local:9071
-        topics: ["confluent-audit-log-events"]
-        group_id: "filebeat"
+        topics: ['confluent-audit-log-events']
+        group_id: filebeat
         username: '${KAFKA_USERNAME}'
         password: '${KAFKA_PASSWORD}'
         ssl.enabled: true
         sasl.mechanism: plain
-        ssl.certificate_authorities: ["/etc/ssl/certs/kafka-ca.pem"]
+        ssl.certificate_authorities: ['/etc/ssl/certs/kafka-ca.pem']
+        parsers:
+        - ndjson:
+            target: log
+            addErrorKey: true
+            message_key: message
+            expand_keys: true
       fields:
         environment: production
         clusterType: external
       processors:
-        - add_cloud_metadata:
-        - add_host_metadata:
+        - if:
+            and:
+            - regexp.message: '^{"timestamp.*'
+            - has_fields: ['kubernetes.container.name']
+          then:
+            - dissect:
+                when:
+                  and:
+                    - regexp.message: '^{"timestamp.*context'
+                    - has_fields: ['kubernetes.container.name']
+                tokenizer: '{"timestamp":"%{@timestamp}","level":"%{log.level}","context":"%{kafka.connect.context}","thread":"%{log.thread}","class":"%{log.class}","message":"%{message}"}'
+                field: message
+                target_prefix: ''
+                overwrite_keys: true
+                ignore_failure: true
+            - dissect:
+                when:
+                  and:
+                    - regexp.message: '^{"timestamp'
+                    - has_fields: ['kubernetes.container.name']
+                    - not:
+                        has_fields: ['log.message']
+                tokenizer: '{"timestamp":"%{@timestamp}","level":"%{log.level}","thread":"%{log.thread}","class":"%{log.class}","message":"%{message}"}'
+                field: message
+                target_prefix: ''
+                overwrite_keys: true
+                ignore_failure: true  
+            - add_fields:
+                when.has_fields: ['log.class']
+                target: ''
+                fields:
+                  log.parsed: true
+        - dissect:
+            when.regexp.message: '^\d+\.\d+\.\d+\.\d+ '
+            tokenizer: '%{host} %{ident} %{principal} [%{timestamp}] "%{verb} %{path} %{protocol}" %{status} %{request_size} "%{referer}" "%{user_agent}"%{tail}'
+            field: message
+            target_prefix: 'access'
+            ignore_failure: true
+        - drop_event:
+            when.equals.kubernetes.container.name: filebeat
       output.logstash:
-        hosts: ['${LOGSTASH_HOST}']
+          enabled: true
+          hosts: ['${LOGSTASH_HOST}']
 
 envFrom:
   - secretRef:
