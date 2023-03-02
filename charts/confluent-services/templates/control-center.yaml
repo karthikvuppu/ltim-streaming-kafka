@@ -66,15 +66,19 @@ spec:
       authentication:
         type: mtls
     {{- end }}
-    {{ if .Values.ksql.enabled }}
+    {{ if and (hasKey .Values "ksql") .Values.ksql }}
     ksqldb:
-    - name: ksqldb
-      advertisedUrl: https://{{ .Values.ksql.dns.prefix }}.{{ .Values.domain }}
-      url: https://ksqldb.confluent.svc.cluster.local:8088
+    {{- range $ksql := .Values.ksql }}
+    {{- if $ksql.enabled }}
+    - name: {{ $ksql.name }}
+      advertisedUrl: https://{{ $ksql.dns.prefix }}.{{ $.Values.domain }}
+      url: https://{{ $ksql.name }}.confluent.svc.cluster.local:8088
       tls:
         enabled: true
       authentication:
         type: mtls
+    {{- end }}
+    {{- end }}
     {{- end }}
   externalAccess:
     type: loadBalancer

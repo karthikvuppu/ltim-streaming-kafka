@@ -89,8 +89,6 @@ connect:
           'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
           'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
 
-ksql:
-  enabled: false
 
 schemaRegistry:
   internalService:

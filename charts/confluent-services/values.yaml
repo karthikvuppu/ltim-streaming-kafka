@@ -1,0 +1,15 @@
+defaults:
+  ksql:
+    configOverrides:
+      log4j:
+        'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
+        'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
+        'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
+      server:
+        'ksql.streams.num.standby.replicas': 1
+        'ksql.query.pull.enable.standby.reads': true
+        'ksql.heartbeat.enable': true
+        'ksql.lag.reporting.enable': true
+        'access.control.allow.origin': '*'
+        'access.control.allow.methods': 'GET,POST,HEAD'
+        'access.control.allow.headers': 'X-Requested-With,Content-Type,Accept,Origin,Authorization'

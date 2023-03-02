@@ -106,8 +106,6 @@ restProxy:
   - zookeeper
   - controlcenter
 
-ksql:
-  enabled: false
 
 connect:
   license:
