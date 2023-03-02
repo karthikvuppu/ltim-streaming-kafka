@@ -13,12 +13,12 @@ spec:
   storageClass:
     name: standard
   dataVolumeCapacity: {{ .Values.kafka.dataVolumeCapacity }}
-  {{ if or (.Values.kafka.mountedSecrets) (.Values.kerberos.activatedInKafka) }}
+  {{- if or (.Values.kafka.mountedSecrets) (.Values.kerberos.activatedInKafka) }}
   mountedSecrets:
-  {{ range .Values.kafka.mountedSecrets }}
+  {{- range .Values.kafka.mountedSecrets }}
   - secretRef: {{ .secretRef }}
   {{- end }}
-  {{ if .Values.kerberos.activatedInKafka }}
+  {{- if .Values.kerberos.activatedInKafka }}
   - secretRef: keytab
   {{- end }}
   {{- end }}
@@ -69,7 +69,17 @@ spec:
 {{toYaml .authentication | indent 8}}
       tls:
         enabled: true
-      {{ if .loadbalancer.enabled}}
+      {{- with .ingress }}
+      {{- if .enabled }}
+        secretRef: {{ .secretRef }}
+      externalAccess:
+        type: staticForHostBasedRouting
+        staticForHostBasedRouting:
+          domain: {{ .domain }}
+          port: {{ .port }}
+      {{- end }}
+      {{- end }}
+      {{- if .loadbalancer.enabled}}
       externalAccess:
         type: loadBalancer
         loadBalancer:
@@ -112,7 +122,19 @@ spec:
 {{toYaml .external.authentication | indent 8}}
       tls:
         enabled: true
+      {{- with .external.ingress }}
+        {{- if .enabled }}
+        secretRef: {{ .secretRef }} 
+        {{- end }}
       externalAccess:
+        {{- if .enabled }}
+        type: staticForHostBasedRouting
+        staticForHostBasedRouting:
+          domain: {{ .domain }}
+          port: {{ .port }}
+        {{- end }}
+      {{- end }}
+      {{- if .external.loadbalancer.enabled }}  
         type: loadBalancer
         loadBalancer:
           annotations:
@@ -133,6 +155,7 @@ spec:
           domain: {{ $.Values.domain }}
           bootstrapPrefix: {{ .external.loadbalancer.bootstrapPrefix }} 
           brokerPrefix: {{ .external.loadbalancer.brokerPrefix }} ##TODO check this is correct
+      {{- end }}
     {{- end }}
   {{- end }}
   {{- with .Values.kafka.configOverrides }}

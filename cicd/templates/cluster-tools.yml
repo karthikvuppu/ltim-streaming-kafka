@@ -10,6 +10,7 @@
     - "helm repo add elastic https://helm.elastic.co"
     - "helm repo add stakater https://stakater.github.io/stakater-charts"
     - "helm repo add datadog https://helm.datadoghq.com"
+    - "helm repo add traefik https://traefik.github.io/charts"
     - 'helm upgrade 
       --install 
       external-dns 
@@ -48,4 +49,15 @@
       --namespace confluent 
       -f tooling/cluster-tools/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
       --kube-context $EKS_CLUSTER'
+    - |          
+        if [[ $ENVIRONMENT == "sandbox" || $CLUSTER_TYPE == "external" ]];
+          then
+            'helm upgrade 
+             --install
+             traefik traefik/traefik
+             --version 21.0.0
+             --namespace ingress
+             --create-namespace
+             --values tooling/ingress/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
+          fi
   when: manual

@@ -1,0 +1,42 @@
+providers:
+  kubernetesIngress:
+    publishedService:
+      enabled: true
+
+service:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    external-dns.alpha.kubernetes.io/ttl: "300"
+    external-dns.alpha.kubernetes.io/hostname:
+      "*.mtlsaws.kafka.iris-streaming-sb.devtest.aws.scania.com,
+      mtlsaws.kafka.iris-streaming-sb.devtest.aws.scania.com,
+      *.oauthaws.kafka.iris-streaming-sb.devtest.aws.scania.com,
+      oauthaws.kafka.iris-streaming-sb.devtest.aws.scania.com"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "600"
+  internal:
+    type: LoadBalancer
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      external-dns.alpha.kubernetes.io/ttl: "300"
+      external-dns.alpha.kubernetes.io/hostname:
+        "*.mtlsonprem.kafka.iris-streaming-sb.devtest.aws.scania.com,
+        mtlsonprem.kafka.iris-streaming-sb.devtest.aws.scania.com,
+        *.oauthonprem.kafka.iris-streaming-sb.devtest.aws.scania.com,
+        oauthonprem.kafka.iris-streaming-sb.devtest.aws.scania.com"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+      service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "600"
+
+ports:
+  kafka:
+    expose: true
+    port: 9092
+    protocol: TCP
+
+logs:
+  general:
+    level: DEBUG
+  access:
+    enabled: true
