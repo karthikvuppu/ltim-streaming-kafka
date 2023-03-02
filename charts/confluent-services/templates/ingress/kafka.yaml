@@ -1,0 +1,38 @@
+# Flag until we remove old set up
+{{- if .Values.kafka.listeners.external.ingress.enabled }}
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  tls:
+    passthrough: true
+  entryPoints:
+  - kafka
+  routes:
+  {{- $domain := .Values.kafka.listeners.external.ingress.domain }}
+  - match: {{ printf "HostSNI(`%s`)" $domain }}
+    services:
+    - name: kafka
+      port: 9092
+  {{- range until (.Values.kafka.replicas | int) }}
+  - match: {{ printf "HostSNI(`b%d.%s`)" . $domain }}
+    services:
+    - name: {{ . | printf "kafka-%d-internal"}} 
+      port: 9092
+  {{- end }}
+  {{- range $custom := .Values.kafka.listeners.custom }}
+  {{- $domain := $custom.ingress.domain }}
+  - match: {{ printf "HostSNI(`%s`)" $domain }}    
+    services:
+    - name: kafka
+      port: {{ $custom.port }}
+  {{- range until ($.Values.kafka.replicas | int) }}
+  - match: {{ printf "HostSNI(`b%d.%s`)" . $domain }}
+    services:
+    - name: {{ . | printf "kafka-%d-internal"}} 
+      port: {{ $custom.port }}
+  {{- end }}
+  {{- end }}
+{{- end }}

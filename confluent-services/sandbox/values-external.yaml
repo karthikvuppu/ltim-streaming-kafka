@@ -327,20 +327,22 @@ kafka:
     external:
       enabled: true
       loadbalancer:
+        enabled: false
         internal: false
-        name: iris-streaming-sb-mtlsaws-nlb
-        bootstrapPrefix: mtlsaws #TODO check if this is correct 
-        brokerPrefix: mtlsaws
-        sourceRanges: "13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32"
-
+      ingress:
+        enabled: true
+        domain: mtlsaws.kafka.iris-streaming-sb.devtest.aws.scania.com
+        port: 9092
+        secretRef: kafka-tls
       authentication:
         type: mtls
         principalMappingRules:
-          # First rule may need to be altered to capture Scania-issued client certificates
           - RULE:CN[ ]?=[ ]?([a-zA-Z0-9-_]+),.*Scania.*/$1/
           - RULE:.*CN[ ]?=[ ]?([a-zA-Z0-9-_]+).*\.scania\.com.*/$1/
       customServerConfiguration:
         'ssl.principal.mapping.rules': '${file:/mnt/secrets/mtls-mapping/mapping.txt:mapping}'
+        'ssl.truststore.location': '/mnt/sslcerts/truststore.p12'
+        'ssl.truststore.password': '${file:/mnt/sslcerts/jksPassword.txt:jksPassword}'
     internal:
       enabled: true
     custom:
@@ -352,38 +354,23 @@ kafka:
           jaasConfig:
             secretRef: credential
         loadbalancer:
-          enabled: true
+          enabled: false
           internal: false
-          name: iris-streaming-sb-oauthaws-nlb
-          sourceRanges: "13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32"
-
+        ingress:
+          enabled: true
+          port: 9092
+          domain: oauthaws.kafka.iris-streaming-sb.devtest.aws.scania.com
+          secretRef: kafka-tls
         customServerConfiguration:
+          'ssl.principal.mapping.rules': '${file:/mnt/secrets/mtls-mapping/mapping.txt:mapping}'
+          'ssl.truststore.location': '/mnt/sslcerts/truststore.p12'
+          'ssl.truststore.password': '${file:/mnt/sslcerts/jksPassword.txt:jksPassword}'
           'sasl.enabled.mechanisms': OAUTHBEARER
-          #TODO: is this needed? not set in 
+          #TODO: is this needed? not set in
           'sasl.mechanism': PLAIN
           'sasl.oauthbearer.jwks.endpoint.url': https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
           'sasl.oauthbearer.expected.audience': afa216a4-e644-461b-a06b-8f0e28574fac
           'sasl.oauthbearer.sub.claim.name': ClientDisplayName
-          'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
-          'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
-      oauthonprem:
-        port: 9095
-        authentication:
-          ## This is only required for using the CFK custom listener section. configOverrides listener.name.client.sasl.enabled.mechanism=OAUTHBEARER will do the trick!
-          type: plain
-          jaasConfig:
-            secretRef: credential
-        loadbalancer:
-          enabled: true
-          internal: true
-          name: iris-streaming-sb-oauthonprem-nlb
-          sourceRanges: "13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32"
-
-        customServerConfiguration:
-          'sasl.enabled.mechanisms': 'OAUTHBEARER'
-          'sasl.oauthbearer.jwks.endpoint.url': 'https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs'
-          'sasl.oauthbearer.expected.audience': 'afa216a4-e644-461b-a06b-8f0e28574fac'
-          'sasl.oauthbearer.sub.claim.name': 'ClientDisplayName'
           'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
           'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
       mtlsonprem:
@@ -395,10 +382,39 @@ kafka:
             - RULE:CN[ ]?=[ ]?([a-zA-Z0-9-_]+),.*Scania.*/$1/
             - RULE:.*CN[ ]?=[ ]?([a-zA-Z0-9-_]+).*\.scania\.com.*/$1/
         loadbalancer: 
+          enabled: false
+          internal: false
+        ingress:
           enabled: true
-          internal: true
-          name: iris-streaming-sb-mtlsonprem-nlb
-          sourceRanges: "13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32"
-
+          port: 9092
+          domain: mtlsonprem.kafka.iris-streaming-sb.devtest.aws.scania.com
+          secretRef: kafka-tls
         customServerConfiguration:
           'ssl.principal.mapping.rules': '${file:/mnt/secrets/mtls-mapping/mapping.txt:mapping}'
+          'ssl.truststore.location': '/mnt/sslcerts/truststore.p12'
+          'ssl.truststore.password': '${file:/mnt/sslcerts/jksPassword.txt:jksPassword}'
+      oauthonprem:
+        port: 9095
+        authentication:
+          ## This is only required for using the CFK custom listener section. configOverrides listener.name.client.sasl.enabled.mechanism=OAUTHBEARER will do the trick!
+          type: plain
+          jaasConfig:
+            secretRef: credential
+        loadbalancer:
+          enabled: false
+          internal: false
+        ingress:
+          enabled: true
+          port: 9092
+          domain: oauthonprem.kafka.iris-streaming-sb.devtest.aws.scania.com
+          secretRef: kafka-tls
+        customServerConfiguration:
+          'ssl.principal.mapping.rules': '${file:/mnt/secrets/mtls-mapping/mapping.txt:mapping}'
+          'ssl.truststore.location': '/mnt/sslcerts/truststore.p12'
+          'ssl.truststore.password': '${file:/mnt/sslcerts/jksPassword.txt:jksPassword}'
+          'sasl.enabled.mechanisms': 'OAUTHBEARER'
+          'sasl.oauthbearer.jwks.endpoint.url': 'https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs'
+          'sasl.oauthbearer.expected.audience': 'afa216a4-e644-461b-a06b-8f0e28574fac'
+          'sasl.oauthbearer.sub.claim.name': 'ClientDisplayName'
+          'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
+          'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
