@@ -362,7 +362,6 @@ kafka:
           domain: oauthaws.kafka.iris-streaming-sb.devtest.aws.scania.com
           secretRef: kafka-tls
         customServerConfiguration:
-          'ssl.principal.mapping.rules': '${file:/mnt/secrets/mtls-mapping/mapping.txt:mapping}'
           'ssl.truststore.location': '/mnt/sslcerts/truststore.p12'
           'ssl.truststore.password': '${file:/mnt/sslcerts/jksPassword.txt:jksPassword}'
           'sasl.enabled.mechanisms': OAUTHBEARER
@@ -409,7 +408,6 @@ kafka:
           domain: oauthonprem.kafka.iris-streaming-sb.devtest.aws.scania.com
           secretRef: kafka-tls
         customServerConfiguration:
-          'ssl.principal.mapping.rules': '${file:/mnt/secrets/mtls-mapping/mapping.txt:mapping}'
           'ssl.truststore.location': '/mnt/sslcerts/truststore.p12'
           'ssl.truststore.password': '${file:/mnt/sslcerts/jksPassword.txt:jksPassword}'
           'sasl.enabled.mechanisms': 'OAUTHBEARER'
