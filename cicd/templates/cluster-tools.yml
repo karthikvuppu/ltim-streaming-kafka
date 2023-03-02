@@ -50,7 +50,7 @@
       -f tooling/cluster-tools/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
       --kube-context $EKS_CLUSTER'
     - |          
-        if [[ $ENVIRONMENT == "sandbox" || $CLUSTER_TYPE == "external" ]];
+        if [[ $ENVIRONMENT == "sandbox" && $CLUSTER_TYPE == "external" ]];
           then
             'helm upgrade 
              --install
@@ -58,6 +58,7 @@
              --version 21.0.0
              --namespace ingress
              --create-namespace
-             --values tooling/ingress/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml'
+             --values tooling/ingress/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
+             --kube-context $EKS_CLUSTER'
           fi
   when: manual
