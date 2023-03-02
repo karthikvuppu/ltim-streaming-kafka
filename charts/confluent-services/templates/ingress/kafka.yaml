@@ -1,5 +1,5 @@
 # Flag until we remove old set up
-{{- if .Values.kafka.listeners.external.ingress.enabled }}
+{{- if (.Values.kafka.listeners.external.ingress).enabled }}
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRouteTCP
 metadata:
