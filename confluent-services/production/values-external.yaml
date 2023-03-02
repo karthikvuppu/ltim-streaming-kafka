@@ -22,7 +22,7 @@ schemaRegistry:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
     server:
       'confluent.schema.registry.anonymous.principal': 'true'
       'authentication.skip.paths': '/*'
@@ -40,7 +40,7 @@ restProxy:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
     server:
       'authentication.method': 'BASIC'
       'authentication.realm': 'KafkaRest'
@@ -98,7 +98,7 @@ ksql:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
     server:
       'access.control.allow.origin': '*'
       'access.control.allow.methods': 'GET,POST,HEAD'
@@ -135,8 +135,8 @@ connect:
         log4j:
           'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
           'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-          'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
-          'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+          'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
+          'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
         server:
           'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
           'value.converter': 'io.confluent.connect.avro.AvroConverter'
@@ -167,8 +167,8 @@ connect:
         log4j:
           'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
           'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-          'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
-          'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+          'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
+          'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
         server:
           'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
           'value.converter': 'io.confluent.connect.avro.AvroConverter'
@@ -207,8 +207,8 @@ connect:
         log4j:
           'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
           'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-          'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
-          'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+          'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
+          'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
         server:
           'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
           'value.converter': 'io.confluent.connect.avro.AvroConverter'
@@ -221,7 +221,8 @@ controlCenter:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
+      'log4j.appender.streams.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
     server:
       'confluent.controlcenter.internal.topics.partitions': '4'
       'confluent.controlcenter.disk.skew.warning.min.bytes': '16106127360' # 15Gb
@@ -247,7 +248,7 @@ zookeeper:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
 
 kafka:
   replicas: 6
@@ -277,7 +278,7 @@ kafka:
       'log4j.logger.io.confluent.security.auth.provider.ldap': 'TRACE'
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
       'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","line":"%L","message":"%m%throwable{full}"}%n'
+      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
     server:
       'confluent.balancer.heal.uneven.load.trigger': 'ANY_UNEVEN_LOAD'
       'ldap.com.sun.jndi.ldap.read.timeout': '60000'
