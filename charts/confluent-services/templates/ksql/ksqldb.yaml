@@ -58,6 +58,14 @@ spec:
           secretRef: mds-client
       tls:
         enabled: true
+    schemaRegistry:
+      authentication:
+        basic:
+          secretRef: {{ $ksql.kafkaCredentialsSecret | default ("credential")}}
+        type: basic
+      tls:
+        enabled: true
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
 {{- if hasKey $ksql "loadbalancer" }}
   externalAccess:
     type: loadBalancer
