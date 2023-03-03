@@ -61,7 +61,7 @@ spec:
     schemaRegistry:
       authentication:
         basic:
-          secretRef: {{ $ksql.kafkaCredentialsSecret | default ("credential")}}
+          secretRef: {{ $ksql.kafkaCredentialsSecret | default ("rest-credential")}}
         type: basic
       tls:
         enabled: true
