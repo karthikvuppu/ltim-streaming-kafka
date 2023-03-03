@@ -330,8 +330,11 @@ kafka:
         principalMappingRules:
           # First rule may need to be altered to capture Scania-issued client certificates
           - RULE:CN[ ]?=[ ]?([a-zA-Z0-9-_]+),.*Scania.*/$1/
-          - RULE:.*CN[ ]?=[ ]?([a-zA-Z0-9-_]+).*\.scania\.com.*/$1/  
+          - RULE:.*CN[ ]?=[ ]?([a-zA-Z0-9-_]+).*\.scania\.com.*/$1/
+      ingress:
+        enabled: false  
       loadbalancer:
+        enabled: true
         internal: false
         name: iris-streaming-devtest-mtlsaws
         sourceRanges: "13.51.132.182/32"

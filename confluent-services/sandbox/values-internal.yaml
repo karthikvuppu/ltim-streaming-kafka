@@ -184,12 +184,13 @@ kafka:
           # First rule may need to be altered to capture Scania-issued client certificates
           - RULE:.*Scania.*CN[ ]?=[ ]?([a-zA-Z0-9-_]+).*/$1/
           - RULE:.*CN[ ]?=[ ]?([a-zA-Z0-9-_]+).*\.scania\.com.*/$1/
-      
+      ingress:
+        enabled: false  
       loadbalancer:
+        enabled: true
         bootstrapPrefix: imtlsonprem #TODO check if this is correct 
         brokerPrefix: imtlsonprem
         internal: true
-        enabled: true
         name: iris-streaming-sb-imtlsonprem-nlb
     custom: 
       internaleks:
