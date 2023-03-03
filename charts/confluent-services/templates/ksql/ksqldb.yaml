@@ -1,33 +1,34 @@
-{{ if .Values.ksql.enabled }}
+{{- range $ksql := .Values.ksql }}
+{{- if $ksql.enabled }}
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KsqlDB
 metadata:
-  name: ksqldb
+  name: {{ $ksql.name | default ("ksqldb") }}
   namespace: confluent
   labels: 
     admission.datadoghq.com/enabled: "true"
 spec:
-  replicas: 3
+  replicas: {{ $ksql.replicas | default (2) }}
   image:
     application: confluentinc/cp-ksqldb-server:7.1.1
     init: confluentinc/confluent-init-container:2.3.0
-  dataVolumeCapacity: {{ .Values.ksql.dataVolumeCapacity }}
-  {{- with .Values.ksql.configOverrides }}
+  dataVolumeCapacity: {{ $ksql.dataVolumeCapacity }}
+  {{- if or $ksql.configOverrides $.Values.defaults.ksql.configOverrides }}
   configOverrides:
-    {{- with .log4j }}
+    {{- with merge (($ksql.configOverrides).log4j) (($.Values.defaults.ksql.configOverrides).log4j) }}
     log4j:
       {{- range $key, $value := . }}
       - {{ $key }}={{ $value }}
       {{- end }}
     {{- end }}
-    {{- with .jvm }}
+    {{- with merge (($ksql.configOverrides).jvm) (($.Values.defaults.ksql.configOverrides).jvm) }}
     jvm:
       {{- range $key, $value := . }}
       - "{{ $key }}={{ $value }}"
       {{- end }}
     {{- end }}
-    {{- with .server }}
+    {{- with merge ($ksql.configOverrides).server (($.Values.defaults.ksql.configOverrides).server) }}
     server:
       {{- range $key, $value := . }}
       - {{ $key }}={{ $value }}
@@ -44,7 +45,7 @@ spec:
       authentication:
         type: plain
         jaasConfig:
-          secretRef: credential
+          secretRef: {{ $ksql.kafkaCredentialsSecret | default ("credential")}}
       tls:
         enabled: true
     mds:
@@ -57,16 +58,18 @@ spec:
           secretRef: mds-client
       tls:
         enabled: true
+{{- if hasKey $ksql "loadbalancer" }}
   externalAccess:
     type: loadBalancer
     loadBalancer:
       annotations:
         service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
-        service.beta.kubernetes.io/aws-load-balancer-subnets: {{ .Values.subnets.public }}
+        service.beta.kubernetes.io/aws-load-balancer-subnets: {{ $.Values.subnets.public }}
         service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=k2
-        service.beta.kubernetes.io/aws-load-balancer-name: {{ .Values.ksql.loadbalancer.name }}
-      domain: {{ .Values.domain }}
-      prefix: {{ .Values.ksql.dns.prefix }}
+        service.beta.kubernetes.io/aws-load-balancer-name: {{ $ksql.loadbalancer.name }}
+      domain: {{ $.Values.domain }}
+      prefix: {{ $ksql.dns.prefix }}
+{{- end }}
   storageClass:
     name: standard
   podTemplate:
@@ -98,4 +101,5 @@ spec:
                     - kafka
                     - zookeeper
             topologyKey: kubernetes.io/hostname
+{{- end }}
 {{- end }}

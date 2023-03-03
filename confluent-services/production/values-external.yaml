@@ -85,25 +85,16 @@ restProxy:
   nodeAffinityServiceName: rp
 
 ksql:
-  enabled: true
-  dataVolumeCapacity: 100Gi
-  onprem:
+  - enabled: true
+    name: ksqldb
+    dataVolumeCapacity: 100Gi
+    onprem:
+      loadbalancer:
+        name: iris-streaming-prod-ksqldbonprem
     loadbalancer:
-      name: iris-streaming-prod-ksqldbonprem
-  loadbalancer:
-    name: iris-streaming-prod-ksqldb
-  dns:
-    prefix: ksqldbaws
-  configOverrides:
-    log4j:
-      'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
-      'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-      'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
-    server:
-      'access.control.allow.origin': '*'
-      'access.control.allow.methods': 'GET,POST,HEAD'
-      'access.control.allow.headers': 'X-Requested-With,Content-Type,Accept,Origin,Authorization'
-
+      name: iris-streaming-prod-ksqldb
+    dns:
+      prefix: ksqldbaws
 
 
 connect:
