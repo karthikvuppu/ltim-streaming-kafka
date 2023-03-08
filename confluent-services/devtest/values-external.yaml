@@ -190,7 +190,7 @@ connect:
     connect-onprem:
       replicas: 3
       image:
-        application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/confluent:meconnect-1.0
+        application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.1.1.2
       plugins:
         - name: kafka-connect-datagen
           owner: confluentinc
@@ -207,6 +207,12 @@ connect:
         - name: kafka-connect-jdbc
           owner: confluentinc
           version: 10.6.0
+        - name: kafka-connect-ibmmq
+          owner: confluentinc
+          version: 12.1.0
+        - name: kafka-connect-ibmmq-sink
+          owner: confluentinc
+          version: 2.1.0
       loadbalancer:
         name: iris-streaming-devtest-onpremconnect
         nodeLabels: onpremconnect
