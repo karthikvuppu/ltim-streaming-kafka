@@ -360,9 +360,14 @@ kafka:
           'sasl.enabled.mechanisms': OAUTHBEARER
           #TODO: is this needed? not set in
           'sasl.mechanism': PLAIN
-          'sasl.oauthbearer.jwks.endpoint.url': https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
-          'sasl.oauthbearer.expected.audience': afa216a4-e644-461b-a06b-8f0e28574fac
-          'sasl.oauthbearer.sub.claim.name': ClientDisplayName
+          # 'sasl.oauthbearer.jwks.endpoint.url': https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs
+          # 'sasl.oauthbearer.expected.audience': afa216a4-e644-461b-a06b-8f0e28574fac
+          # 'sasl.oauthbearer.sub.claim.name': ClientDisplayName
+          # 'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
+          # 'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
+          'sasl.oauthbearer.jwks.endpoint.url': 'https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs'
+          'sasl.oauthbearer.expected.audience': 'account'
+          'sasl.oauthbearer.sub.claim.name': 'clientId'
           'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
           'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
       mtlsonprem:
@@ -404,8 +409,13 @@ kafka:
           'ssl.truststore.location': '/mnt/sslcerts/truststore.p12'
           'ssl.truststore.password': '${file:/mnt/sslcerts/jksPassword.txt:jksPassword}'
           'sasl.enabled.mechanisms': 'OAUTHBEARER'
+          # 'sasl.oauthbearer.jwks.endpoint.url': 'https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs'
+          # 'sasl.oauthbearer.expected.audience': 'afa216a4-e644-461b-a06b-8f0e28574fac'
+          # 'sasl.oauthbearer.sub.claim.name': 'ClientDisplayName'
+          # 'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
+          # 'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
           'sasl.oauthbearer.jwks.endpoint.url': 'https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs'
-          'sasl.oauthbearer.expected.audience': 'afa216a4-e644-461b-a06b-8f0e28574fac'
-          'sasl.oauthbearer.sub.claim.name': 'ClientDisplayName'
+          'sasl.oauthbearer.expected.audience': 'account'
+          'sasl.oauthbearer.sub.claim.name': 'clientId'
           'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
           'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
