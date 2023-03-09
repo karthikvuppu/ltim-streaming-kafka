@@ -65,19 +65,17 @@ spec:
     {{- range $name, $value := . }}
     - name: {{ $name }}
       port: {{ .port }}
-      authentication: 
+      authentication:
 {{toYaml .authentication | indent 8}}
       tls:
         enabled: true
-      {{- with .ingress }}
-      {{- if .enabled }}
-        secretRef: {{ .secretRef }}
+      {{- if (.ingress) }}
+        secretRef: {{ .ingress.secretRef }}
       externalAccess:
         type: staticForHostBasedRouting
         staticForHostBasedRouting:
-          domain: {{ .domain }}
-          port: {{ .port }}
-      {{- end }}
+          domain: {{ .ingress.domain }}
+          port: {{ .ingress.port }}
       {{- end }}
       {{- if .loadbalancer.enabled}}
       externalAccess:
@@ -97,7 +95,6 @@ spec:
             {{- if .loadbalancer.internal }}
             service.beta.kubernetes.io/aws-load-balancer-subnets: {{ $.Values.subnets.private}}
             service.beta.kubernetes.io/aws-load-balancer-internal: "true"
-            
             {{- if .loadbalancer.internalScheme }}
             service.beta.kubernetes.io/aws-load-balancer-scheme: internal
             {{- end }}
@@ -121,20 +118,8 @@ spec:
       authentication:
 {{toYaml .external.authentication | indent 8}}
       tls:
-        enabled: true
-      {{- with .external.ingress }}
-        {{- if .enabled }}
-        secretRef: {{ .secretRef }} 
-        {{- end }}
-      externalAccess:
-        {{- if .enabled }}
-        type: staticForHostBasedRouting
-        staticForHostBasedRouting:
-          domain: {{ .domain }}
-          port: {{ .port }}
-        {{- end }}
-      {{- end }}
-      {{- if .external.loadbalancer.enabled }}  
+        enabled: true 
+      externalAccess:  
         type: loadBalancer
         loadBalancer:
           annotations:
@@ -155,7 +140,6 @@ spec:
           domain: {{ $.Values.domain }}
           bootstrapPrefix: {{ .external.loadbalancer.bootstrapPrefix }} 
           brokerPrefix: {{ .external.loadbalancer.brokerPrefix }} ##TODO check this is correct
-      {{- end }}
     {{- end }}
   {{- end }}
   {{- with .Values.kafka.configOverrides }}
