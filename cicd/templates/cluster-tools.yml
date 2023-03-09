@@ -52,13 +52,13 @@
     - |          
         if [[ $ENVIRONMENT == "sandbox" && $CLUSTER_TYPE == "external" ]];
           then
-            'helm upgrade 
-             --install
-             traefik traefik/traefik
-             --version 21.0.0
-             --namespace ingress
-             --create-namespace
-             --values tooling/ingress/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
-             --kube-context $EKS_CLUSTER'
-          fi
+            helm upgrade \
+            --install \
+            traefik traefik/traefik \
+            --version 21.0.0 \
+            --namespace ingress \
+            --create-namespace \
+            --values tooling/ingress/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml \
+            --kube-context $EKS_CLUSTER
+        fi
   when: manual
