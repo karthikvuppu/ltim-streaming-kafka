@@ -80,6 +80,7 @@ spec:
     {{- end }}
     {{- end }}
     {{- end }}
+  {{- if not (.Values.controlCenter.ingress) }}
   externalAccess:
     type: loadBalancer
     loadBalancer:
@@ -100,6 +101,7 @@ spec:
         service.beta.kubernetes.io/aws-load-balancer-name: {{ .Values.controlCenter.loadbalancer.name }}
       domain: {{ .Values.domain }}
       prefix: {{ .Values.controlCenter.dns.prefix }}
+  {{- end }}
   storageClass:
     name: standard
      

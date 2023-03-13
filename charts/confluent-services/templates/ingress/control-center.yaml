@@ -1,0 +1,37 @@
+# Flag until we remove old set up
+{{- if (.Values.controlCenter.ingress).enabled }}
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - kind: Rule
+    match: {{ printf "Host(`controlcenter.%s`)" .Values.controlCenter.ingress.domain }}
+    services:
+    - kind: Service
+      name: controlcenter
+      namespace: confluent
+      port: {{ .Values.controlCenter.ingress.port }}
+      scheme: https
+      serversTransport: controlcenter-transport
+  tls:
+    secretName: controlcenter-tls
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: ServersTransport
+metadata:
+  name: controlcenter-transport
+  namespace: confluent
+spec:
+  serverName: {{ .Values.controlCenter.ingress.domain }}
+  rootCAsSecrets:
+    - ca-root
+  forwardingTimeouts:
+    dialTimeout: 42s
+    responseHeaderTimeout: 42s
+    idleConnTimeout: 42s
+{{- end }}

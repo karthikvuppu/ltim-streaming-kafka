@@ -251,12 +251,10 @@ controlCenter:
       'log4j.appender.streams.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
     server:
       'confluent.controlcenter.internal.topics.partitions': '4'
-  loadbalancer:
-    name: iris-streaming-sb-controlcenter
-    certificateArn: arn:aws:acm:eu-north-1:572663323550:certificate/a29562a2-f4a3-4c03-b9b5-f77960e0580a
-    nodeLabel: cc
-  dns:
-    prefix: controlcenter
+  ingress:
+    enabled: true
+    domain: iris-streaming-sb.devtest.aws.scania.com
+    port: 9021
   nodeAffinityServiceName: cc
 
 zookeeper:
