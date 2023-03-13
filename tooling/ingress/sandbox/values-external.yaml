@@ -16,6 +16,8 @@ service:
     service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
     service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
     service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "600"
+# This specifies the CIDRs that are allowed to access the NLB. Will be removed in the future when the Whitelistening is on Ingress Controller.
+    service.beta.kubernetes.io/load-balancer-source-ranges: 13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32
   internal:
     type: LoadBalancer
     annotations:
