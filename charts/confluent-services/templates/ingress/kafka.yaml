@@ -13,11 +13,15 @@ spec:
   - kafka
   routes:
   - match: {{ printf "HostSNI(`%s`)" $val.ingress.domain }}
+    middlewares:
+    - name: kafka-ipwhitelist
     services:
     - name: kafka
       port: {{ $val.port }}
   {{- range until ($.Values.kafka.replicas | int) }}
   - match: {{ printf "HostSNI(`b%d.%s`)" . $val.ingress.domain }}
+    middlewares:
+    - name: kafka-ipwhitelist
     services:
     - name: {{ . | printf "kafka-%d-internal"}} 
       port: {{ $val.port }}
