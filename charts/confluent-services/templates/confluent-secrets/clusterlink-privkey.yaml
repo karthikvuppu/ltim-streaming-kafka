@@ -1,0 +1,22 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: clusterlink-privkey
+  namespace: confluent
+spec:
+  refreshInterval: "1m"  # May be set to zero to fetch and create it once
+  secretStoreRef:
+    name: global-secret-store
+    kind: ClusterSecretStore
+  target:
+    name: clusterlink-privkey
+    creationPolicy: Owner
+  data:
+    - secretKey: keystore.12
+      remoteRef:
+        key: {{ .Values.environment }}/{{ .Values.clusterType}}/clusterlink-privkey
+        property: keystore.12
+    - secretKey: cacerts.pem
+      remoteRef:
+        key: {{ .Values.environment }}/{{ .Values.clusterType}}/clusterlink-privkey
+        property: cacerts.pem
