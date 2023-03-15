@@ -10,7 +10,7 @@ spec:
     - websecure
   routes:
   - kind: Rule
-    match: {{ printf "Host(`controlcenter.%s`)" .Values.controlCenter.ingress.domain }}
+    match: {{ printf "Host(`%s`)" .Values.controlCenter.ingress.domain }}
     services:
     - kind: Service
       name: controlcenter

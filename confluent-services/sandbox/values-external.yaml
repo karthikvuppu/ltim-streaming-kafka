@@ -253,7 +253,7 @@ controlCenter:
       'confluent.controlcenter.internal.topics.partitions': '4'
   ingress:
     enabled: true
-    domain: iris-streaming-sb.devtest.aws.scania.com
+    domain: controlcenter.iris-streaming-sb.devtest.aws.scania.com
     port: 9021
   nodeAffinityServiceName: cc
 
