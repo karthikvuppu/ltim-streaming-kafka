@@ -1,0 +1,22 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: seip-ibmmq-certs
+  namespace: confluent
+spec:
+  refreshInterval: "1m"  # May be set to zero to fetch and create it once
+  secretStoreRef:
+    name: global-secret-store
+    kind: ClusterSecretStore
+  target:
+    name: seip-ibmmq-certs
+    creationPolicy: Owner
+  data:
+    - secretKey: keystore.jks
+      remoteRef:
+        key: {{ .Values.environment }}/{{ .Values.clusterType}}/seip-ibmmq-certs
+        property: keystore.jks
+    - secretKey: truststore.jks
+      remoteRef:
+        key: {{ .Values.environment }}/{{ .Values.clusterType}}/seip-ibmmq-certs
+        property: truststore.jks
