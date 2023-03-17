@@ -237,6 +237,7 @@ connect:
         - keystore
         - truststore
         - clusterlink-privkey
+        - seip-ibmmq-certs
     connect-me:
       replicas: 3
       image:
