@@ -1,0 +1,9 @@
+installCRDs: true
+webhook:
+  securePort: 9999
+  hostNetwork: true
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::572663323550:role/cert-manager-irsa
+securityContext:
+  fsGroup: 1001

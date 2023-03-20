@@ -1,6 +1,14 @@
 environment: sandbox
 clusterType: internal
 
+domain:
+  name: iris-streaming-sb.devtest.aws.scania.com
+  prefix:
+    - imtlsaws
+    - imtlsonprem
+    - ioauthaws
+    - ioauthonprem
+
 externalSecret:
   enabled: true
   aws:
@@ -11,6 +19,10 @@ ldapProxy:
 
 datadog:
   enabled: true
-
 filebeat:
   enabled: true
+
+certManager:
+  enabled: false
+clusterIssuer:
+  hostedZoneID: Z045221811UTX9KK3NEWU

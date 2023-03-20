@@ -1,6 +1,14 @@
 environment: prod
 clusterType: internal
 
+domain:
+  name: iris-streaming.prod.aws.scania.com
+  prefix:
+    - imtlsaws
+    - imtlsonprem
+    - ioauthaws
+    - ioauthonprem
+
 externalSecret:
   enabled: true
   aws:
@@ -14,3 +22,8 @@ datadog:
 
 filebeat:
   enabled: true
+
+certManager:
+  enabled: false
+clusterIssuer:
+  hostedZoneID: Z0523917343SHVNQKTNUD
