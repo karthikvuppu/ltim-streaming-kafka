@@ -19,7 +19,7 @@ spec:
       scheme: https
       serversTransport: controlcenter-transport
   tls:
-    secretName: controlcenter-tls
+    secretName: wildcard-cert
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: ServersTransport
