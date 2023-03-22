@@ -16,7 +16,7 @@ spec:
       remoteRef:
         key: {{ .Values.environment }}/{{ .Values.clusterType}}/seip-ibmmq-certs
         property: keystore.jks
-    - secretKey: truststore.jks
+    - secretKey: truststore.p12
       remoteRef:
         key: {{ .Values.environment }}/{{ .Values.clusterType}}/seip-ibmmq-certs
-        property: truststore.jks
+        property: truststore.p12

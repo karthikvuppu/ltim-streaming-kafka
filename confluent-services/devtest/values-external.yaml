@@ -227,6 +227,8 @@ connect:
         server:
           'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
           'value.converter': 'io.confluent.connect.avro.AvroConverter'
+        jvm:
+          '-Dcom.ibm.mq.cfg.useIBMCipherMappings': 'false'
         log4j:
           'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
           'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
