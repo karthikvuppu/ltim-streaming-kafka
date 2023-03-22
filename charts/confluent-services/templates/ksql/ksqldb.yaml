@@ -11,8 +11,8 @@ metadata:
 spec:
   replicas: {{ $ksql.replicas | default (2) }}
   image:
-    application: confluentinc/cp-ksqldb-server:7.1.1
-    init: confluentinc/confluent-init-container:2.3.0
+    application: confluentinc/cp-ksqldb-server:{{ $ksql.confluentVersion | default $.Values.defaults.confluent.platformVersion }}
+    init: confluentinc/confluent-init-container:{{ $ksql.cfkVersion | default $.Values.defaults.confluent.cfkVersion }}
   dataVolumeCapacity: {{ $ksql.dataVolumeCapacity }}
   {{- if or $ksql.configOverrides $.Values.defaults.ksql.configOverrides }}
   configOverrides:

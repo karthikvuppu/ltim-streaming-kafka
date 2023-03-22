@@ -12,7 +12,7 @@ spec:
   oneReplicaPerNode: true
   image:
     application: {{ .image.application }}
-    init: confluentinc/confluent-init-container:2.3.0
+    init: confluentinc/confluent-init-container:{{ .cfkVersion | default $.Values.defaults.confluent.cfkVersion }}
   # mountedVolumes:
   #   volumes:
   #     - name: config-volume
