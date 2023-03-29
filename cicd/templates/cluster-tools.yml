@@ -12,6 +12,7 @@
     - "helm repo add datadog https://helm.datadoghq.com"
     - "helm repo add jetstack https://charts.jetstack.io"
     - "helm repo add traefik https://traefik.github.io/charts"
+    - "helm repo add kafka-lag-exporter https://seglo.github.io/kafka-lag-exporter/repo/"
     - 'helm upgrade 
       --install 
       external-dns 
@@ -72,6 +73,17 @@
           --namespace ingress \
           --create-namespace \
           --values tooling/ingress/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml \
+          --kube-context $EKS_CLUSTER
+        fi
+    - |
+        if [[ $ENVIRONMENT == "sandbox" && $CLUSTER_TYPE == "external" ]];
+        then
+          helm upgrade \
+          --install \
+          kafka-lag-exporter kafka-lag-exporter/kafka-lag-exporter \
+          --namespace kafka-lag-exporter \
+          --create-namespace \
+          --values tooling/kafka-lag-exporter/values-common.yaml \
           --kube-context $EKS_CLUSTER
         fi
   when: manual

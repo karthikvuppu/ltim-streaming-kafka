@@ -21,6 +21,8 @@ datadog:
   enabled: true
 filebeat:
   enabled: true
+kafkalagexporter:
+  enabled: true
 
 certManager:
   enabled: true
