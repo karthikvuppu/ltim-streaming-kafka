@@ -172,6 +172,9 @@ connect:
         - name: kafka-connect-s3-source
           owner: confluentinc
           version: 2.5.1
+        - name: kafka-connect-kinesis
+          owner: confluentinc 
+          version: 1.1.4
       loadbalancer:
         internal: false
         name: iris-streaming-devtest-awsconnect
