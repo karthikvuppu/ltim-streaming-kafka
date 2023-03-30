@@ -1,6 +1,7 @@
 datadog:
   apiKeyExistingSecret: datadog-api-key
   site: datadoghq.eu
+  checksCardinality: orchestrator # Enable pod_name in datadog
 
 agents:
   image:
