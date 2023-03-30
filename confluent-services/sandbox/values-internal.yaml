@@ -188,6 +188,7 @@ kafka:
         brokerPrefix: imtlsonprem
         internal: true
         name: iris-streaming-sb-imtlsonprem-nlb
+        sourceRanges: "13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32"
     custom:
       internaleks:
         port: 9094
@@ -207,6 +208,7 @@ kafka:
           enabled: true
           internal: true
           name: iris-streaming-sb-ildaponprem-nlb
+          sourceRanges: "13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32"
 
 controlCenter:
   dataVolumeCapacity: 300Gi
