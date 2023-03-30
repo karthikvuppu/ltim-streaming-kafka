@@ -17,6 +17,7 @@
       --install 
       external-dns 
       bitnami/external-dns 
+      --version 6.14.4
       --namespace externaldns 
       --create-namespace 
       --values tooling/external-dns/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
@@ -24,12 +25,14 @@
     - 'helm upgrade
       --install  
       external-secrets external-secrets/external-secrets
+      --version v0.8.1
       --namespace external-secrets 
       --create-namespace
       --kube-context $EKS_CLUSTER'
     - 'helm upgrade 
       --install 
       filebeat elastic/filebeat 
+      --version 8.5.1
       --namespace filebeat 
       --create-namespace 
       --values tooling/filebeat/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
@@ -37,11 +40,13 @@
     - 'helm upgrade 
       --install 
       stakater stakater/reloader 
+      --version v1.0.15 
       --namespace stakater-reloader 
       --create-namespace
       --kube-context $EKS_CLUSTER'
     - 'helm upgrade
       --install
+      --version 3.20.2 
       datadog datadog/datadog
       --namespace datadog
       -f tooling/datadog/values.yaml
@@ -81,6 +86,7 @@
           helm upgrade \
           --install \
           kafka-lag-exporter kafka-lag-exporter/kafka-lag-exporter \
+          --version 0.8.2 \
           --namespace kafka-lag-exporter \
           --create-namespace \
           --values tooling/kafka-lag-exporter/values-common.yaml \
