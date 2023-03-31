@@ -44,9 +44,9 @@ kerberos:
 connect:
   instances:
     connect-onprem:
+      cfkVersion: 2.5.1
+      confluentVersion: 7.3.2
       replicas: 1
-      image:
-        application: confluentinc/cp-server-connect:7.1.1
       dns:
         prefix: ionpremconnect
       loadbalancer:
@@ -77,6 +77,8 @@ connect:
 
 
 schemaRegistry:
+  cfkVersion: 2.5.1
+  confluentVersion: 7.3.2
   internalService:
     enabled: false
   loadbalancer:
@@ -99,6 +101,8 @@ schemaRegistry:
       'authentication.skip.paths': '/*'
 
 restProxy:
+  cfkVersion: 2.5.1
+  confluentVersion: 7.3.2
   authentication:
     type: mtls 
   dependencies:
@@ -119,6 +123,8 @@ restProxy:
       'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
 
 zookeeper:
+  cfkVersion: 2.5.1
+  confluentVersion: 7.3.2
   dataVolumeCapacity: 40Gi
   logVolumeCapacity: 30Gi
   podAntiAffinity:
@@ -133,6 +139,8 @@ zookeeper:
       'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
 
 kafka:
+  cfkVersion: 2.5.1
+  confluentVersion: 7.3.2
   replicas: 3
   dataVolumeCapacity: 1500Gi
   oneReplicaPerNode: false
@@ -211,6 +219,8 @@ kafka:
           sourceRanges: "13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32"
 
 controlCenter:
+  cfkVersion: 2.5.1
+  confluentVersion: 7.3.2
   dataVolumeCapacity: 300Gi
   configOverrides:
     log4j:
