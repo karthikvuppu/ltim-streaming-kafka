@@ -8,8 +8,8 @@ spec:
     secretRef: confluent-license
   replicas: {{ .Values.kafka.replicas }}
   image:
-    application: confluentinc/cp-server:7.1.1
-    init: confluentinc/confluent-init-container:2.3.0
+    application: confluentinc/cp-server:{{ .Values.kafka.confluentVersion | default .Values.defaults.confluent.platformVersion }}
+    init: confluentinc/confluent-init-container:{{ .Values.kafka.cfkVersion | default .Values.defaults.confluent.cfkVersion }}
   storageClass:
     name: standard
   dataVolumeCapacity: {{ .Values.kafka.dataVolumeCapacity }}

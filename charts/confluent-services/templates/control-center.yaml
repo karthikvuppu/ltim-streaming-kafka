@@ -8,8 +8,8 @@ spec:
     secretRef: confluent-license
   replicas: 1
   image:
-    application: confluentinc/cp-enterprise-control-center:7.1.1
-    init: confluentinc/confluent-init-container:2.3.0
+    application: confluentinc/cp-enterprise-control-center:{{ .Values.controlCenter.confluentVersion | default .Values.defaults.confluent.platformVersion }}
+    init: confluentinc/confluent-init-container:{{ .Values.controlCenter.cfkVersion | default .Values.defaults.confluent.cfkVersion }}
   dataVolumeCapacity: {{.Values.controlCenter.dataVolumeCapacity}}
   {{ with .Values.controlCenter.configOverrides}}
   configOverrides:

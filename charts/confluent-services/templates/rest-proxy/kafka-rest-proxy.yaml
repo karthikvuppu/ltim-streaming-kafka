@@ -61,8 +61,8 @@ spec:
 {{ toYaml . | indent 8 }}
       {{- end }}
   image:
-    application: confluentinc/cp-kafka-rest:7.1.1
-    init: confluentinc/confluent-init-container:2.3.0
+    application: confluentinc/cp-kafka-rest:{{ .Values.restProxy.confluentVersion | default .Values.defaults.confluent.platformVersion }}
+    init: confluentinc/confluent-init-container:{{ .Values.restProxy.cfkVersion | default .Values.defaults.confluent.cfkVersion }}
   replicas: 1
   {{- with .Values.restProxy.mountedVolumes }}
   mountedVolumes:

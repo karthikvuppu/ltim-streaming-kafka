@@ -6,8 +6,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-zookeeper:7.1.1
-    init: confluentinc/confluent-init-container:2.3.0
+    application: confluentinc/cp-zookeeper:{{ .Values.zookeeper.confluentVersion | default .Values.defaults.confluent.platformVersion }}
+    init: confluentinc/confluent-init-container:{{ .Values.zookeeper.cfkVersion | default .Values.defaults.confluent.cfkVersion }}
   dataVolumeCapacity: {{ .Values.zookeeper.dataVolumeCapacity }}
   logVolumeCapacity: {{ .Values.zookeeper.logVolumeCapacity }}
   authentication:

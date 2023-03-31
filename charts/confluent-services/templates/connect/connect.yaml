@@ -5,23 +5,30 @@ kind: Connect
 metadata:
   name: {{ $name }}
   namespace: confluent
+  annotations:
+    platform.confluent.io/pod-overlay-configmap-name: {{ $name }}-pod-overlay
   finalizers:
   - connect.finalizers.platform.confluent.io
 spec:
   replicas: {{ .replicas}}
   oneReplicaPerNode: true
   image:
+  {{- if (.image).application }}
     application: {{ .image.application }}
-    init: confluentinc/confluent-init-container:2.3.0
-  # mountedVolumes:
-  #   volumes:
-  #     - name: config-volume
-  #       configMap:
-  #         name: cert-test
-  #   volumeMounts:
-  #     - name: config-volume
-  #       mountPath: /mnt
-  #       readOnly: true   
+  {{- else }}
+    application: confluentinc/cp-server-connect:{{ .confluentVersion | default $.Values.defaults.confluent.platformVersion }}
+  {{- end }}
+    init: confluentinc/confluent-init-container:{{ .cfkVersion | default $.Values.defaults.confluent.cfkVersion }}
+  {{- if .additionalJars }}
+  mountedVolumes:
+    volumes:
+      - name: additional-jars
+        emptyDir: {}
+    volumeMounts:
+      - name: additional-jars
+        mountPath: /usr/share/java/additional-jars
+        readOnly: true   
+  {{- end }}
   build:
     type: onDemand
     onDemand:
@@ -141,4 +148,33 @@ spec:
   - secretRef: {{ . }}
   {{- end }}
   {{- end }}
+{{- if .additionalJars }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}-pod-overlay
+  namespace: confluent
+data:
+  pod-template.yaml: |
+    spec:
+      template:
+        spec:
+          initContainers:
+          - name: curl
+            image: appropriate/curl
+            command:
+              - sh
+              - -c
+              - |
+                cd /tmp
+{{- range .additionalJars }}
+                curl -O {{ . }}
+{{- end }}
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+              - name: additional-jars
+                mountPath: /tmp
+
+{{- end }}
 {{- end }}

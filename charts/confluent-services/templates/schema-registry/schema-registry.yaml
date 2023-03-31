@@ -6,8 +6,8 @@ metadata:
 spec:
   replicas: {{ .Values.schemaRegistry.replicas }}
   image:
-    application: confluentinc/cp-schema-registry:7.1.1
-    init: confluentinc/confluent-init-container:2.3.0
+    application: confluentinc/cp-schema-registry:{{ .Values.schemaRegistry.confluentVersion | default .Values.defaults.confluent.platformVersion }}
+    init: confluentinc/confluent-init-container:{{ .Values.schemaRegistry.cfkVersion | default .Values.defaults.confluent.cfkVersion }}
   {{ with .Values.schemaRegistry.configOverrides }}
   configOverrides:
     {{- with .log4j }}
