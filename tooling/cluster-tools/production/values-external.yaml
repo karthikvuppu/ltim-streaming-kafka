@@ -23,6 +23,9 @@ datadog:
 filebeat:
   enabled: true
 
+kafkalagexporter:
+  enabled: true
+
 certManager:
   enabled: false
 clusterIssuer:

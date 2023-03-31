@@ -56,6 +56,14 @@
       --namespace confluent 
       -f tooling/cluster-tools/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
       --kube-context $EKS_CLUSTER'
+    - 'helm upgrade 
+      --install  
+      --version 0.8.2 
+      kafka-lag-exporter kafka-lag-exporter/kafka-lag-exporter
+      --namespace kafka-lag-exporter 
+      --create-namespace 
+      -f tooling/kafka-lag-exporter/values-common.yaml 
+      --kube-context $EKS_CLUSTER'
     - |
         if [[ $ENVIRONMENT == "sandbox" && $CLUSTER_TYPE == "external" ]];
         then
@@ -78,18 +86,6 @@
           --namespace ingress \
           --create-namespace \
           --values tooling/ingress/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml \
-          --kube-context $EKS_CLUSTER
-        fi
-    - |
-        if [[ $ENVIRONMENT == "sandbox" && $CLUSTER_TYPE == "external" ]];
-        then
-          helm upgrade \
-          --install \
-          kafka-lag-exporter kafka-lag-exporter/kafka-lag-exporter \
-          --version 0.8.2 \
-          --namespace kafka-lag-exporter \
-          --create-namespace \
-          --values tooling/kafka-lag-exporter/values-common.yaml \
           --kube-context $EKS_CLUSTER
         fi
   when: manual
