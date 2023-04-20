@@ -115,6 +115,9 @@ connect:
         - name: kafka-connect-hdfs3
           owner: confluentinc
           version: 1.1.10
+        - name: kafka-connect-kinesis
+          owner: confluentinc
+          version: 1.3.16
       loadbalancer:
         internal: false
         name: iris-streaming-prod-awsconnect
