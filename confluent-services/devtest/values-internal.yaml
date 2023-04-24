@@ -223,3 +223,22 @@ kafka:
           sourceRanges: "13.51.132.182/32, 13.51.115.193/32, 13.51.138.3/32"
           bootstrapPrefix: ildaponprem
           brokerPrefix: ildaponprem
+      ioauthonprem:
+        port: 9095
+        authentication:
+          type: plain
+          jaasConfig:
+            secretRef: credential
+        loadbalancer:
+          enabled: true
+          internal: true
+          name: iris-streaming-devtest-ioauthonprem
+          sourceRanges: "13.51.132.182/32"
+          bootstrapPrefix: ioauthonprem
+        customServerConfiguration:
+          'sasl.enabled.mechanisms': 'OAUTHBEARER'
+          'sasl.oauthbearer.jwks.endpoint.url': 'https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs'
+          'sasl.oauthbearer.expected.audience': 'account'
+          'sasl.oauthbearer.sub.claim.name': 'clientId'
+          'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
+          'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'

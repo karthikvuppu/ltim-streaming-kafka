@@ -217,6 +217,26 @@ kafka:
           internal: true
           name: iris-streaming-sb-ildaponprem-nlb
           sourceRanges: "13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32"
+      ioauthonprem:
+        port: 9095
+        authentication:
+          ## This is only required for using the CFK custom listener section. configOverrides listener.name.client.sasl.enabled.mechanism=OAUTHBEARER will do the trick!
+          type: plain
+          jaasConfig:
+            secretRef: credential
+        loadbalancer:
+          enabled: true
+          internal: true
+          name: iris-streaming-sb-ioauthonprem-nlb
+          sourceRanges: "13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32"
+        customServerConfiguration:
+          'sasl.enabled.mechanisms': 'OAUTHBEARER'
+          'sasl.oauthbearer.jwks.endpoint.url': 'https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs'
+          'sasl.oauthbearer.expected.audience': 'account'
+          'sasl.oauthbearer.sub.claim.name': 'clientId'
+          'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
+          'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
+
 
 controlCenter:
   cfkVersion: 2.5.1
