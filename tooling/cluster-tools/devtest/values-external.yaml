@@ -27,6 +27,6 @@ kafkalagexporter:
   enabled: true
 
 certManager:
-  enabled: false
+  enabled: true
 clusterIssuer:
   hostedZoneID: Z013025421OH83T6MGYV1

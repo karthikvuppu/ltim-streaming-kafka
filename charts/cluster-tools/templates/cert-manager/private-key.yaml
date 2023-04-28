@@ -1,0 +1,20 @@
+{{ if .Values.certManager.enabled}}
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: letsencrypt-private-key
+  namespace: cert-manager
+spec:
+  refreshInterval: "1m"  # May be set to zero to fetch and create it once
+  secretStoreRef:
+    name: global-secret-store
+    kind: ClusterSecretStore
+  target:
+    name: letsencrypt-private-key
+    creationPolicy: Owner
+  data:
+    - secretKey: tls.key
+      remoteRef:
+        key: common/letsencrypt-private-key
+        property: tls.key
+{{- end }}
