@@ -1,0 +1,103 @@
+providers:
+  kubernetesIngress:
+    publishedService:
+      enabled: true
+
+deployment:
+  replicas: 3
+
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 2
+    maxSurge: 1
+
+service:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    external-dns.alpha.kubernetes.io/ttl: "300"
+    external-dns.alpha.kubernetes.io/hostname:
+      "*.mtlsaws.kafka.iris-streaming-sb.devtest.aws.scania.com,
+      mtlsaws.kafka.iris-streaming-sb.devtest.aws.scania.com,
+      *.oauthaws.kafka.iris-streaming-sb.devtest.aws.scania.com,
+      oauthaws.kafka.iris-streaming-sb.devtest.aws.scania.com,
+      controlcenter.iris-streaming-sb.devtest.aws.scania.com"
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-05f7a5ed2f3bffe1f, subnet-01134504e0e2585cb, subnet-0b0d0d44264a719c2
+    service.beta.kubernetes.io/load-balancer-source-ranges: "13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32"
+    service.beta.kubernetes.io/aws-load-balancer-name: external-public-ingress
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "600"
+    service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "stickiness.enabled=true,stickiness.type=source_ip,preserve_client_ip.enabled=true"
+    service.beta.kubernetes.io/aws-load-balancer-target-node-labels: "eks.amazonaws.com/nodegroup=infra-ingress-nodes"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "cluster_type=external,lb_type=public"
+
+  spec:
+    externalTrafficPolicy: Local
+    allocateLoadBalancerNodePorts: false
+    
+  internal:
+    type: LoadBalancer
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      external-dns.alpha.kubernetes.io/ttl: "300"
+      external-dns.alpha.kubernetes.io/hostname:
+        "*.mtlsonprem.kafka.iris-streaming-sb.devtest.aws.scania.com,
+        mtlsonprem.kafka.iris-streaming-sb.devtest.aws.scania.com,
+        *.oauthonprem.kafka.iris-streaming-sb.devtest.aws.scania.com,
+        oauthonprem.kafka.iris-streaming-sb.devtest.aws.scania.com"
+      service.beta.kubernetes.io/aws-load-balancer-type: nlb
+      service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+      service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-005c0a53190a785d7, subnet-000ec77e207799a57, subnet-0700aa03c92c90b8a
+      service.beta.kubernetes.io/load-balancer-source-ranges: "13.48.228.240/32, 13.51.76.45/32, 13.51.129.156/32"
+      service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "600"
+      service.beta.kubernetes.io/aws-load-balancer-name: external-private-ingress
+      service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: "stickiness.enabled=true,stickiness.type=source_ip,preserve_client_ip.enabled=true"
+      service.beta.kubernetes.io/aws-load-balancer-target-node-labels: "eks.amazonaws.com/nodegroup=infra-ingress-nodes"
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+      service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "cluster_type=external,lb_type=private"
+    spec:
+      externalTrafficPolicy: Local
+      allocateLoadBalancerNodePorts: false
+
+securityContext:
+  runAsUser: 0
+  runAsGroup: 0
+  runAsNonRoot: false
+  capabilities:
+    drop:
+      - ALL
+    add:
+      - NET_BIND_SERVICE
+
+ports:
+  websecure:
+    port: 443
+  kafka:
+    expose: true
+    port: 9092
+    protocol: TCP
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: service
+              operator: In
+              values:
+                - infra
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: '{{ template "traefik.name" . }}'
+            app.kubernetes.io/instance: '{{ .Release.Name }}-{{ .Release.Namespace }}'
+        topologyKey: kubernetes.io/hostname
+
+logs:
+  general:
+    level: DEBUG
+  access:
+    enabled: true
