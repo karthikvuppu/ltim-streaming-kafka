@@ -48,11 +48,15 @@ controlCenter:
       'confluent.controlcenter.mds.client.idle.timeout': '30000'
       'confluent.controlcenter.mds.client.max.requests.queued.per.destination': '2048'
       'confluent.controlcenter.internal.topics.partitions': '4'
-  loadbalancer:
-    internal: false
-    name: iris-streaming-devtest-controlcenter
-    nodeLabel: cc
-    certificateArn: arn:aws:acm:eu-north-1:858242954753:certificate/57e103f8-aa1a-4cbc-ba9b-94a06299924c
+  # loadbalancer:
+  #   internal: false
+  #   name: iris-streaming-devtest-controlcenter
+  #   nodeLabel: cc
+  #   certificateArn: arn:aws:acm:eu-north-1:858242954753:certificate/57e103f8-aa1a-4cbc-ba9b-94a06299924c
+  ingress:
+    enabled: true
+    domain: controlcenter.iris-streaming.devtest.aws.scania.com
+    port: 9021
   dns:
     prefix: controlcenter
   nodeAffinityServiceName: cc
@@ -412,3 +416,77 @@ kafka:
           bootstrapPrefix: mtlsonprem
         customServerConfiguration:
           'ssl.principal.mapping.rules': '${file:/mnt/secrets/mtls-mapping/mtls-mapping.txt:mapping}'
+
+      ingressmtlsaws:
+        port: 9096
+        loadbalancer:
+          enabled: false
+          internal: false
+        authentication:
+          type: mtls
+          principalMappingRules:
+            - DEFAULT
+        ingress:
+          domain: mtlsaws.kafka.iris-streaming.devtest.aws.scania.com
+          port: 9092
+          secretRef: kafka-tls
+        customServerConfiguration:
+          'ssl.truststore.location': '/mnt/sslcerts/truststore.p12'
+          'ssl.truststore.password': '${file:/mnt/sslcerts/jksPassword.txt:jksPassword}'
+      ingressoauthaws:
+        port: 9097
+        loadbalancer:
+          enabled: false
+          internal: false
+        authentication:
+          type: plain
+          jaasConfig:
+            secretRef: credential
+        ingress:
+          port: 9092
+          domain: oauthaws.kafka.iris-streaming.devtest.aws.scania.com
+          secretRef: kafka-tls
+        customServerConfiguration:
+          'sasl.enabled.mechanisms': 'OAUTHBEARER'
+          'sasl.oauthbearer.jwks.endpoint.url': 'https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs'
+          'sasl.oauthbearer.expected.audience': 'account'
+          'sasl.oauthbearer.sub.claim.name': 'clientId'
+          'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
+          'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
+      ingressmtlsonprem:
+        port: 9098
+        loadbalancer: 
+          enabled: false
+          internal: false
+        authentication:
+          type: mtls
+          principalMappingRules:
+            - DEFAULT
+        customServerConfiguration:
+          'ssl.truststore.location': '/mnt/sslcerts/truststore.p12'
+          'ssl.truststore.password': '${file:/mnt/sslcerts/jksPassword.txt:jksPassword}'
+        ingress:
+          port: 9092
+          domain: mtlsonprem.kafka.iris-streaming.devtest.aws.scania.com
+          secretRef: kafka-tls
+      ingressoauthonprem:
+        port: 9099
+        loadbalancer:
+          enabled: false
+          internal: false
+        authentication:
+          type: plain
+          jaasConfig:
+            secretRef: credential
+        ingress:
+          port: 9092
+          domain: oauthonprem.kafka.iris-streaming.devtest.aws.scania.com
+          secretRef: kafka-tls
+        customServerConfiguration:
+          'sasl.enabled.mechanisms': OAUTHBEARER
+          'sasl.mechanism': PLAIN
+          'sasl.oauthbearer.jwks.endpoint.url': 'https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs'
+          'sasl.oauthbearer.expected.audience': 'account'
+          'sasl.oauthbearer.sub.claim.name': 'clientId'
+          'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
+          'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'

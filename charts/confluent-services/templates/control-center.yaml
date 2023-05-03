@@ -80,7 +80,7 @@ spec:
     {{- end }}
     {{- end }}
     {{- end }}
-  {{- if not (.Values.controlCenter.ingress) }}
+  {{- if .Values.controlCenter.loadbalancer }}
   externalAccess:
     type: loadBalancer
     loadBalancer:

@@ -27,7 +27,7 @@ metadata:
   name: controlcenter-transport
   namespace: confluent
 spec:
-  serverName: {{ .Values.controlCenter.ingress.domain }}
+  serverName: controlcenter.confluent.svc.cluster.local
   rootCAsSecrets:
     - ca-root
   forwardingTimeouts:
