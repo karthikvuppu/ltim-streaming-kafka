@@ -126,11 +126,14 @@ restProxy:
     internal: false
     name: iris-streaming-devtest-restproxyaws
     nodeLabels: rp
+  ingress:
+    enabled: true
+    domain: restproxy.kafka.iris-streaming.devtest.aws.scania.com
+    port: 8082
   dns:
     prefix: restproxyaws
   podAntiAffinity:
-    - kafka
-    - zookeeper
+    - kafkarestproxy
   nodeAffinityServiceName: rp
 
 ksql:
