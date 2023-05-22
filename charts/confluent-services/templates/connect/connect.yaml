@@ -148,7 +148,6 @@ spec:
   - secretRef: {{ . }}
   {{- end }}
   {{- end }}
-{{- if .additionalJars }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -160,6 +159,7 @@ data:
     spec:
       template:
         spec:
+{{- if .additionalJars }}
           initContainers:
           - name: curl
             image: appropriate/curl
@@ -171,10 +171,11 @@ data:
 {{- range .additionalJars }}
                 curl -O {{ . }}
 {{- end }}
+{{- end }}
             imagePullPolicy: IfNotPresent
             volumeMounts:
               - name: additional-jars
                 mountPath: /tmp
 
-{{- end }}
+
 {{- end }}

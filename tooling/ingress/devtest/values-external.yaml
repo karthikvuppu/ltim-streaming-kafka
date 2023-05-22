@@ -17,10 +17,11 @@ service:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     external-dns.alpha.kubernetes.io/ttl: "300"
     external-dns.alpha.kubernetes.io/hostname:
-      "*.mtlsaws.kafka.iris-streaming.devtest.aws.scania.com,
-      mtlsaws.kafka.iris-streaming.devtest.aws.scania.com,
+      "*.kafka.iris-streaming.devtest.aws.scania.com,
+      *.mtlsaws.kafka.iris-streaming.devtest.aws.scania.com,
       *.oauthaws.kafka.iris-streaming.devtest.aws.scania.com,
-      oauthaws.kafka.iris-streaming.devtest.aws.scania.com,
+      *.mtls.kafka.iris-streaming.devtest.aws.scania.com,
+      *.oauth.kafka.iris-streaming.devtest.aws.scania.com,
       controlcenter.iris-streaming.devtest.aws.scania.com"
     service.beta.kubernetes.io/aws-load-balancer-type: nlb
     service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
@@ -43,7 +44,10 @@ service:
       cert-manager.io/cluster-issuer: letsencrypt-prod
       external-dns.alpha.kubernetes.io/ttl: "300"
       external-dns.alpha.kubernetes.io/hostname:
-        "*.mtlsonprem.kafka.iris-streaming.devtest.aws.scania.com,
+        "*.kafka-op.iris-streaming.devtest.aws.scania.com,
+        *.mtls.kafka-op.iris-streaming.devtest.aws.scania.com,
+        *.oauth.kafka-op.iris-streaming.devtest.aws.scania.com,
+        *.mtlsonprem.kafka.iris-streaming.devtest.aws.scania.com,
         mtlsonprem.kafka.iris-streaming.devtest.aws.scania.com,
         *.oauthonprem.kafka.iris-streaming.devtest.aws.scania.com,
         oauthonprem.kafka.iris-streaming.devtest.aws.scania.com"
