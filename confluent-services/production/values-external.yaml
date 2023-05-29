@@ -150,6 +150,9 @@ connect:
         - name: kafka-connect-hdfs3
           owner: confluentinc
           version: 1.1.10
+        - name: kafka-connect-ibmmq
+          owner: confluentinc
+          version: 12.1.0
       loadbalancer:
         name: iris-streaming-prod-onpremconnect
         nodeLabels: onpremconnect
@@ -169,6 +172,7 @@ connect:
       mountedSecrets:
         - connect-clients
         - clusterlink-privkey
+        - seip-ibmmq-cert
 
     connect-me:
       replicas: 3
