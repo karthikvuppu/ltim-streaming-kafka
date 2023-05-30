@@ -226,6 +226,9 @@ connect:
         - name: kafka-connect-ibmmq-sink
           owner: confluentinc
           version: 2.1.0
+        - name: kafka-connect-servicenow
+          owner: confluentinc
+          version: 2.4.3        
       loadbalancer:
         name: iris-streaming-devtest-onpremconnect
         nodeLabels: onpremconnect
