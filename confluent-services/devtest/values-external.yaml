@@ -269,7 +269,7 @@ connect:
           version: 10.3.3
         - name: kafka-connect-oracle-cdc
           owner: confluentinc
-          version: 2.2.2
+          version: 2.6.0
       loadbalancer:
         name: iris-streaming-devtest-meconnect
         internal: true
