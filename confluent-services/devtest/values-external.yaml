@@ -182,6 +182,9 @@ connect:
         - name: kafka-connect-kinesis
           owner: confluentinc 
           version: 1.3.16
+        - name: kafka-connect-servicenow
+          owner: confluentinc
+          version: 2.4.4 
       loadbalancer:
         internal: false
         name: iris-streaming-devtest-awsconnect
@@ -225,7 +228,7 @@ connect:
           version: 12.1.0
         - name: kafka-connect-ibmmq-sink
           owner: confluentinc
-          version: 2.1.0
+          version: 2.1.0      
       loadbalancer:
         name: iris-streaming-devtest-onpremconnect
         nodeLabels: onpremconnect
