@@ -206,7 +206,7 @@ connect:
     connect-onprem:
       replicas: 3
       image:
-        application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.1.1.9
+        application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.2.1.1
       plugins:
         - name: kafka-connect-datagen
           owner: confluentinc
