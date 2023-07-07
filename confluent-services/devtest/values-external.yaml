@@ -185,6 +185,9 @@ connect:
         - name: kafka-connect-servicenow
           owner: confluentinc
           version: 2.4.4 
+        - name: snowflake-kafka-connector
+          owner: snowflakeinc
+          version: 1.9.3   
       loadbalancer:
         internal: false
         name: iris-streaming-devtest-awsconnect
