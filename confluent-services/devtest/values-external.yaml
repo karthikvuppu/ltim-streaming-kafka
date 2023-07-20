@@ -499,3 +499,5 @@ kafka:
           'sasl.oauthbearer.sub.claim.name': 'clientId'
           'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
           'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
+  annotationOverrides:
+    ad.datadoghq.com/kafka.instances: '[{"host": "%%host%%","port":"7203", "max_returned_metrics":8000}]'
