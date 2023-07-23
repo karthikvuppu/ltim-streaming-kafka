@@ -3,13 +3,13 @@ defaults:
     cfkVersion: 2.3.0
     platformVersion: 7.1.1
   kafka:
-    annotationOverrides:
-      - ad.datadoghq.com/kafka.check_names: '["confluent_platform"]'
-      - ad.datadoghq.com/kafka.init_configs: '[{"is_jmx": true, "collect_default_metrics": true, "service_check_prefix": "confluent", "new_gc_metrics": true, "collect_default_jvm_metrics": true}]'
-      - ad.datadoghq.com/kafka.instances: '[{"host": "%%host%%","port":"7203", "max_returned_metrics":1800}]'
-      - ad.datadoghq.com/kafka.logs: '[{"source":"confluent_platform","service":"confluent_platform"}]'
-      - secret.reloader.stakater.com/reload: mtls-mapping
-      - co.elastic.logs/enabled: "true"      
+    annotation:
+      'ad.datadoghq.com/kafka.check_names': '["confluent_platform"]'
+      'ad.datadoghq.com/kafka.init_configs': '[{"is_jmx": true, "collect_default_metrics": true, "service_check_prefix": "confluent", "new_gc_metrics": true, "collect_default_jvm_metrics": true}]'
+      'ad.datadoghq.com/kafka.instances': '[{"host": "%%host%%","port":"7203", "max_returned_metrics":1800}]'
+      'ad.datadoghq.com/kafka.logs': '[{"source":"confluent_platform","service":"confluent_platform"}]'
+      'secret.reloader.stakater.com/reload': mtls-mapping
+      'co.elastic.logs/enabled': "true"      
   ksql:
     configOverrides:
       log4j:
