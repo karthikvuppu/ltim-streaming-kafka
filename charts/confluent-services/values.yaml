@@ -16,3 +16,11 @@ defaults:
         'access.control.allow.origin': '*'
         'access.control.allow.methods': 'GET,POST,HEAD'
         'access.control.allow.headers': 'X-Requested-With,Content-Type,Accept,Origin,Authorization'
+kafka:
+  annotation:
+    'ad.datadoghq.com/kafka.check_names': '["confluent_platform"]'
+    'ad.datadoghq.com/kafka.init_configs': '[{"is_jmx": true, "collect_default_metrics": true, "service_check_prefix": "confluent", "new_gc_metrics": true, "collect_default_jvm_metrics": true}]'
+    'ad.datadoghq.com/kafka.instances': '[{"host": "%%host%%","port":"7203", "max_returned_metrics":1800}]'
+    'ad.datadoghq.com/kafka.logs': '[{"source":"confluent_platform","service":"confluent_platform"}]'
+    'secret.reloader.stakater.com/reload': mtls-mapping
+    'co.elastic.logs/enabled': "true"     
