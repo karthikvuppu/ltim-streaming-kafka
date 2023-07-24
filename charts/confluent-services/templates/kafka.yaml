@@ -255,10 +255,10 @@ spec:
     {{- with .Values.kafka.annotation }}
     annotations:
     {{- range $key, $value := .}}
-      {{ $key }}: {{ $value }}
+      {{ $key }}: {{ $value | squote }}
     {{- end }}
     {{- end }} 
-    #annotations:
+   #annotations:
    #  ad.datadoghq.com/kafka.check_names: '["confluent_platform"]'
    #  ad.datadoghq.com/kafka.init_configs: '[{"is_jmx": true, "collect_default_metrics": true, "service_check_prefix": "confluent", "new_gc_metrics": true, "collect_default_jvm_metrics": true}]'
    #  ad.datadoghq.com/kafka.instances: '[{"host": "%%host%%","port":"7203", "max_returned_metrics":8000}]'
