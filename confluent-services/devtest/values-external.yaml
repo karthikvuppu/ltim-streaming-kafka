@@ -505,4 +505,4 @@ kafka:
     'ad.datadoghq.com/kafka.instances': '[{"host": "%%host%%","port":"7203", "max_returned_metrics":8000}]'
     'ad.datadoghq.com/kafka.logs': '[{"source":"confluent_platform","service":"confluent_platform"}]'
     'secret.reloader.stakater.com/reload': mtls-mapping
-    'co.elastic.logs/enabled': "true"         
+    'co.elastic.logs/enabled': "true"       
