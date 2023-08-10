@@ -26,6 +26,7 @@ daemonset:
                   multiline.pattern: '^(\[|\{)'
                   multiline.negate: true
                   multiline.match: after
+                  multiline.max_lines: 3000
       filebeat.inputs:
       - type: kafka
         hosts:
