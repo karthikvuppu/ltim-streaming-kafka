@@ -156,6 +156,9 @@ connect:
         - name: kafka-connect-ibmmq
           owner: confluentinc
           version: 12.1.0
+        - name: kafka-connect-oracle-cdc
+          owner: confluentinc
+          version: 2.7.3
       loadbalancer:
         name: iris-streaming-prod-onpremconnect
         nodeLabels: onpremconnect
