@@ -1,0 +1,65 @@
+## Statically define one or more cluster
+clusters: 
+  - bootstrapBrokers: "kafka.confluent.svc.cluster.local:9071"
+    topicBlacklist:
+    - "^_.*"
+    groupBlacklist:
+    - "^(_|Confluent).*"
+    consumerProperties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: PLAIN
+      ssl.truststore.location: /mnt/kafka-ca/ca.crt
+      ssl.truststore.type: PEM
+    consumerPropertiesNoQuotes:
+      sasl.jaas.config: "\"org.apache.kafka.common.security.plain.PlainLoginModule required username='\"${KAFKA_USERNAME}\"' password='\"${KAFKA_PASSWORD}\"';\""
+      
+    adminClientProperties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: PLAIN
+      ssl.truststore.location: /mnt/kafka-ca/ca.crt
+      ssl.truststore.type: PEM
+    adminClientPropertiesNoQuotes:
+      sasl.jaas.config: "\"org.apache.kafka.common.security.plain.PlainLoginModule required username='\"${KAFKA_USERNAME}\"' password='\"${KAFKA_PASSWORD}\"';\""
+
+metricWhitelist:
+  - .*
+
+rootLogLevel: INFO
+kafkaLagExporterLogLevel: INFO
+kafkaLogLevel: INFO
+akkaLogLevel: INFO
+
+additionalLabels:
+  app: kafka-lag-exporter
+
+image:
+  tag: 0.8.2
+
+extraMounts: 
+  - name: kafka-ca
+    mount:
+      secret:
+        secretName: kafka-ca
+    mountPath: /mnt/kafka-ca
+envFromSecretRefs:
+  - kafka-credentials
+
+
+podAnnotations:
+  ad.datadoghq.com/kafka-lag-exporter.checks: |
+           {
+             "openmetrics": {
+               "instances": [
+                 {
+                   "openmetrics_endpoint": "http://%%host%%:%%port%%",
+                   "namespace": "kafka-lag-exporter",
+                   "metrics": [
+                       "kafka_.*"
+                     ]
+                 }
+               ]
+             }
+           }   
+
+
+logPattern: '{"timestamp":"%date{ISO8601}","level":"%-5level","thread":"%X{akkaSource}","class":"%logger{36}","message":"%msg%ex"}%n'

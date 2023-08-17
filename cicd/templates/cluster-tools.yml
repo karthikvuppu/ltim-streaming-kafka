@@ -62,7 +62,7 @@
       kafka-lag-exporter kafka-lag-exporter/kafka-lag-exporter
       --namespace kafka-lag-exporter 
       --create-namespace 
-      -f tooling/kafka-lag-exporter/values-common.yaml 
+      -f tooling/kafka-lag-exporter/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
       --kube-context $EKS_CLUSTER'
     - |
         if [[ ( $ENVIRONMENT == "sandbox" || $ENVIRONMENT == "devtest" ) && $CLUSTER_TYPE == "external" ]];
