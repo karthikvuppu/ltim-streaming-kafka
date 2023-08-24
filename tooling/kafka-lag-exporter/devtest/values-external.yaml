@@ -5,6 +5,8 @@ clusters:
     - "^_.*"
     groupBlacklist:
     - "^(_|Confluent).*"
+    groupWhitelist:
+    - "appian.*"
     consumerProperties:
       security.protocol: SASL_SSL
       sasl.mechanism: PLAIN
