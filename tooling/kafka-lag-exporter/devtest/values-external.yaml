@@ -5,8 +5,6 @@ clusters:
     - "^_.*"
     groupBlacklist:
     - "^(_|Confluent).*"
-    groupWhitelist: 
-    - ["^appian-.+","^mona-.+","^nile-.+"]
     consumerProperties:
       security.protocol: SASL_SSL
       sasl.mechanism: PLAIN
