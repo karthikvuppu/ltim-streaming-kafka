@@ -258,7 +258,7 @@ zookeeper:
 
 kafka:
   replicas: 6
-  dataVolumeCapacity: 3500Gi
+  dataVolumeCapacity: 5000Gi
   
   mountedSecrets:
   - secretRef: mtls-mapping
