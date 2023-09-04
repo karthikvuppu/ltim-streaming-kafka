@@ -237,7 +237,10 @@ connect:
           version: 2.1.0  
         - name: snowflake-kafka-connector
           owner: snowflakeinc
-          version: 1.9.3  
+          version: 1.9.3
+        - name: connect-transforms
+          owner: confluentinc
+          version: 1.4.3
       loadbalancer:
         name: iris-streaming-devtest-onpremconnect
         nodeLabels: onpremconnect
