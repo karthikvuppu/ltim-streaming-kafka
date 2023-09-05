@@ -318,6 +318,7 @@ kafka:
       'ldap.retry.timeout.ms': '6600000'
       'confluent.schema.registry.url': 'https://schemaregistry.confluent.svc.cluster.local:8081'
       'connections.max.reauth.ms': '3600000'
+      'delete.topic.enable': 'false'
     jvm:
       '-Djava.security.krb5.conf': '/etc/krb5.conf'
       '-Dcom.sun.jndi.ldap.debug': 'true'
