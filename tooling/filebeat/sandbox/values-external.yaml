@@ -23,7 +23,7 @@ daemonset:
                 - type: container
                   paths:
                     - /var/log/containers/*-${data.kubernetes.container.id}.log
-                  multiline.pattern: '^(\[|\{)'
+                  multiline.pattern: '^\[|^\{'
                   multiline.negate: true
                   multiline.match: after
                   multiline.max_lines: 3000
