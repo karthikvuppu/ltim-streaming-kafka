@@ -191,6 +191,9 @@ connect:
         - name: connect-transforms
           owner: confluentinc
           version: 1.4.3
+        - name: kafka-connect-transform-common
+          owner: jcustenborder
+          version: 0.1.0.58
       loadbalancer:
         internal: false
         name: iris-streaming-devtest-awsconnect
