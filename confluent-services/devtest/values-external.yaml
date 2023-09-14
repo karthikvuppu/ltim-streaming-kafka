@@ -228,7 +228,7 @@ connect:
           version: 1.1.10
         - name: kafka-connect-oracle-cdc
           owner: confluentinc
-          version: 2.7.3
+          version: 2.9.0
         - name: kafka-connect-jdbc
           owner: confluentinc
           version: 10.7.2
