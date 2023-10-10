@@ -290,7 +290,7 @@ kafka:
       'ldap.com.sun.jndi.ldap.read.timeout': '60000'
       'ldap.refresh.interval.ms': '60000'
       'ldap.retry.timeout.ms': '6600000'
-      'delete.topic.enable': 'false'
+     # 'delete.topic.enable': 'true'
     jvm:
       '-Djava.security.krb5.conf': '/etc/krb5.conf'
       '-Dcom.sun.jndi.ldap.debug': 'true'  
