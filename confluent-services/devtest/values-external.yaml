@@ -271,7 +271,7 @@ connect:
     connect-me:
       replicas: 3
       image:
-        application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/confluent:meconnect-1.0
+        application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.2.1.2
       plugins:
         - name: kafka-connect-datagen
           owner: confluentinc
