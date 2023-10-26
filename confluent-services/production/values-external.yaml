@@ -118,6 +118,12 @@ connect:
         - name: kafka-connect-kinesis
           owner: confluentinc
           version: 1.3.16
+        - name: kafka-connect-servicenow
+          owner: confluentinc
+          version: 2.4.4
+        - name: connect-transforms
+          owner: confluentinc
+          version: 1.4.3
       loadbalancer:
         internal: false
         name: iris-streaming-prod-awsconnect
