@@ -290,7 +290,7 @@ connect:
           version: 2.6.0
         - name: snowflake-kafka-connector
           owner: snowflakeinc
-          version: 1.9.3
+          version: 2.1.0
         - name: connect-transforms
           owner: confluentinc
           version: 1.4.3
