@@ -16,7 +16,9 @@ licenseKey: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJjb250cm9sLWNlbnRlci
 #  -----END PUBLIC KEY-----
 
 replicas: 1
-heapOptions: "-Xms256M -Xmx1024M"
+resources:
+   limits:
+     memory: 1Gi
 
 
 ## Enable extra Kubernetes API groups in role/clusterrole resource
