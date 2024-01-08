@@ -23,7 +23,7 @@ stages:
     ENVIRONMENT: sandbox
     AWS_ROLE_ARN: $AWS_ROLE_ARN_SANDBOX
     EXTERNAL_EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
-    INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
+    # INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
     CLUSTER_REGION: eu-north-1
     CONF_OPERATOR_VERSION: "0.581.34"
 
@@ -32,7 +32,7 @@ stages:
     ENVIRONMENT: devtest
     AWS_ROLE_ARN: $AWS_ROLE_ARN_DEVTEST
     EXTERNAL_EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
-    INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
+    # INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
     CLUSTER_REGION: eu-north-1
 
 .production:
@@ -40,7 +40,7 @@ stages:
     ENVIRONMENT: production
     AWS_ROLE_ARN: $AWS_ROLE_ARN_PRODUCTION
     EXTERNAL_EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
-    INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
+    # INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
     CLUSTER_REGION: eu-north-1
 
 ################################################ ClusterType ###############################################
@@ -50,10 +50,10 @@ stages:
     CLUSTER_TYPE: external
     EKS_CLUSTER: $EXTERNAL_EKS_CLUSTER
 
-.internal:
-  variables:
-    CLUSTER_TYPE: internal
-    EKS_CLUSTER: "$INTERNAL_EKS_CLUSTER"
+# .internal:
+#   variables:
+#     CLUSTER_TYPE: internal
+#     EKS_CLUSTER: "$INTERNAL_EKS_CLUSTER"
 
 ################################################# Cluster Tools ###############################################
 sbox-external cluster-tools:
@@ -64,13 +64,13 @@ sbox-external cluster-tools:
   - .external
   when: manual
 
-sbox-internal cluster-tools:
-  stage: cluster tools
-  extends:
-  - .cluster-tools-deploy
-  - .sandbox
-  - .internal
-  when: manual
+# sbox-internal cluster-tools:
+#   stage: cluster tools
+#   extends:
+#   - .cluster-tools-deploy
+#   - .sandbox
+#   - .internal
+#   when: manual
 
 devtest-external cluster-tools:
   stage: cluster tools
@@ -80,13 +80,13 @@ devtest-external cluster-tools:
   - .external
   when: manual
 
-devtest-internal cluster-tools:
-  stage: cluster tools
-  extends:
-  - .cluster-tools-deploy
-  - .dev-test
-  - .internal
-  when: manual
+# devtest-internal cluster-tools:
+#   stage: cluster tools
+#   extends:
+#   - .cluster-tools-deploy
+#   - .dev-test
+#   - .internal
+#   when: manual
 
 prod-external cluster-tools:
   stage: cluster tools
@@ -96,13 +96,13 @@ prod-external cluster-tools:
   - .external
   when: manual
 
-prod-internal cluster-tools:
-  stage: cluster tools
-  extends:
-  - .cluster-tools-deploy
-  - .production
-  - .internal
-  when: manual
+# prod-internal cluster-tools:
+#   stage: cluster tools
+#   extends:
+#   - .cluster-tools-deploy
+#   - .production
+#   - .internal
+#   when: manual
 
 ################################################# Confluent Operator ###############################################
 sbox-external confluent-operator:
@@ -113,13 +113,13 @@ sbox-external confluent-operator:
   - .external
   when: manual
 
-sbox-internal confluent-operator:
-  stage: confluent operator
-  extends:
-  - .confluent-operator-deploy
-  - .sandbox
-  - .internal
-  when: manual
+# sbox-internal confluent-operator:
+#   stage: confluent operator
+#   extends:
+#   - .confluent-operator-deploy
+#   - .sandbox
+#   - .internal
+#   when: manual
 
 devtest-external confluent-operator:
   stage: confluent operator
@@ -129,12 +129,12 @@ devtest-external confluent-operator:
   - .external
   when: manual
 
-devtest-internal confluent-operator:
-  stage: confluent operator
-  extends:
-  - .confluent-operator-deploy
-  - .dev-test
-  - .internal
+# devtest-internal confluent-operator:
+#   stage: confluent operator
+#   extends:
+#   - .confluent-operator-deploy
+#   - .dev-test
+#   - .internal
 
 prod-external confluent-operator:
   stage: confluent operator
@@ -144,13 +144,13 @@ prod-external confluent-operator:
   - .external
   when: manual
 
-prod-internal confluent-operator:
-  stage: confluent operator
-  extends:
-  - .confluent-operator-deploy
-  - .production
-  - .internal
-  when: manual
+# prod-internal confluent-operator:
+#   stage: confluent operator
+#   extends:
+#   - .confluent-operator-deploy
+#   - .production
+#   - .internal
+#   when: manual
 
 ################################################# Confluent Services ###############################################
 sbox-external confluent-service:
@@ -161,13 +161,13 @@ sbox-external confluent-service:
   - .external
   when: manual
 
-sbox-internal confluent-service:
-  stage: confluent service
-  extends:
-  - .confluent-services-deploy
-  - .sandbox
-  - .internal
-  when: manual
+# sbox-internal confluent-service:
+#   stage: confluent service
+#   extends:
+#   - .confluent-services-deploy
+#   - .sandbox
+#   - .internal
+#   when: manual
 
 devtest-external confluent-service:
   stage: confluent service
@@ -177,13 +177,13 @@ devtest-external confluent-service:
   - .external
   when: manual
 
-devtest-internal confluent-service:
-  stage: confluent service
-  extends:
-  - .confluent-services-deploy
-  - .dev-test
-  - .internal
-  when: manual
+# devtest-internal confluent-service:
+#   stage: confluent service
+#   extends:
+#   - .confluent-services-deploy
+#   - .dev-test
+#   - .internal
+#   when: manual
 
 prod-external confluent-service:
   stage: confluent service
@@ -193,10 +193,10 @@ prod-external confluent-service:
   - .external
   when: manual
 
-prod-internal confluent-service:
-  stage: confluent service
-  extends:
-  - .confluent-services-deploy
-  - .production
-  - .internal
-  when: manual
+# prod-internal confluent-service:
+#   stage: confluent service
+#   extends:
+#   - .confluent-services-deploy
+#   - .production
+#   - .internal
+#   when: manual
