@@ -29,7 +29,13 @@ clusterRole:
 
 kRaft:
   enabled: false
- 
+
+kRaftController:
+  enabled: false
+
+kcontroller:
+  enabled: false
+
 kraftcontroller:
   enabled: false
 
