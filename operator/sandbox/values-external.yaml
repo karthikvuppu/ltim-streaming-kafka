@@ -27,6 +27,9 @@ clusterRole:
 #  migration: true
   openshift: false
 
+kRaft:
+  enabled: false
+ 
 kraftcontroller:
   enabled: false
 
