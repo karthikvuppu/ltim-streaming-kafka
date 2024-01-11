@@ -40,8 +40,10 @@ kerberos:
 connect:
   instances:
     connect-me: 
-      cfkVersion: 2.5.1
-      confluentVersion: 7.3.2
+      #cfkVersion: 2.5.1
+      #confluentVersion: 7.3.2
+      cfkVersion: 2.7.2
+      confluentVersion: 7.5.2
       replicas: 2
       dns:
         prefix: meconnect
@@ -91,8 +93,10 @@ connect:
         - connect-clients
         - cert-test 
     connect-onprem:
-      cfkVersion: 2.5.1
-      confluentVersion: 7.3.2
+      #cfkVersion: 2.5.1
+      #confluentVersion: 7.3.2
+      cfkVersion: 2.7.2
+      confluentVersion: 7.5.2
       replicas: 2
       hostname: onpremconnect.iris-streaming-sb.devtest.aws.scania.com
       loadbalancer:
@@ -127,8 +131,10 @@ connect:
       mountedSecrets:
         - connect-clients
   connect-aws:
-    cfkVersion: 2.5.1
-    confluentVersion: 7.3.2
+    #cfkVersion: 2.5.1
+    #confluentVersion: 7.3.2
+    cfkVersion: 2.7.2
+    confluentVersion: 7.5.2
     replicas: 2
     loadbalancer:
       internal: false
@@ -161,8 +167,10 @@ connect:
 
 ksql:
   - enabled: true
-    cfkVersion: 2.5.1
-    confluentVersion: 7.3.2
+    #cfkVersion: 2.5.1
+    #confluentVersion: 7.3.2
+    cfkVersion: 2.7.2
+    confluentVersion: 7.5.2
     name: ksqldb
     replicas: 2
     dataVolumeCapacity: 20Gi
@@ -175,8 +183,10 @@ ksql:
       prefix: ksqldbaws
 
 schemaRegistry:
-  cfkVersion: 2.5.1
-  confluentVersion: 7.3.2
+  #cfkVersion: 2.5.1
+  #confluentVersion: 7.3.2
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
   internalService:
     enabled: true
     loadbalancer:
@@ -200,8 +210,10 @@ schemaRegistry:
       'authentication.skip.paths': '/*'
 
 restProxy:
-  cfkVersion: 2.5.1
-  confluentVersion: 7.3.2
+  #cfkVersion: 2.5.1
+  #confluentVersion: 7.3.2
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
   configOverrides:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
@@ -253,8 +265,10 @@ restProxy:
   - kafkarestproxy
 
 controlCenter:
-  cfkVersion: 2.5.1
-  confluentVersion: 7.3.2
+  #cfkVersion: 2.5.1
+  #confluentVersion: 7.3.2
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
   dataVolumeCapacity: 30Gi
   configOverrides:
     log4j:
@@ -273,8 +287,10 @@ controlCenter:
 zookeeper:
   #cfkVersion: 2.4.2
   #confluentVersion: 7.2.4
-  cfkVersion: 2.5.1
-  confluentVersion: 7.3.2
+  #cfkVersion: 2.5.1
+  #confluentVersion: 7.3.2
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
   dataVolumeCapacity: 40Gi
   logVolumeCapacity: 30Gi
   podAntiAffinity:
@@ -292,8 +308,10 @@ zookeeper:
 kafka:
   #cfkVersion: 2.4.2
   #confluentVersion: 7.2.4
-  cfkVersion: 2.5.1
-  confluentVersion: 7.3.2
+  #cfkVersion: 2.5.1
+  #confluentVersion: 7.3.2
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
   replicas: 6
   dataVolumeCapacity: 50Gi
   oneReplicaPerNode: true
@@ -502,3 +520,6 @@ kafka:
     'ad.datadoghq.com/kafka.logs': '[{"source":"confluent_platform","service":"confluent_platform"}]'
     'secret.reloader.stakater.com/reload': mtls-mapping
     'co.elastic.logs/enabled': "true" 
+
+kraft:
+  - enabled: false
