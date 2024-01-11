@@ -520,6 +520,3 @@ kafka:
     'ad.datadoghq.com/kafka.logs': '[{"source":"confluent_platform","service":"confluent_platform"}]'
     'secret.reloader.stakater.com/reload': mtls-mapping
     'co.elastic.logs/enabled': "true" 
-
-kraft:
-  - enabled: false

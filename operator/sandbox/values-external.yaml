@@ -26,3 +26,9 @@ resources:
 clusterRole:
 #  migration: true
   openshift: false
+
+kraft:
+  enabled: false
+
+zookeeper:
+  enabled: true
