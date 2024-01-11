@@ -27,7 +27,7 @@ clusterRole:
 #  migration: true
   openshift: false
 
-kRaft:
+kcontroller:
   enabled: false
 
 zookeeper:
