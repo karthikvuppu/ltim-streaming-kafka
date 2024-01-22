@@ -37,6 +37,8 @@ kerberos:
     .global.scd.scania.com = GLOBAL.SCD.SCANIA.COM
 
 controlCenter:
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
   dataVolumeCapacity: 60Gi
   configOverrides:
     log4j:
@@ -62,6 +64,8 @@ controlCenter:
   nodeAffinityServiceName: cc
 
 schemaRegistry:
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
   replicas: 3
   internalService: 
     enabled: true
@@ -85,6 +89,8 @@ schemaRegistry:
     - zookeeper
 
 restProxy:
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
   configOverrides:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
@@ -138,6 +144,8 @@ restProxy:
 
 ksql:
   - enabled: true
+    cfkVersion: 2.7.2
+    confluentVersion: 7.5.2
     name: ksqldb
     dataVolumeCapacity: 60Gi
     onprem:
@@ -163,6 +171,8 @@ connect:
     secretRef: confluent-license
   instances:
     connect-aws:
+      cfkVersion: 2.7.2
+      confluentVersion: 7.5.2
       replicas: 3
       image:
         application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.1.1.2
@@ -213,6 +223,8 @@ connect:
       mountedSecrets:
         - connect-clients
     connect-onprem:
+      cfkVersion: 2.7.2
+      confluentVersion: 7.5.2
       replicas: 3
       image:
         application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.2.1.2
@@ -269,6 +281,8 @@ connect:
         - clusterlink-privkey
         - seip-ibmmq-cert
     connect-me:
+      cfkVersion: 2.7.2
+      confluentVersion: 7.5.2
       replicas: 3
       image:
         application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.2.1.2
@@ -314,6 +328,8 @@ connect:
         - connect-clients
 
 zookeeper:
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
   dataVolumeCapacity: 120Gi
   logVolumeCapacity: 90Gi
   podAntiAffinity:
@@ -329,6 +345,8 @@ zookeeper:
 
 
 kafka:
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
   replicas: 6
   dataVolumeCapacity: 2500Gi
   
