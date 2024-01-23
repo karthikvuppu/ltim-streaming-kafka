@@ -1,9 +1,8 @@
 defaults:
   confluent:
-    #cfkVersion: 2.3.0
-    #platformVersion: 7.1.1
-    cfkVersion: 2.7.2
-    platformVersion: 7.5.2
+    cfkVersion: 2.3.0
+    platformVersion: 7.1.1
+
   ksql:
     configOverrides:
       log4j:
