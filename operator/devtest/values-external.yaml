@@ -11,18 +11,3 @@ resources:
 
 clusterRole:
   openshift: false
-
-kRaft:
-  enabled: false
-
-kRaftController:
-  enabled: false
-
-kcontroller:
-  enabled: false
-
-kraftcontroller:
-  enabled: false
-
-zookeeper:
-  enabled: true
