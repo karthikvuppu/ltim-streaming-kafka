@@ -179,8 +179,8 @@ connect:
       confluentVersion: 7.5.2
       platformVersion: 7.5.2
       replicas: 3
-      image:
-        application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.1.1.2
+      #image:
+        #application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.1.1.2
       plugins:
         - name: kafka-connect-datagen
           owner: confluentinc
@@ -232,8 +232,8 @@ connect:
       confluentVersion: 7.5.2
       platformVersion: 7.5.2
       replicas: 3
-      image:
-        application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.2.1.2
+      #image:
+        #application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.2.1.2
       plugins:
         - name: kafka-connect-datagen
           owner: confluentinc
