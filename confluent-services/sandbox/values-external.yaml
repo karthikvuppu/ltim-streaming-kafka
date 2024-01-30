@@ -35,6 +35,10 @@ kerberos:
     [domain_realm]
     global.scd.scania.com = GLOBAL.SCD.SCANIA.COM
     .global.scd.scania.com = GLOBAL.SCD.SCANIA.COM
+
+confluent:
+    cfkVersion: 2.7.2
+    confluentVersion: 7.5.2
     
 # Connect
 connect:
@@ -169,8 +173,8 @@ ksql:
   - enabled: true
     #cfkVersion: 2.5.1
     #confluentVersion: 7.3.2
-    cfkVersion: 2.7.2
-    confluentVersion: 7.5.2
+    #cfkVersion: 2.7.2
+    #confluentVersion: 7.5.2
     name: ksqldb
     replicas: 2
     dataVolumeCapacity: 20Gi
