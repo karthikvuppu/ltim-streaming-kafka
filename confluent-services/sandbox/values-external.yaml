@@ -37,8 +37,8 @@ kerberos:
     .global.scd.scania.com = GLOBAL.SCD.SCANIA.COM
 
 confluent:
-    cfkVersion: 2.7.2
-    confluentVersion: 7.5.2
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
     
 # Connect
 connect:
