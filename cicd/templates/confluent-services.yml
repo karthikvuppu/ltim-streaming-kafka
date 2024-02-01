@@ -8,6 +8,7 @@
       --install confluent-services charts/confluent-services/
       --namespace confluent
       -f charts/confluent-services/values.yaml
+      -f confluent-services/$ENVIRONMENT/values.yaml
       -f confluent-services/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
       --kube-context $EKS_CLUSTER"
   when: manual

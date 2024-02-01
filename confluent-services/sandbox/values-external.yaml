@@ -1,7 +1,5 @@
 environment: sandbox
 clusterType: external
-cfk: 2.7.2
-platform: 7.5.2
 domain: iris-streaming-sb.devtest.aws.scania.com
 
 subnets:
