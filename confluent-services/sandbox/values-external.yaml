@@ -41,6 +41,8 @@ connect:
     connect-me: 
       #cfkVersion: 2.5.1
       #confluentVersion: 7.3.2
+      cfkVersion: 2.7.2
+      confluentVersion: 7.5.2
       replicas: 2
       dns:
         prefix: meconnect
@@ -92,6 +94,8 @@ connect:
     connect-onprem:
       #cfkVersion: 2.5.1
       #confluentVersion: 7.3.2
+      cfkVersion: 2.7.2
+      confluentVersion: 7.5.2
       replicas: 2
       hostname: onpremconnect.iris-streaming-sb.devtest.aws.scania.com
       loadbalancer:
@@ -128,6 +132,8 @@ connect:
   connect-aws:
     #cfkVersion: 2.5.1
     #confluentVersion: 7.3.2
+    cfkVersion: 2.7.2
+    confluentVersion: 7.5.2
     replicas: 2
     loadbalancer:
       internal: false
@@ -162,6 +168,8 @@ ksql:
   - enabled: true
     #cfkVersion: 2.5.1
     #confluentVersion: 7.3.2
+    cfkVersion: 2.7.2
+    confluentVersion: 7.5.2
     name: ksqldb
     replicas: 2
     dataVolumeCapacity: 20Gi
@@ -176,6 +184,8 @@ ksql:
 schemaRegistry:
   #cfkVersion: 2.5.1
   #confluentVersion: 7.3.2
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
   internalService:
     enabled: true
     loadbalancer:
@@ -201,6 +211,8 @@ schemaRegistry:
 restProxy:
   #cfkVersion: 2.5.1
   #confluentVersion: 7.3.2
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
   configOverrides:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
@@ -252,8 +264,10 @@ restProxy:
   - kafkarestproxy
 
 controlCenter:
-  cfkVersion: {{ .Values.cfk }}
-  confluentVersion: {{ .Values.platform }}
+  #cfkVersion: {{ .Values.cfk }}
+  #confluentVersion: {{ .Values.platform }}
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
   dataVolumeCapacity: 35Gi
   configOverrides:
     log4j:
@@ -274,6 +288,8 @@ zookeeper:
   #confluentVersion: 7.2.4
   #cfkVersion: 2.5.1
   #confluentVersion: 7.3.2
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
   dataVolumeCapacity: 40Gi
   logVolumeCapacity: 30Gi
   podAntiAffinity:
@@ -293,6 +309,8 @@ kafka:
   #confluentVersion: 7.2.4
   #cfkVersion: 2.5.1
   #confluentVersion: 7.3.2
+  cfkVersion: 2.7.2
+  confluentVersion: 7.5.2
   replicas: 6
   dataVolumeCapacity: 50Gi
   oneReplicaPerNode: true
