@@ -36,9 +36,8 @@ kerberos:
     global.scd.scania.com = GLOBAL.SCD.SCANIA.COM
     .global.scd.scania.com = GLOBAL.SCD.SCANIA.COM
 
-confluent:
-  cfkVersion: 2.7.2
-  confluentVersion: 7.5.2
+cfkVersion: 2.7.2
+confluentVersion: 7.5.2
     
 # Connect
 connect:
@@ -273,7 +272,7 @@ controlCenter:
   #confluentVersion: 7.3.2
   cfkVersion: 2.7.2
   confluentVersion: 7.5.2
-  dataVolumeCapacity: 30Gi
+  dataVolumeCapacity: 35Gi
   configOverrides:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
@@ -288,8 +287,6 @@ controlCenter:
     port: 9021
   nodeAffinityServiceName: cc
 
-kRaft:
-  - enabled: false
 
 zookeeper:
   - enabled: true
