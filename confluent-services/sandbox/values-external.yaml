@@ -1,8 +1,9 @@
 environment: sandbox
 clusterType: external
-confluent:
-  cfkVersion: 2.7.2
-  platformVersion: 7.5.2
+defaults:
+  confluent:
+    cfkVersion: 2.7.2
+    confluentVersion: 7.5.2
 
 domain: iris-streaming-sb.devtest.aws.scania.com
 
