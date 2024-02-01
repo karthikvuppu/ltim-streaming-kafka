@@ -1,10 +1,7 @@
 environment: sandbox
 clusterType: external
-defaults:
-  confluent:
-    cfkVersion: 2.7.2
-    confluentVersion: 7.5.2
-
+cfk: 2.7.2
+platform: 7.5.2
 domain: iris-streaming-sb.devtest.aws.scania.com
 
 subnets:
@@ -257,8 +254,8 @@ restProxy:
   - kafkarestproxy
 
 controlCenter:
-  #cfkVersion: 2.5.1
-  #confluentVersion: 7.3.2
+  cfkVersion: {{ .Values.cfk }}
+  confluentVersion: {{ .Values.platform }}
   dataVolumeCapacity: 35Gi
   configOverrides:
     log4j:

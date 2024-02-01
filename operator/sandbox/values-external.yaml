@@ -26,18 +26,3 @@ resources:
 clusterRole:
 #  migration: true
   openshift: false
-
-kRaft:
-  enabled: false
-
-kRaftController:
-  enabled: false
-
-kcontroller:
-  enabled: false
-
-kraftcontroller:
-  enabled: false
-
-zookeeper:
-  enabled: true
