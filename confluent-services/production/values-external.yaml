@@ -124,6 +124,9 @@ connect:
         - name: connect-transforms
           owner: confluentinc
           version: 1.4.3
+        - name: snowflake-kafka-connector
+          owner: snowflakeinc
+          version: 1.9.3
       loadbalancer:
         internal: false
         name: iris-streaming-prod-awsconnect
@@ -168,6 +171,12 @@ connect:
         - name: kafka-connect-jdbc
           owner: confluentinc
           version: 10.7.2
+        - name: snowflake-kafka-connector
+          owner: snowflakeinc
+          version: 1.9.3
+        - name: connect-transforms
+          owner: confluentinc
+          version: 1.4.3
       loadbalancer:
         name: iris-streaming-prod-onpremconnect
         nodeLabels: onpremconnect
