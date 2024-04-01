@@ -259,6 +259,9 @@ connect:
         - name: snowflake-kafka-connector
           owner: snowflakeinc
           version: 1.9.3
+        - name: kafka-connect-servicenow
+          owner: confluentinc
+          version: 2.4.4
         - name: connect-transforms
           owner: confluentinc
           version: 1.4.3
@@ -311,7 +314,7 @@ connect:
           version: 2.6.0
         - name: snowflake-kafka-connector
           owner: snowflakeinc
-          version: 2.1.0
+          version: 1.9.3
         - name: connect-transforms
           owner: confluentinc
           version: 1.4.3
