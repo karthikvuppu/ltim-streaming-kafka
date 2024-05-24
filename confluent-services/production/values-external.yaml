@@ -266,10 +266,11 @@ zookeeper:
   dataVolumeCapacity: 120Gi
   logVolumeCapacity: 90Gi
   podAntiAffinity:
-    - kafka
-    - connect
-    - k2
-    - srrp
+    - zookeeper 
+  #  - kafka
+  #  - connect
+  #  - k2
+  #  - srrp
   configOverrides:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
