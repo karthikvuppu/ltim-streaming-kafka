@@ -295,10 +295,11 @@ kafka:
           secretRef: rest-credential
   oneReplicaPerNode: true
   podAntiAffinity:
-    - zookeeper
-    - srrp
-    - k2
-    - connect
+    - kafka
+  #  - zookeeper
+  #  - srrp
+  #  - k2
+  #  - connect
 
   configOverrides:
     log4j:
