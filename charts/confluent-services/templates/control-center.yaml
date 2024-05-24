@@ -131,13 +131,13 @@ spec:
                   operator: In
                   values:
                     - {{ required "NodeAffinityServiceName is mandatory" .Values.controlCenter.nodeAffinityServiceName }}
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                    - zookeeper
-                    - kafka
-            topologyKey: kubernetes.io/hostname
+    #  podAntiAffinity:
+    #    requiredDuringSchedulingIgnoredDuringExecution:
+    #      - labelSelector:
+    #          matchExpressions:
+    #            - key: app
+    #              operator: In
+    #              values:
+    #                - zookeeper
+    #                - kafka
+    #        topologyKey: kubernetes.io/hostname
