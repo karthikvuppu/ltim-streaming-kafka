@@ -69,6 +69,12 @@ spec:
       domain: {{ .Values.domain }}
       prefix: {{ .Values.schemaRegistry.dns.prefix }}
   podTemplate:
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5m"
+      limits:
+        memory: "4Gi"
     podSecurityContext:
       fsGroup: 1000
       runAsGroup: 1000
@@ -91,7 +97,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - srrp
+                    - kafka
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:

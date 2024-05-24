@@ -32,8 +32,9 @@ schemaRegistry:
   dns:
     prefix: schemaregistryaws
   podAntiAffinity:
-    - kafka
-    - zookeeper
+    - schemaregistry 
+  #  - kafka
+  #  - zookeeper
 
 restProxy:
   configOverrides:
