@@ -81,9 +81,10 @@ restProxy:
   dns:
     prefix: restproxyaws
   podAntiAffinity:
-    - kafka
-    - zookeeper
-  nodeAffinityServiceName: rp
+    - kafkarestproxy
+  #  - kafka
+  #  - zookeeper
+  nodeAffinityServiceName: kafka
 
 ksql:
   - enabled: true

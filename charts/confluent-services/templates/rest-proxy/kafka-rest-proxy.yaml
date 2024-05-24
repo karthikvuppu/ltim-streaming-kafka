@@ -86,6 +86,12 @@ spec:
       prefix: {{ .Values.restProxy.dns.prefix }} 
 
   podTemplate:
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5m"
+      limits:
+        memory: "4Gi"
     podSecurityContext:
       fsGroup: 1000
       runAsGroup: 1000
