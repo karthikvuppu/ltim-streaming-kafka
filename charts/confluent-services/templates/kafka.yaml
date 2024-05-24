@@ -248,6 +248,12 @@ spec:
       enabled: true
   oneReplicaPerNode: {{ .Values.kafka.oneReplicaPerNode }}
   podTemplate:
+    resources:
+      requests:
+        memory: "16Gi"
+        cpu: "4m"
+      limits:
+        memory: "16Gi"
     podSecurityContext:
       fsGroup: 1000
       runAsGroup: 1000
