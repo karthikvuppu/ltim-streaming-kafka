@@ -287,6 +287,10 @@ kafka:
   authorization:
     superUsers:
       - User:serviceirisssp
+  rackAssignment:
+    nodeLabels:
+    - topology\.kubernetes\.io/zone
+
   dependencies:
     kafkaRest:
       authentication:
@@ -314,6 +318,13 @@ kafka:
       'ldap.retry.timeout.ms': '6600000'
       'connections.max.reauth.ms': '3600000'
      # 'delete.topic.enable': 'true'
+      'confluent.tier.feature': 'true'
+      'confluent.tier.enable': 'true'
+      'confluent.tier.backend': 'S3'
+      'confluent.tier.s3.bucket': 'streamingkafka-app-data'
+      'confluent.tier.s3.prefix': 'application-data'
+      'confluent.tier.s3.region': 'eu-north-1'
+
     jvm:
       '-Djava.security.krb5.conf': '/etc/krb5.conf'
       '-Dcom.sun.jndi.ldap.debug': 'true'  
