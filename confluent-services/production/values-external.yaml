@@ -351,6 +351,8 @@ kafka:
       'confluent.tier.s3.bucket': 'streamingkafka-app-data'
       'confluent.tier.s3.prefix': 'application-data'
       'confluent.tier.s3.region': 'eu-north-1'
+      'inter.broker.protocol.version': '3.5'
+      'password.encoder.secret': 'secret'
 
     jvm:
       '-Djava.security.krb5.conf': '/etc/krb5.conf'
