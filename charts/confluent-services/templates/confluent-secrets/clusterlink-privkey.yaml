@@ -12,10 +12,10 @@ spec:
     name: clusterlink-privkey
     creationPolicy: Owner
   data:
-    - secretKey: keystore.12
+    - secretKey: keystore.p12
       remoteRef:
         key: {{ .Values.environment }}/{{ .Values.clusterType}}/clusterlink-privkey
-        property: keystore.12
+        property: keystore.p12
     - secretKey: cacerts.pem
       remoteRef:
         key: {{ .Values.environment }}/{{ .Values.clusterType}}/clusterlink-privkey
