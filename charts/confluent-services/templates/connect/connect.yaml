@@ -139,8 +139,9 @@ spec:
                 - key: app
                   operator: In
                   values:
-                    - kafka
-                    - zookeeper
+                    - connect
+                    # - kafka
+                    # - zookeeper
             topologyKey: kubernetes.io/hostname
   {{ with .mountedSecrets}}
   mountedSecrets:
