@@ -282,7 +282,7 @@ controlCenter:
   loadbalancer:
     internal: false
     name: iris-streaming-prod-controlcenter
-    nodeLabel: cc
+    nodeLabel: kafka
     certificateArn: arn:aws:acm:eu-north-1:541662535189:certificate/3bce9083-3ec7-4f63-9c12-48abca958621
   dns:
     prefix: controlcenter
