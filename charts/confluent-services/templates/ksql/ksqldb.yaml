@@ -73,7 +73,7 @@ spec:
       annotations:
         service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
         service.beta.kubernetes.io/aws-load-balancer-subnets: {{ $.Values.subnets.public }}
-        service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=k2
+        service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
         service.beta.kubernetes.io/aws-load-balancer-name: {{ $ksql.loadbalancer.name }}
       domain: {{ $.Values.domain }}
       prefix: {{ $ksql.dns.prefix }}
