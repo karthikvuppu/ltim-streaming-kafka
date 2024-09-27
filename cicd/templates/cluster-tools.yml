@@ -65,7 +65,7 @@
       -f tooling/kafka-lag-exporter/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
       --kube-context $EKS_CLUSTER'
     - |
-        if [[ ( $ENVIRONMENT == "sandbox" || $ENVIRONMENT == "devtest" ) && $CLUSTER_TYPE == "external" ]];
+        if [[ ( $ENVIRONMENT == "sandbox" || $ENVIRONMENT == "devtest" || $ENVIRONMENT == "production" ) && $CLUSTER_TYPE == "external" ]];
         then
           helm upgrade \
           --install \
