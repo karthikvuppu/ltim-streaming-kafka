@@ -83,7 +83,7 @@ restProxy:
   loadbalancer:
     internal: false
     name: iris-streaming-prod-restproxy
-    nodeLabels: rp
+    nodeLabels: kafka
   dns:
     prefix: restproxyaws
   podAntiAffinity:
