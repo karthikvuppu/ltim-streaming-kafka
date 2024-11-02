@@ -350,6 +350,8 @@ kafka:
       'ldap.refresh.interval.ms': '60000'
       'ldap.retry.timeout.ms': '6600000'
       'connections.max.reauth.ms': '3600000'
+      'confluent.consumer.lag.emitter.enabled': 'true'
+      'confluent.consumer.lag.emitter.interval.ms': '60000'
      # 'delete.topic.enable': 'true'
       'confluent.tier.feature': 'true'
       'confluent.tier.enable': 'true'
@@ -362,7 +364,12 @@ kafka:
 
     jvm:
       '-Djava.security.krb5.conf': '/etc/krb5.conf'
-      '-Dcom.sun.jndi.ldap.debug': 'true'  
+      '-Dcom.sun.jndi.ldap.debug': 'true' 
+      '-Dcom.sun.management.jmxremote.authenticate': 'false'
+      '-Dcom.sun.management.jmxremote.ssl': 'false'
+      '-Dcom.sun.management.jmxremote.local.only': 'false'
+      '-Dcom.sun.management.jmxremote.port': '7203'
+      '-Dcom.sun.management.jmxremote.rmi.port': '7203' 
   listeners:
     internal:
       enabled: true
@@ -441,9 +448,9 @@ kafka:
         customServerConfiguration:
           'ssl.principal.mapping.rules': '${file:/mnt/secrets/mtls-mapping/mtls-mapping.txt:mapping}'
   annotation:
-    'ad.datadoghq.com/kafka.check_names': '["confluent_platform"]'
-    'ad.datadoghq.com/kafka.init_configs': '[{"is_jmx": true, "collect_default_metrics": true, "service_check_prefix": "confluent", "new_gc_metrics": true, "collect_default_jvm_metrics": true}]'
-    'ad.datadoghq.com/kafka.instances': '[{"host": "%%host%%","port":"7203", "max_returned_metrics":8000}]'
-    'ad.datadoghq.com/kafka.logs': '[{"source":"confluent_platform","service":"confluent_platform"}]'
+    'ad.datadoghq.com/kafka.check_names': '["kafka"]'
+    'ad.datadoghq.com/kafka.init_configs': '[{"is_jmx": true, "collect_default_metrics": false}]'
+    'ad.datadoghq.com/kafka.instances': '[{"host": "%%host%%", "port": "7203", "max_returned_metrics": 25000, "conf": [{"include": {"domain": "kafka.server"}, "bean_regex": ["kafka.server:client-id=*,consumer-group=*,member=*,partition=*,topic=*,type=tenant-metrics"]}, {"include": {"domain": "kafka.producer"}, "bean_regex": ["kafka.producer:type=producer-metrics,client-id=*"]}]}]'
+    'ad.datadoghq.com/kafka.logs': '[{"source":"kafka","service":"kafka"}]'
     'secret.reloader.stakater.com/reload': mtls-mapping
-    'co.elastic.logs/enabled': "true" 
+    'co.elastic.logs/enabled': "true"  
