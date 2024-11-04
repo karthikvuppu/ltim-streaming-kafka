@@ -51,8 +51,7 @@
       --namespace datadog
       -f tooling/datadog/values.yaml
       --kube-context $EKS_CLUSTER'
-    - 'helm upgrade \
-      --debug
+    - 'helm upgrade 
       --install cluster-tools charts/cluster-tools 
       --namespace confluent 
       -f tooling/cluster-tools/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
