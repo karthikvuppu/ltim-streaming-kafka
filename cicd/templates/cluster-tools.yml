@@ -4,6 +4,7 @@
   extends:
   - .helm-common
   - .authenticate
+
   script:
     - 'helm repo add bitnami https://charts.bitnami.com/bitnami'
     - 'helm repo add external-secrets https://charts.external-secrets.io'
