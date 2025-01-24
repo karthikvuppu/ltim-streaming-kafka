@@ -114,6 +114,12 @@ spec:
       domain: {{ $.Values.domain}}
       prefix: {{ .dns.prefix }}
   podTemplate:
+    resources:
+      requests:
+        memory: "6Gi"
+        cpu: "2m"
+      limits:
+        memory: "16Gi"  
     podSecurityContext:
       fsGroup: 1000
       runAsGroup: 1000
