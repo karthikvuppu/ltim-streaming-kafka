@@ -354,7 +354,7 @@ kafka:
       'confluent.consumer.lag.emitter.interval.ms': '60000'
      # 'delete.topic.enable': 'true'
       'confluent.tier.feature': 'true'
-      'confluent.tier.enable': 'true'
+     # 'confluent.tier.enable': 'true'
       'confluent.tier.backend': 'S3'
       'confluent.tier.s3.bucket': 'streamingkafka-app-data'
       'confluent.tier.s3.prefix': 'application-data'
