@@ -13,7 +13,7 @@ subnets:
 
 
 schemaRegistry:
-  cfkVersion: 2.7.2
+  cfkVersion: 2.9.2
   confluentVersion: 7.5.2
   platformVersion: 7.5.2
   replicas: 3
@@ -40,7 +40,7 @@ schemaRegistry:
   #  - zookeeper
 
 restProxy:
-  cfkVersion: 2.7.2
+  cfkVersion: 2.9.2
   confluentVersion: 7.5.2
   platformVersion: 7.5.2
   configOverrides:
@@ -94,7 +94,7 @@ restProxy:
 
 ksql:
   - enabled: true
-    cfkVersion: 2.7.2
+    cfkVersion: 2.9.2
     confluentVersion: 7.5.2
     platformVersion: 7.5.2
     name: ksqldb
@@ -113,7 +113,7 @@ connect:
     secretRef: confluent-license
   instances:
     # connect-aws:
-    #   cfkVersion: 2.7.2
+    #   cfkVersion: 2.9.2
     #   confluentVersion: 7.5.2
     #   platformVersion: 7.5.2
     #   replicas: 3
@@ -160,7 +160,7 @@ connect:
     #   mountedSecrets:
     #     - connect-clients
     connect-onprem:
-      cfkVersion: 2.7.2
+      cfkVersion: 2.9.2
       confluentVersion: 7.5.2
       platformVersion: 7.5.2
       replicas: 3
@@ -224,7 +224,7 @@ connect:
         - seip-ibmmq-cert
 
     connect-me:
-      cfkVersion: 2.7.2
+      cfkVersion: 2.9.2
       confluentVersion: 7.5.2
       platformVersion: 7.5.2
       replicas: 3
@@ -266,7 +266,7 @@ connect:
         - connect-clients
 
 controlCenter:
-  cfkVersion: 2.7.2
+  cfkVersion: 2.9.2
   confluentVersion: 7.5.2
   platformVersion: 7.5.2  
   dataVolumeCapacity: 300Gi
@@ -290,7 +290,7 @@ controlCenter:
 
 
 zookeeper:
-  cfkVersion: 2.7.2
+  cfkVersion: 2.9.2
   confluentVersion: 7.5.2
   platformVersion: 7.5.2
   dataVolumeCapacity: 120Gi
@@ -308,7 +308,7 @@ zookeeper:
       'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
 
 kafka:
-  cfkVersion: 2.7.2
+  cfkVersion: 2.9.2
   confluentVersion: 7.5.2
   platformVersion: 7.5.2
   replicas: 6

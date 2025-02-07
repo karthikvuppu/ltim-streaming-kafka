@@ -50,7 +50,7 @@ spec:
     type: rbac
   dependencies:
     kafka:
-      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9094
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9073
       tls:
         enabled: true
       authentication:
