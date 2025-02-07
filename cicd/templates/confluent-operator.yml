@@ -15,3 +15,4 @@
       --version $CONF_OPERATOR_VERSION
       --kube-context $EKS_CLUSTER"
   when: manual
+
