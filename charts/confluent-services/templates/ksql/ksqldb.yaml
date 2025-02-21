@@ -9,7 +9,7 @@ metadata:
   labels: 
     admission.datadoghq.com/enabled: "true"
 spec:
-  replicas: {{ $ksql.replicas | default (2) }}
+  replicas: {{ $ksql.replicas | default (3) }}
   image:
     application: confluentinc/cp-ksqldb-server:{{ $ksql.confluentVersion | default $.Values.defaults.confluent.platformVersion }}
     init: confluentinc/confluent-init-container:{{ $ksql.cfkVersion | default $.Values.defaults.confluent.cfkVersion }}
