@@ -21,7 +21,7 @@ datadog:
   enabled: true
 
 filebeat:
-  enabled: true
+  enabled: false ##kafka-2469 filebeat removal 
 
 #kafkalagexporter:
 #  enabled: true

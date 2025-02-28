@@ -30,14 +30,14 @@
       --namespace external-secrets 
       --create-namespace
       --kube-context $EKS_CLUSTER'
-    - 'helm upgrade 
-      --install 
-      filebeat elastic/filebeat 
-      --version 8.5.1
-      --namespace filebeat 
-      --create-namespace 
-      --values tooling/filebeat/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
-      --kube-context $EKS_CLUSTER'
+#    - 'helm upgrade ##kafka-2469 filebeat removal 
+#      --install 
+#      filebeat elastic/filebeat 
+#      --version 8.5.1
+#      --namespace filebeat 
+#      --create-namespace 
+#      --values tooling/filebeat/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
+#      --kube-context $EKS_CLUSTER'
     - 'helm upgrade 
       --install 
       stakater stakater/reloader 
