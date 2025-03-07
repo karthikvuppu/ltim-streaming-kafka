@@ -26,7 +26,7 @@
     - 'helm upgrade
       --install  
       external-secrets external-secrets/external-secrets
-      --version v0.8.1
+      --version v0.9.0
       --namespace external-secrets 
       --create-namespace
       --kube-context $EKS_CLUSTER'
