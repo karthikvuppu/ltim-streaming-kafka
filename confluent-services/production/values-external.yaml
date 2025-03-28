@@ -13,9 +13,12 @@ subnets:
 
 
 schemaRegistry:
-  cfkVersion: 2.9.2
-  confluentVersion: 7.5.2
-  platformVersion: 7.5.2
+  cfkVersion: 2.10.0
+  confluentVersion: 7.8.0
+  platformVersion: 7.8.0
+ # cfkVersion: 2.9.2
+ # confluentVersion: 7.5.2
+ # platformVersion: 7.5.2
   replicas: 3
   internalService: 
     enabled: true
@@ -40,9 +43,12 @@ schemaRegistry:
   #  - zookeeper
 
 restProxy:
-  cfkVersion: 2.9.2
-  confluentVersion: 7.5.2
-  platformVersion: 7.5.2
+  cfkVersion: 2.10.0
+  confluentVersion: 7.8.0
+  platformVersion: 7.8.0
+   # cfkVersion: 2.9.2
+ # confluentVersion: 7.5.2
+ # platformVersion: 7.5.2
   configOverrides:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
@@ -94,9 +100,12 @@ restProxy:
 
 ksql:
   - enabled: true
-    cfkVersion: 2.9.2
-    confluentVersion: 7.5.2
-    platformVersion: 7.5.2
+    cfkVersion: 2.10.0
+    confluentVersion: 7.8.0
+    platformVersion: 7.8.0
+     # cfkVersion: 2.9.2
+ # confluentVersion: 7.5.2
+ # platformVersion: 7.5.2
     name: ksqldb
     dataVolumeCapacity: 100Gi
     onprem:
@@ -160,9 +169,12 @@ connect:
     #   mountedSecrets:
     #     - connect-clients
     connect-onprem:
-      cfkVersion: 2.9.2
-      confluentVersion: 7.5.2
-      platformVersion: 7.5.2
+      cfkVersion: 2.10.0
+      confluentVersion: 7.8.0
+      platformVersion: 7.8.0
+       # cfkVersion: 2.9.2
+ # confluentVersion: 7.5.2
+ # platformVersion: 7.5.2
       replicas: 3
       image:
         application: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.5.2.1
@@ -224,9 +236,12 @@ connect:
         - seip-ibmmq-cert
 
     connect-me:
-      cfkVersion: 2.9.2
-      confluentVersion: 7.5.2
-      platformVersion: 7.5.2
+      cfkVersion: 2.10.0
+      confluentVersion: 7.8.0
+      platformVersion: 7.8.0
+       # cfkVersion: 2.9.2
+ # confluentVersion: 7.5.2
+ # platformVersion: 7.5.2
       replicas: 3
       image:
         application: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.5.2.2
@@ -266,9 +281,12 @@ connect:
         - connect-clients
 
 controlCenter:
-  cfkVersion: 2.9.2
-  confluentVersion: 7.5.2
-  platformVersion: 7.5.2  
+  cfkVersion: 2.10.0
+  confluentVersion: 7.8.0
+  platformVersion: 7.8.0 
+   # cfkVersion: 2.9.2
+ # confluentVersion: 7.5.2
+ # platformVersion: 7.5.2
   dataVolumeCapacity: 300Gi
   configOverrides:
     log4j:
@@ -290,9 +308,12 @@ controlCenter:
 
 
 zookeeper:
-  cfkVersion: 2.9.2
-  confluentVersion: 7.5.2
-  platformVersion: 7.5.2
+  cfkVersion: 2.10.0
+  confluentVersion: 7.8.0
+  platformVersion: 7.8.0
+   # cfkVersion: 2.9.2
+ # confluentVersion: 7.5.2
+ # platformVersion: 7.5.2
   dataVolumeCapacity: 120Gi
   logVolumeCapacity: 90Gi
   podAntiAffinity:
@@ -308,9 +329,12 @@ zookeeper:
       'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
 
 kafka:
-  cfkVersion: 2.9.2
-  confluentVersion: 7.5.2
-  platformVersion: 7.5.2
+  cfkVersion: 2.10.0
+  confluentVersion: 7.8.0
+  platformVersion: 7.8.0
+   # cfkVersion: 2.9.2
+ # confluentVersion: 7.5.2
+ # platformVersion: 7.5.2
   replicas: 6
   dataVolumeCapacity: 5000Gi
   

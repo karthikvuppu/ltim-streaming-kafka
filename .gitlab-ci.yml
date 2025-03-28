@@ -5,7 +5,7 @@ include:
   - 'cicd/templates/confluent-services.yml'
 
 variables:
-  CONF_OPERATOR_VERSION: "0.1033.22"
+  CONF_OPERATOR_VERSION: "0.1145.6"
   
 
 stages:
@@ -44,7 +44,7 @@ stages:
     EXTERNAL_EKS_CLUSTER: $EKS_CLUSTER_PROD_EXT
     # INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_PROD_INT
     CLUSTER_REGION: eu-north-1
-    CONF_OPERATOR_VERSION: "0.1033.22"
+    CONF_OPERATOR_VERSION: "0.1145.6"
 
 ################################################ ClusterType ###############################################
 
