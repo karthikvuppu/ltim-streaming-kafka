@@ -177,7 +177,7 @@ connect:
  # platformVersion: 7.5.2
       replicas: 3
       image:
-        application: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.8.0.1
+        application: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.8.0.3
       plugins:
         - name: kafka-connect-datagen
           owner: confluentinc
