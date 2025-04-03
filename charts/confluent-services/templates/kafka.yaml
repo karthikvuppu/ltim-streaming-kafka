@@ -253,7 +253,7 @@ spec:
         memory: "16Gi"
         cpu: "4m"
       limits:
-        memory: "16Gi"
+        memory: "20Gi"
     serviceAccountName: kafka
     podSecurityContext:
       fsGroup: 1000
