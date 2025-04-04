@@ -32,7 +32,7 @@ spec:
       volumes:
         - name: kafka-client-config-volume
           configMap:
-            name: kafka-client-config-clusterlink
+            name: kafka-client-config
         - name: kafka-secrets-volume
           secret:
-            secretName: kafka-secrets-clusterlink
+            secretName: kafka-secrets
