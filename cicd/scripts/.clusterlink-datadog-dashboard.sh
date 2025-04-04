@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export SECRET=$(aws secretsmanager get-secret-value --secret-id "clusterlink-secrets" --region $CLUSTER_REGION --query "SecretString" --output text)
+export SECRET=$(aws secretsmanager get-secret-value --secret-id $CLUSTERLINK_SECRET --region $CLUSTER_REGION --query "SecretString" --output text)
 KEY_PASSWORD=$(echo $SECRET | jq -r '.keystorepw')
 JAAS_PASSWORD=$(echo $SECRET | jq -r '.jaaspw')
 kubectl get secret tls-group -n confluent -o jsonpath='{.data.cacerts\.pem}' | base64 -d > cacert.pem
