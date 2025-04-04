@@ -1,0 +1,10 @@
+apiVersion: v2
+name: clusterlink-dashboard
+version: 0.0.1
+description: cluster link dashboard setup 
+keywords:
+- clusterlink-dashboard-setup
+maintainers:
+- name: Iris streaming
+  email: streaming.ms@scania.com  
+  
