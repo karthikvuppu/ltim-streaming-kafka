@@ -72,7 +72,7 @@
     ################## End of block ##################
 
     - 'helm upgrade 
-     --install clusterlink-dashboard charts/cluster-tools/templates/clusterlink-datadog-dashboard/clusterlink-dashboard.yaml
+     --install clusterlink-dashboard charts/cluster-tools/templates/clusterlink-datadog-dashboard
      --namespace confluent 
      -f tooling/clusterlink-dashboard/production/values.yaml
      --kube-context $EKS_CLUSTER'
