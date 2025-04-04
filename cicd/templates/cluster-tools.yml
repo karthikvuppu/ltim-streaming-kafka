@@ -65,6 +65,18 @@
 #      --create-namespace 
 #      -f tooling/kafka-lag-exporter/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml
 #      --kube-context $EKS_CLUSTER'
+
+    ################## Script to create kubernetes secrets and configmap for clusterlink dashboard setup on datadog ##################
+    - chmod +x cicd/scripts/.clusterlink-datadog-dashboard.sh
+    - . cicd/scripts/.clusterlink-datadog-dashboard.sh
+    ################## End of block ##################
+
+    - 'helm upgrade 
+     --install clusterlink-dashboard charts/cluster-tools/templates/clusterlink-datadog-dashboard/clusterlink-dashboard.yaml
+     --namespace confluent 
+     -f tooling/clusterlink-dashboard/production/values.yaml
+     --kube-context $EKS_CLUSTER'
+
     - |
         if [[ ( $ENVIRONMENT == "sandbox" || $ENVIRONMENT == "devtest" ) && $CLUSTER_TYPE == "external" ]];
         then

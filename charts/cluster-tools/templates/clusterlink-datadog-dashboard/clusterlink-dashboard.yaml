@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clusterlink-datadog-dashboard
+  namespace: confluent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clusterlink-dashboard
+  template:
+    metadata:
+      labels:
+        app: clusterlink-dashboard
+    spec:
+      containers:
+        - name: clusterlink-dashboard
+          image: {{ .Values.clusterlinkCustomDashboard.image }}
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+          volumeMounts:
+            - name: kafka-client-config-volume
+              mountPath: /etc/kafka/config
+            - name: kafka-secrets-volume
+              mountPath: /etc/kafka/secrets
+              readOnly: true
+      volumes:
+        - name: kafka-client-config-volume
+          configMap:
+            name: kafka-client-config-clusterlink
+        - name: kafka-secrets-volume
+          secret:
+            secretName: kafka-secrets-clusterlink
