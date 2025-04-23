@@ -13,6 +13,7 @@ stages:
   - cluster tools
   - confluent operator
   - confluent service
+  - kafka-endpoints-deploy
 
 .helm-common:
   image: dtzar/helm-kubectl:3.10
@@ -206,10 +207,25 @@ prod-external confluent-service:
 #   - .internal
 #   when: manual
 ################################################## Kafka Endpoints Deploy ###############################################
-production-kafka-endpoints-monitor-deploy:
+pord-kafka-endpoints-monitor-deploy:
   stage: kafka-endpoints-deploy
   extends:
-  - .kafka-endpoints-monitor-deploy
+  - .helm-common
+  - .authenticate
   - .production
   - .external
+  script:
+    - 'helm upgrade 
+     --install kafka-endpoints-monitor charts/kafka-endpoints-monitor
+     --namespace confluent 
+     -f tooling/kafka-endpoints-monitor/production/values.yaml
+     --set host=$EKS_CLUSTER
+     --set KAFKA_MONITOR=$KAFKA_MONITOR
+     --kube-context $EKS_CLUSTER'
+  rules:
+    #- if: '$CI_COMMIT_BRANCH == "prodation" || $CI_COMMIT_BRANCH == "main"'
+    #- if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - changes:
+        - tooling/kafka-endpoints-monitor/production/values.yaml
   when: manual
+
