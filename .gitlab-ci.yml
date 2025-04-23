@@ -46,6 +46,7 @@ stages:
     CLUSTER_REGION: eu-north-1
     CONF_OPERATOR_VERSION: "0.1145.6"
     CLUSTERLINK_SECRET: $CLUSTERLINK_SECRET
+    KAFKA_MONITOR: $KAFKA_MONITOR_PROD
 
 ################################################ ClusterType ###############################################
 
@@ -204,3 +205,11 @@ prod-external confluent-service:
 #   - .production
 #   - .internal
 #   when: manual
+################################################## Kafka Endpoints Deploy ###############################################
+production-kafka-endpoints-monitor-deploy:
+  stage: kafka-endpoints-deploy
+  extends:
+  - .kafka-endpoints-monitor-deploy
+  - .production
+  - .external
+  when: manual
