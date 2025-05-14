@@ -352,8 +352,10 @@ kafka:
   dependencies:
     kafkaRest:
       authentication:
-        type: bearer
-        bearer:
+        #type: bearer
+        type: basic
+        #bearer:
+        basic:
           secretRef: rest-credential
   oneReplicaPerNode: true
   podAntiAffinity:
