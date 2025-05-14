@@ -352,10 +352,8 @@ kafka:
   dependencies:
     kafkaRest:
       authentication:
-        #type: bearer
-        type: basic
-        #bearer:
-        basic:
+        type: bearer
+        bearer:
           secretRef: rest-credential
   oneReplicaPerNode: true
   podAntiAffinity:
@@ -457,7 +455,46 @@ kafka:
           'sasl.oauthbearer.sub.claim.name': 'clientId'
           'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
           'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
-      
+      oauthawseid:
+        port: 9096
+        authentication: 
+          type: plain
+          jaasConfig:
+            secretRef: credential
+        loadbalancer:
+          enabled: true
+          internal: false
+          bootstrapPrefix: oauthawseid
+          #name: iris-streaming-prod-oauthawseid
+          sourceRanges: "13.48.14.192/32"
+        customServerConfiguration:
+          'sasl.enabled.mechanisms': 'OAUTHBEARER'
+          'sasl.mechanism': 'PLAIN'
+          'sasl.oauthbearer.jwks.endpoint.url': 'https://login.microsoftonline.com/common/discovery/keys'
+          'sasl.oauthbearer.expected.audience': '638198fb-4b00-4570-ba1d-86cfbf73af32'
+          'sasl.oauthbearer.sub.claim.name': 'sub'
+          'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
+          'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
+      oauthonpremeid:
+        port: 9097
+        authentication:
+          type: plain
+          jaasConfig:
+            secretRef: credential
+        loadbalancer:
+          enabled: true
+          internal: true
+          #internalScheme: true
+          #name: iris-streaming-prod-oauthonpremeid
+          sourceRanges: "13.48.14.192/32"
+          bootstrapPrefix: oauthonpremeid
+        customServerConfiguration:
+          'sasl.enabled.mechanisms': 'OAUTHBEARER'
+          'sasl.oauthbearer.jwks.endpoint.url': 'https://login.microsoftonline.com/common/discovery/keys'
+          'sasl.oauthbearer.expected.audience': '638198fb-4b00-4570-ba1d-86cfbf73af32'
+          'sasl.oauthbearer.sub.claim.name': 'sub'
+          'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
+          'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'      
       mtlsonprem:
         port: 9094
         authentication:
