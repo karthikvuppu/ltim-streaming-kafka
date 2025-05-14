@@ -375,6 +375,7 @@ kafka:
       'ldap.refresh.interval.ms': '60000'
       'ldap.retry.timeout.ms': '6600000'
       'connections.max.reauth.ms': '3600000'
+      'message.max.bytes' : '8388608'
       'confluent.consumer.lag.emitter.enabled': 'true'
       'confluent.consumer.lag.emitter.interval.ms': '60000'
      # 'delete.topic.enable': 'true'
