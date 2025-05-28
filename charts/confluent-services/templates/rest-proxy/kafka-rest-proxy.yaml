@@ -109,7 +109,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - {{ .Values.restProxy.nodeAffinityServiceName | default "kafka" }}
+                    - {{ .Values.restProxy.nodeAffinityServiceName | default "kafka-arm" }}
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:

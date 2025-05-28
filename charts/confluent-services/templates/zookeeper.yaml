@@ -58,7 +58,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - kafka
+                    - kafka-arm
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
            - labelSelector:

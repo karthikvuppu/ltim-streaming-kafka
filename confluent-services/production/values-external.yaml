@@ -89,14 +89,14 @@ restProxy:
   loadbalancer:
     internal: false
     name: iris-streaming-prod-restproxy
-    nodeLabels: kafka
+    nodeLabels: kafka-arm
   dns:
     prefix: restproxyaws
   podAntiAffinity:
     - kafkarestproxy
   #  - kafka
   #  - zookeeper
-  nodeAffinityServiceName: kafka
+  nodeAffinityServiceName: kafka-arm
 
 ksql:
   - enabled: true
@@ -177,7 +177,8 @@ connect:
  # platformVersion: 7.5.2
       replicas: 3
       image:
-        application: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.8.0.3
+        application: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.8.3.1
+        #application: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.8.0.3
       plugins:
         - name: kafka-connect-datagen
           owner: confluentinc
@@ -214,11 +215,11 @@ connect:
           version: 1.4.3
       loadbalancer:
         name: iris-streaming-prod-onpremconnect
-        nodeLabels: kafka
+        nodeLabels: kafka-arm
         internal: true
       dns:
         prefix: onpremconnect
-      nodeAffinityServiceName: kafka
+      nodeAffinityServiceName: kafka-arm
       configOverrides:
         jvm:
           '-Dcom.ibm.mq.cfg.useIBMCipherMappings': 'false'      
@@ -244,7 +245,8 @@ connect:
  # platformVersion: 7.5.2
       replicas: 3
       image:
-        application: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.8.0.2
+        application: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.8.2.2
+        #application: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.8.0.2
         #application: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.5.2.2
       plugins:
         - name: kafka-connect-datagen
@@ -265,10 +267,10 @@ connect:
       loadbalancer:
         name: iris-streaming-prod-meconnect
         internal: true
-        nodeLabels: kafka
+        nodeLabels: kafka-arm
       dns:
         prefix: meconnect
-      nodeAffinityServiceName: kafka
+      nodeAffinityServiceName: kafka-arm
       configOverrides:
         log4j:
           'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
@@ -301,11 +303,11 @@ controlCenter:
   loadbalancer:
     internal: false
     name: iris-streaming-prod-controlcenter
-    nodeLabel: kafka
+    nodeLabel: kafka-arm
     certificateArn: arn:aws:acm:eu-north-1:541662535189:certificate/3bce9083-3ec7-4f63-9c12-48abca958621
   dns:
     prefix: controlcenter
-  nodeAffinityServiceName: kafka
+  nodeAffinityServiceName: kafka-arm
 
 
 zookeeper:

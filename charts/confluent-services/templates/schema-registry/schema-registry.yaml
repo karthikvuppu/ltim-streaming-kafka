@@ -64,7 +64,7 @@ spec:
         service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
         service.beta.kubernetes.io/aws-load-balancer-subnets: {{ .Values.subnets.public }}             
         {{- end }}
-        service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
+        service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka-arm
         service.beta.kubernetes.io/aws-load-balancer-name: {{ .Values.schemaRegistry.loadbalancer.name }}
       domain: {{ .Values.domain }}
       prefix: {{ .Values.schemaRegistry.dns.prefix }}
@@ -97,7 +97,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - kafka
+                    - kafka-arm
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:

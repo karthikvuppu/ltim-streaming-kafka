@@ -91,7 +91,7 @@ spec:
             {{- with.loadbalancer.sourceRanges }}
             service.beta.kubernetes.io/load-balancer-source-ranges: {{ . }}
             {{- end }}
-            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
+            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka-arm
             {{- if .loadbalancer.internal }}
             service.beta.kubernetes.io/aws-load-balancer-subnets: {{ $.Values.subnets.private}}
             service.beta.kubernetes.io/aws-load-balancer-internal: "true"
@@ -137,7 +137,7 @@ spec:
             {{- with .external.loadbalancer.sourceRanges }}
             service.beta.kubernetes.io/load-balancer-source-ranges: {{ . }}
             {{- end }}
-            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
+            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka-arm
           domain: {{ $.Values.domain }}
           bootstrapPrefix: {{ .external.loadbalancer.bootstrapPrefix }} 
           brokerPrefix: {{ .external.loadbalancer.brokerPrefix }} ##TODO check this is correct
@@ -276,7 +276,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - kafka
+                    - kafka-arm
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:

@@ -1,2 +1,3 @@
 clusterlinkCustomDashboard:
-  image: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/clusterlink-topic:1
+  image: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/clusterlink-topic:2.0
+  #image: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/clusterlink-topic:1
