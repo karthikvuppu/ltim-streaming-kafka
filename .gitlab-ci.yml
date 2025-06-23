@@ -20,15 +20,15 @@ stages:
   image: dtzar/helm-kubectl:3.10
 
 ################################################ Environments ###############################################
-.sandbox:
-  variables:
-    ENVIRONMENT: sandbox
-    AWS_ROLE_ARN: $AWS_ROLE_ARN_SANDBOX
-    EXTERNAL_EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
-    # INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
-    CLUSTER_REGION: eu-north-1
-    #CONF_OPERATOR_VERSION: "0.581.34"
-    CONF_OPERATOR_VERSION: "0.824.33"
+# .sandbox:
+#   variables:
+#     ENVIRONMENT: sandbox
+#     AWS_ROLE_ARN: $AWS_ROLE_ARN_SANDBOX
+#     EXTERNAL_EKS_CLUSTER: $EKS_CLUSTER_SBOX_EXT
+#     # INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_SBOX_INT
+#     CLUSTER_REGION: eu-north-1
+#     #CONF_OPERATOR_VERSION: "0.581.34"
+#     CONF_OPERATOR_VERSION: "0.824.33"
 
 .dev-test:
   variables:
@@ -37,7 +37,8 @@ stages:
     EXTERNAL_EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_EXT
     # INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
     CLUSTER_REGION: eu-north-1
-    CONF_OPERATOR_VERSION: "0.824.33"
+    CONF_OPERATOR_VERSION: "0.1145.6"
+    KAFKA_MONITOR: $KAFKA_MONITOR_DEVTEST
 
 .production:
   variables: 
@@ -63,13 +64,13 @@ stages:
 #     EKS_CLUSTER: "$INTERNAL_EKS_CLUSTER"
 
 ################################################# Cluster Tools ###############################################
-sbox-external cluster-tools:
-  stage: cluster tools
-  extends:
-  - .cluster-tools-deploy
-  - .sandbox
-  - .external
-  when: manual
+# sbox-external cluster-tools:
+#   stage: cluster tools
+#   extends:
+#   - .cluster-tools-deploy
+#   - .sandbox
+#   - .external
+#   when: manual
 
 # sbox-internal cluster-tools:
 #   stage: cluster tools
@@ -112,13 +113,13 @@ prod-external cluster-tools:
 #   when: manual
 
 ################################################# Confluent Operator ###############################################
-sbox-external confluent-operator:
-  stage: confluent operator
-  extends:
-  - .confluent-operator-deploy
-  - .sandbox
-  - .external
-  when: manual
+# sbox-external confluent-operator:
+#   stage: confluent operator
+#   extends:
+#   - .confluent-operator-deploy
+#   - .sandbox
+#   - .external
+#   when: manual
 
 # sbox-internal confluent-operator:
 #   stage: confluent operator
@@ -160,13 +161,13 @@ prod-external confluent-operator:
 #   when: manual
 
 ################################################# Confluent Services ###############################################
-sbox-external confluent-service:
-  stage: confluent service
-  extends:
-  - .confluent-services-deploy
-  - .sandbox
-  - .external
-  when: manual
+# sbox-external confluent-service:
+#   stage: confluent service
+#   extends:
+#   - .confluent-services-deploy
+#   - .sandbox
+#   - .external
+#   when: manual
 
 # sbox-internal confluent-service:
 #   stage: confluent service
@@ -208,6 +209,15 @@ prod-external confluent-service:
 #   - .internal
 #   when: manual
 ################################################### Kafka Endpoints Deploy ###############################################
+devtest-kafka-endpoints-monitor-deploy:
+  stage: kafka-endpoints-deploy
+  extends:
+  - .kafka-endpoints-deploy
+  - .dev-test
+  - .external
+  when: manual
+
+
 prod-kafka-endpoints-monitor-deploy:
   stage: kafka-endpoints-deploy
   extends:
