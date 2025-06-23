@@ -1,6 +1,6 @@
 environment: devtest
 clusterType: external
 #image: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/kafka-monitor:1.25
-image: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/kafka-monitor:2.0
+image: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/kafka-monitor:4.0
 SERVICE_URLS: "https://controlcenter.iris-streaming.devtest.aws.scania.com,https://schemaregistryaws.iris-streaming.devtest.aws.scania.com,https://restproxyaws.iris-streaming.devtest.aws.scania.com,https://ksqldbaws.iris-streaming.devtest.aws.scania.com,https://mds.kafka.iris-streaming.devtest.aws.scania.com/kafka/v3/clusters,https://connect-me.confluent.svc.cluster.local:8083,https://connect-onprem.confluent.svc.cluster.local:8083"
 TELNET_HOSTS_PORTS: "mtlsaws.iris-streaming.devtest.aws.scania.com:9092,mtlsonprem.iris-streaming.devtest.aws.scania.com:9094,oauthaws.iris-streaming.devtest.aws.scania.com:9093,oauthawsentraid.iris-streaming.devtest.aws.scania.com:9096,oauthonprem.iris-streaming.devtest.aws.scania.com:9095,oauthonprementraid.iris-streaming.devtest.aws.scania.com:9097"
