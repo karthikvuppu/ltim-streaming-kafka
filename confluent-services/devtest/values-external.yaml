@@ -7,6 +7,9 @@ subnets:
   public: subnet-03bb1df2bc15436b6, subnet-061b406bbac050fcb, subnet-0a71781428bea6c6e
   private: subnet-0e18497ffe09aa1bc, subnet-0a3762c0ef8a83cf0, subnet-0869429a688c9e4ad
 
+ldap:
+  address: ldaps://global.scd.scania.com:636
+
 kerberos:
   activatedInKafka: false
   configuration: |

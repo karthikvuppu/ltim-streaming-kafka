@@ -11,6 +11,8 @@ subnets:
   private: subnet-0afeb4522b2ed064b, subnet-0fddbd8a941de3b4e, subnet-01f1630c12ec7f40c
   public: subnet-0423b8b8775463560, subnet-0c0586ccf00d51272, subnet-0c34899861e8035bc
 
+ldap:
+  address: ldap://ldap-proxy.confluent.svc.cluster.local:636
 
 schemaRegistry:
   cfkVersion: 2.10.0
