@@ -1,39 +1,39 @@
-{{- if (.Values.restProxy.ingress).enabled }}
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: restproxy
-  namespace: confluent
-spec:
-  entryPoints:
-    - websecure
-  routes:
-  - kind: Rule
-    match: {{ printf "Host(`%s`) && PathPrefix(`/topics`,`/consumers`,`/brokers`,`/v3/clusters`)" .Values.restProxy.ingress.domain }}
-    middlewares:
-    - name: http-ipwhitelist
-    services:
-    - kind: Service
-      name: kafkarestproxy
-      namespace: confluent
-      port: {{ .Values.restProxy.ingress.port }}
-      scheme: https
-      serversTransport: restproxy-transport
-  tls:
-    secretName: kafka-tls
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: ServersTransport
-metadata:
-  name: restproxy-transport
-  namespace: confluent
-spec:
-  insecureSkipVerify: true
-  rootCAsSecrets:
-    - ca-root
-  forwardingTimeouts:
-    dialTimeout: 42s
-    responseHeaderTimeout: 42s
-    idleConnTimeout: 42s
-{{- end }}
+# {{- if (.Values.restProxy.ingress).enabled }}
+# ---
+# apiVersion: traefik.containo.us/v1alpha1
+# kind: IngressRoute
+# metadata:
+#   name: restproxy
+#   namespace: confluent
+# spec:
+#   entryPoints:
+#     - websecure
+#   routes:
+#   - kind: Rule
+#     match: {{ printf "Host(`%s`) && PathPrefix(`/topics`,`/consumers`,`/brokers`,`/v3/clusters`)" .Values.restProxy.ingress.domain }}
+#     middlewares:
+#     - name: http-ipwhitelist
+#     services:
+#     - kind: Service
+#       name: kafkarestproxy
+#       namespace: confluent
+#       port: {{ .Values.restProxy.ingress.port }}
+#       scheme: https
+#       serversTransport: restproxy-transport
+#   tls:
+#     secretName: kafka-tls
+# ---
+# apiVersion: traefik.containo.us/v1alpha1
+# kind: ServersTransport
+# metadata:
+#   name: restproxy-transport
+#   namespace: confluent
+# spec:
+#   insecureSkipVerify: true
+#   rootCAsSecrets:
+#     - ca-root
+#   forwardingTimeouts:
+#     dialTimeout: 42s
+#     responseHeaderTimeout: 42s
+#     idleConnTimeout: 42s
+# {{- end }}
