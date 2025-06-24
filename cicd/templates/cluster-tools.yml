@@ -12,8 +12,8 @@
     - "helm repo add stakater https://stakater.github.io/stakater-charts"
     - "helm repo add datadog https://helm.datadoghq.com"
     - "helm repo add jetstack https://charts.jetstack.io"
-    - "helm repo add traefik https://traefik.github.io/charts"
-    - "helm repo add kafka-lag-exporter https://seglo.github.io/kafka-lag-exporter/repo/"
+    # - "helm repo add traefik https://traefik.github.io/charts"
+    # - "helm repo add kafka-lag-exporter https://seglo.github.io/kafka-lag-exporter/repo/"
     - 'helm upgrade 
       --install 
       external-dns 
@@ -50,7 +50,7 @@
       --version 3.20.2 
       datadog datadog/datadog
       --namespace datadog
-      -f tooling/datadog/values.yaml
+      -f tooling/datadog/$ENVIRONMENT/values.yaml
       --kube-context $EKS_CLUSTER'
     #- 'helm upgrade 
     #  --install cluster-tools charts/cluster-tools 
@@ -84,22 +84,22 @@
           helm upgrade \
           --install \
           cert-manager jetstack/cert-manager \
-          --version v1.11.0 \
+          --version v1.17.0 \
           --namespace cert-manager \
           --create-namespace \
           --values tooling/cert-manager/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml \
           --kube-context $EKS_CLUSTER
         fi
-    - |
-        if [[ ( $ENVIRONMENT == "sandbox" || $ENVIRONMENT == "devtest" ) && $CLUSTER_TYPE == "external" ]];
-        then
-          helm upgrade \
-          --install \
-          traefik traefik/traefik \
-          --version 21.0.0 \
-          --namespace ingress \
-          --create-namespace \
-          --values tooling/ingress/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml \
-          --kube-context $EKS_CLUSTER
-        fi
+    # - |
+    #     if [[ ( $ENVIRONMENT == "sandbox" || $ENVIRONMENT == "devtest" ) && $CLUSTER_TYPE == "external" ]];
+    #     then
+    #       helm upgrade \
+    #       --install \
+    #       traefik traefik/traefik \
+    #       --version 21.0.0 \
+    #       --namespace ingress \
+    #       --create-namespace \
+    #       --values tooling/ingress/$ENVIRONMENT/values-$CLUSTER_TYPE.yaml \
+    #       --kube-context $EKS_CLUSTER
+    #     fi
   when: manual
