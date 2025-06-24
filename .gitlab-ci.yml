@@ -4,6 +4,7 @@ include:
   - 'cicd/templates/confluent-operator.yml'
   - 'cicd/templates/confluent-services.yml'
   - 'cicd/templates/kafka-endpoints-deploy.yml'
+  - 'cicd/templates/clusterlink-dashboard-deploy.yml'
 
 variables:
   CONF_OPERATOR_VERSION: "0.1145.6"
@@ -15,6 +16,7 @@ stages:
   - confluent operator
   - confluent service
   - kafka-endpoints-deploy
+  - clusterlink-dashboard-deploy
 
 .helm-common:
   image: dtzar/helm-kubectl:3.10
@@ -38,6 +40,7 @@ stages:
     # INTERNAL_EKS_CLUSTER: $EKS_CLUSTER_DEVTEST_INT
     CLUSTER_REGION: eu-north-1
     CONF_OPERATOR_VERSION: "0.1145.6"
+    CLUSTERLINK_SECRET: $CLUSTERLINK_SECRET
     KAFKA_MONITOR: $KAFKA_MONITOR_DEVTEST
 
 .production:
@@ -227,3 +230,20 @@ prod-kafka-endpoints-monitor-deploy:
   when: manual
 
 
+################################################### clusterlink dashboard deploy on Datadog ###############################################
+devtest-clusterlink-dashboard-deploy:
+  stage: clusterlink-dashboard-deploy
+  extends:
+  - .clusterlink-dashboard-deploy
+  - .dev-test
+  - .external
+  when: manual
+
+
+prod-clusterlink-dashboard-deploy:
+  stage: clusterlink-dashboard-deploy
+  extends:
+  - .clusterlink-dashboard-deploy
+  - .production
+  - .external
+  when: manual
