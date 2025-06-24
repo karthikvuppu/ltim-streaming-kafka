@@ -1,7 +1,7 @@
 environment: production
 clusterType: external
 image: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/kafka-monitor:4.0
-##image: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/kafka-monitor:1.25
+#image: 541662535189.dkr.ecr.eu-north-1.amazonaws.com/kafka-monitor:1.25
 SERVICE_URLS: "https://controlcenter.iris-streaming.prod.aws.scania.com,https://schemaregistryaws.iris-streaming.prod.aws.scania.com,https://ksqldbaws.iris-streaming.prod.aws.scania.com,https://restproxyaws.iris-streaming.prod.aws.scania.com,https://mds.kafka.iris-streaming.prod.aws.scania.com/kafka/v3/clusters,https://connect-me.confluent.svc.cluster.local:8083,https://connect-onprem.confluent.svc.cluster.local:8083"
 #TELNET_HOSTS_PORTS: "mtlsaws.iris-streaming.prod.aws.scania.com:9092,mtlsonprem.iris-streaming.prod.aws.scania.com:9094,oauthaws.iris-streaming.prod.aws.scania.com:9093,oauthonprem.iris-streaming.prod.aws.scania.com:9095"
 #TELNET_HOSTS_PORTS: "oauthonpremeid.iris-streaming.prod.aws.scania.com:9097,oauthawseid.iris-streaming.prod.aws.scania.com:9096,mtlsaws.iris-streaming.prod.aws.scania.com:9092,mtlsonprem.iris-streaming.prod.aws.scania.com:9094,oauthaws.iris-streaming.prod.aws.scania.com:9093,oauthonprem.iris-streaming.prod.aws.scania.com:9095"
