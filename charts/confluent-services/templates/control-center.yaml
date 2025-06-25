@@ -109,10 +109,10 @@ spec:
   podTemplate:
     resources:
       requests:
-        memory: "4Gi"
-        cpu: "1m"
+        memory: {{ .Values.controlCenter.resources.requests.memory | quote }}
+        cpu: {{ .Values.controlCenter.resources.requests.cpu | default "1m" | quote }}
       limits:
-        memory: "8Gi"
+        memory: {{ .Values.controlCenter.resources.limits.memory | quote }}
     podSecurityContext:
       fsGroup: 1000
       runAsGroup: 1000

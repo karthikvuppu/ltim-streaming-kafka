@@ -293,6 +293,12 @@ controlCenter:
  # confluentVersion: 7.5.2
  # platformVersion: 7.5.2
   dataVolumeCapacity: 300Gi
+  resources:
+    requests:
+      memory: "4Gi"
+      cpu: "1m"
+    limits:
+      memory: "8Gi"
   configOverrides:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
