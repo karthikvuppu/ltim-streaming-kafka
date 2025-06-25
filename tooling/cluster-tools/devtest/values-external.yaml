@@ -21,12 +21,17 @@ datadog:
   enabled: true
 
 filebeat:
-  enabled: true
+  enabled: false #disable file beat 
 
-kafkalagexporter:
-  enabled: true
+#kafkalagexporter:
+#  enabled: true
 
 certManager:
   enabled: true
 clusterIssuer:
   hostedZoneID: Z013025421OH83T6MGYV1
+
+clusterlinkCustomDashboard:
+#  image: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/clusterlink-topic:3
+  image: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/clusterlink-topic:latest
+ 
