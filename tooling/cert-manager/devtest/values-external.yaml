@@ -1,4 +1,6 @@
-installCRDs: true
+#installCRDs: true
+crds:
+  enabled: true
 webhook:
   securePort: 9999
   hostNetwork: true

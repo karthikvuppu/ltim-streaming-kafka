@@ -1,30 +1,30 @@
-{{- range $key, $val := .Values.kafka.listeners.custom }}
-{{- if (hasKey $val "ingress") }}
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRouteTCP
-metadata:
-  name: kafka-{{ $key }}
-  namespace: confluent
-spec:
-  tls:
-    passthrough: true
-  entryPoints:
-  - kafka
-  routes:
-  - match: {{ printf "HostSNI(`%s`)" $val.ingress.domain }}
-    middlewares:
-    - name: kafka-ipwhitelist
-    services:
-    - name: kafka
-      port: {{ $val.port }}
-  {{- range until ($.Values.kafka.replicas | int) }}
-  - match: {{ printf "HostSNI(`b%d.%s`)" . $val.ingress.domain }}
-    middlewares:
-    - name: kafka-ipwhitelist
-    services:
-    - name: {{ . | printf "kafka-%d-internal"}} 
-      port: {{ $val.port }}
-  {{- end }}
-{{- end }}
-{{- end }}
+# {{- range $key, $val := .Values.kafka.listeners.custom }}
+# {{- if (hasKey $val "ingress") }}
+# ---
+# apiVersion: traefik.containo.us/v1alpha1
+# kind: IngressRouteTCP
+# metadata:
+#   name: kafka-{{ $key }}
+#   namespace: confluent
+# spec:
+#   tls:
+#     passthrough: true
+#   entryPoints:
+#   - kafka
+#   routes:
+#   - match: {{ printf "HostSNI(`%s`)" $val.ingress.domain }}
+#     middlewares:
+#     - name: kafka-ipwhitelist
+#     services:
+#     - name: kafka
+#       port: {{ $val.port }}
+#   {{- range until ($.Values.kafka.replicas | int) }}
+#   - match: {{ printf "HostSNI(`b%d.%s`)" . $val.ingress.domain }}
+#     middlewares:
+#     - name: kafka-ipwhitelist
+#     services:
+#     - name: {{ . | printf "kafka-%d-internal"}} 
+#       port: {{ $val.port }}
+#   {{- end }}
+# {{- end }}
+# {{- end }}

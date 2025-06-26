@@ -50,7 +50,7 @@ spec:
     type: rbac
   dependencies:
     kafka:
-      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9094
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9073
       tls:
         enabled: true
       authentication:
@@ -114,6 +114,12 @@ spec:
       domain: {{ $.Values.domain}}
       prefix: {{ .dns.prefix }}
   podTemplate:
+    resources:
+      requests:
+        memory: "6Gi"
+        cpu: "2m"
+      limits:
+        memory: "16Gi"  
     podSecurityContext:
       fsGroup: 1000
       runAsGroup: 1000
@@ -139,8 +145,9 @@ spec:
                 - key: app
                   operator: In
                   values:
-                    - kafka
-                    - zookeeper
+                    - connect
+                    # - kafka
+                    # - zookeeper
             topologyKey: kubernetes.io/hostname
   {{ with .mountedSecrets}}
   mountedSecrets:

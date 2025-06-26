@@ -7,6 +7,9 @@ subnets:
   public: subnet-03bb1df2bc15436b6, subnet-061b406bbac050fcb, subnet-0a71781428bea6c6e
   private: subnet-0e18497ffe09aa1bc, subnet-0a3762c0ef8a83cf0, subnet-0869429a688c9e4ad
 
+ldap:
+  address: ldaps://global.scd.scania.com:636
+
 kerberos:
   activatedInKafka: false
   configuration: |
@@ -37,10 +40,19 @@ kerberos:
     .global.scd.scania.com = GLOBAL.SCD.SCANIA.COM
 
 controlCenter:
-  cfkVersion: 2.7.2
-  confluentVersion: 7.5.2
-  platformVersion: 7.5.2
-  dataVolumeCapacity: 60Gi
+  cfkVersion: 2.10.0
+  #cfkVersion: 2.9.2
+  confluentVersion: 7.8.0
+  platformVersion: 7.8.0
+  #confluentVersion: 7.5.2
+  #platformVersion: 7.5.2
+  dataVolumeCapacity: 110Gi
+  resources:
+    requests:
+      memory: "4Gi"
+      cpu: "1m"
+    limits:
+      memory: "24Gi"
   configOverrides:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
@@ -51,28 +63,31 @@ controlCenter:
       'confluent.controlcenter.mds.client.idle.timeout': '30000'
       'confluent.controlcenter.mds.client.max.requests.queued.per.destination': '2048'
       'confluent.controlcenter.internal.topics.partitions': '4'
-  # loadbalancer:
+  loadbalancer:
   #   internal: false
-  #   name: iris-streaming-devtest-controlcenter
-  #   nodeLabel: cc
-  #   certificateArn: arn:aws:acm:eu-north-1:858242954753:certificate/57e103f8-aa1a-4cbc-ba9b-94a06299924c
-  ingress:
-    enabled: true
-    domain: controlcenter.iris-streaming.devtest.aws.scania.com
-    port: 9021
+    name: iris-streaming-devtest-cc
+    nodeLabel: kafka-arm
+    certificateArn: arn:aws:acm:eu-north-1:858242954753:certificate/57e103f8-aa1a-4cbc-ba9b-94a06299924c
+  # ingress:
+  #   enabled: true
+  #   domain: controlcenter.iris-streaming.devtest.aws.scania.com
+  #   port: 9021
   dns:
     prefix: controlcenter
-  nodeAffinityServiceName: cc
+  nodeAffinityServiceName: kafka-arm
 
 schemaRegistry:
-  cfkVersion: 2.7.2
-  confluentVersion: 7.5.2
-  platformVersion: 7.5.2
+  cfkVersion: 2.10.0
+  #cfkVersion: 2.9.2
+  confluentVersion: 7.8.0
+  platformVersion: 7.8.0
+  #confluentVersion: 7.5.2
+  #platformVersion: 7.5.2
   replicas: 3
   internalService: 
     enabled: true
     loadbalancer:
-      name: iris-streaming-devtest-schemaonprem
+      name: iris-streaming-devtest-schemaon
   configOverrides:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
@@ -83,17 +98,21 @@ schemaRegistry:
       'authentication.skip.paths': '/*'
   loadbalancer:
     internal: false
-    name: iris-streaming-devtest-schemaregistryaws
+    name: iris-streaming-devtest-sch-aws
   dns:
     prefix: schemaregistryaws
   podAntiAffinity:
-    - kafka
-    - zookeeper
+    - schemaregistry 
+  #  - kafka
+  #  - zookeeper
 
 restProxy:
-  cfkVersion: 2.7.2
-  confluentVersion: 7.5.2
-  platformVersion: 7.5.2
+  cfkVersion: 2.10.0
+  #cfkVersion: 2.9.2
+  confluentVersion: 7.8.0
+  platformVersion: 7.8.0
+  #confluentVersion: 7.5.2
+  #platformVersion: 7.5.2
   configOverrides:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
@@ -134,22 +153,25 @@ restProxy:
   loadbalancer:
     internal: false
     name: iris-streaming-devtest-restproxyaws
-    nodeLabels: rp
-  ingress:
-    enabled: true
-    domain: restproxy.kafka.iris-streaming.devtest.aws.scania.com
-    port: 8082
+    nodeLabels: kafka-arm
+  # ingress:
+  #   enabled: true
+  #   domain: restproxy.kafka.iris-streaming.devtest.aws.scania.com
+  #   port: 8082
   dns:
     prefix: restproxyaws
   podAntiAffinity:
     - kafkarestproxy
-  nodeAffinityServiceName: rp
+  nodeAffinityServiceName: kafka-arm
 
 ksql:
   - enabled: true
-    cfkVersion: 2.7.2
-    confluentVersion: 7.5.2
-    platformVersion: 7.5.2
+    cfkVersion: 2.10.0
+    #cfkVersion: 2.9.2
+    confluentVersion: 7.8.0
+    platformVersion: 7.8.0
+    #confluentVersion: 7.5.2
+    #platformVersion: 7.5.2
     name: ksqldb
     dataVolumeCapacity: 60Gi
     onprem:
@@ -174,66 +196,71 @@ connect:
   license:
     secretRef: confluent-license
   instances:
-    connect-aws:
-      cfkVersion: 2.7.2
-      confluentVersion: 7.5.2
-      platformVersion: 7.5.2
-      replicas: 3
-      image:
-        application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.1.1.2
-      plugins:
-        - name: kafka-connect-datagen
-          owner: confluentinc
-          version: 0.5.3
-        - name: debezium-connector-mysql
-          owner: debezium
-          version: 1.8.1
-        - name: kafka-connect-hdfs3
-          owner: confluentinc
-          version: 1.1.10
-        - name: kafka-connect-s3-source
-          owner: confluentinc
-          version: 2.5.1
-        - name: kafka-connect-kinesis
-          owner: confluentinc 
-          version: 1.3.16
-        - name: kafka-connect-servicenow
-          owner: confluentinc
-          version: 2.4.4 
-        - name: snowflake-kafka-connector
-          owner: snowflakeinc
-          version: 1.9.3
-        - name: connect-transforms
-          owner: confluentinc
-          version: 1.4.3
-        - name: kafka-connect-transform-common
-          owner: jcustenborder
-          version: 0.1.0.58
-      loadbalancer:
-        internal: false
-        name: iris-streaming-devtest-awsconnect
-        nodeLabels: awsconnect
-      dns:
-        prefix: awsconnect
-      nodeAffinityServiceName: awsconnect
-      configOverrides:
-        server:
-          'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
-          'value.converter': 'io.confluent.connect.avro.AvroConverter'
-        log4j:
-          'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
-          'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
-          'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
-          'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
-      mountedSecrets:
-        - connect-clients
+  #  connect-aws:
+  #    cfkVersion: 2.9.2
+  #    confluentVersion: 7.5.2
+  #    platformVersion: 7.5.2
+  #    replicas: 3
+  #    image:
+  #      application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.1.1.2
+  #    plugins:
+  #      - name: kafka-connect-datagen
+  #        owner: confluentinc
+  #        version: 0.5.3
+  #      - name: debezium-connector-mysql
+  #        owner: debezium
+  #        version: 1.8.1
+  #      - name: kafka-connect-hdfs3
+  #        owner: confluentinc
+  #        version: 1.1.10
+  #      - name: kafka-connect-s3-source
+  #        owner: confluentinc
+  #        version: 2.5.1
+  #      - name: kafka-connect-kinesis
+  #        owner: confluentinc 
+  #        version: 1.3.16
+  #      - name: kafka-connect-servicenow
+  #        owner: confluentinc
+  #        version: 2.4.4 
+  #      - name: snowflake-kafka-connector
+  #        owner: snowflakeinc
+  #        version: 1.9.3
+  #      - name: connect-transforms
+  #        owner: confluentinc
+  #        version: 1.4.3
+  #      - name: kafka-connect-transform-common
+  #        owner: jcustenborder
+  #        version: 0.1.0.58
+  #    loadbalancer:
+  #      internal: false
+  #      name: iris-streaming-devtest-awsconnect
+  #      nodeLabels: awsconnect
+  #    dns:
+  #      prefix: awsconnect
+  #    nodeAffinityServiceName: awsconnect
+  #    configOverrides:
+  #      server:
+  #        'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
+  #        'value.converter': 'io.confluent.connect.avro.AvroConverter'
+  #      log4j:
+  #        'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
+  #        'log4j.appender.stdout.layout': 'org.apache.log4j.EnhancedPatternLayout'
+  #        'log4j.appender.stdout.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
+  #        'log4j.appender.connectAppender.layout.ConversionPattern': '{"timestamp":"%d{ISO8601}","level":"%p","context":"%X{connector.context}","thread":"%t","class":"%C","message":"%m%throwable{full}"}%n'
+  #    mountedSecrets:
+  #      - connect-clients
     connect-onprem:
-      cfkVersion: 2.7.2
-      confluentVersion: 7.5.2
-      platformVersion: 7.5.2
+      cfkVersion: 2.10.0
+      #cfkVersion: 2.9.2
+      confluentVersion: 7.8.0
+      platformVersion: 7.8.0
+      #confluentVersion: 7.5.2
+      #platformVersion: 7.5.2
       replicas: 3
       image:
-        application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.2.1.2
+#        application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.8.0.1
+        application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.8.3.1
+        #application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.5.2.3
       plugins:
         - name: kafka-connect-datagen
           owner: confluentinc
@@ -262,16 +289,25 @@ connect:
         - name: kafka-connect-servicenow
           owner: confluentinc
           version: 2.4.4
+        - name: kafka-connect-azure-blob-storage
+          owner: confluentinc
+          version: 1.6.13
+        - name: kafka-connect-s3
+          owner: confluentinc
+          version: 10.5.13
         - name: connect-transforms
           owner: confluentinc
           version: 1.4.3
+        - name: kafka-connect-http
+          owner: confluentinc
+          version: 1.7.7
       loadbalancer:
         name: iris-streaming-devtest-onpremconnect
         nodeLabels: onpremconnect
         internal: true
       dns:
         prefix: onpremconnect
-      nodeAffinityServiceName: onpremconnect
+      nodeAffinityServiceName: kafka-arm
       configOverrides:
         server:
           'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
@@ -290,12 +326,17 @@ connect:
         - clusterlink-privkey
         - seip-ibmmq-cert
     connect-me:
-      cfkVersion: 2.7.2
-      confluentVersion: 7.5.2
-      platformVersion: 7.5.2
+      cfkVersion: 2.10.0
+      #cfkVersion: 2.9.2
+      confluentVersion: 7.8.0
+      platformVersion: 7.8.0
+      #confluentVersion: 7.5.2
+      #platformVersion: 7.5.2
       replicas: 3
       image:
-        application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.2.1.2
+        #application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.8.0.3
+        application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.8.2.2
+        #application: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/iris-connect:7.5.2.3
       plugins:
         - name: kafka-connect-datagen
           owner: confluentinc
@@ -324,7 +365,7 @@ connect:
         nodeLabels: meconnect
       dns:
         prefix: meconnect
-      nodeAffinityServiceName: meconnect
+      nodeAffinityServiceName: kafka-arm
       configOverrides:
         server:
           'key.converter': 'org.apache.kafka.connect.storage.StringConverter'
@@ -338,16 +379,20 @@ connect:
         - connect-clients
 
 zookeeper:
-  cfkVersion: 2.7.2
-  confluentVersion: 7.5.2
-  platformVersion: 7.5.2
+  cfkVersion: 2.10.0
+  #cfkVersion: 2.9.2
+  confluentVersion: 7.8.0
+  platformVersion: 7.8.0
+  #confluentVersion: 7.5.2
+  #platformVersion: 7.5.2
   dataVolumeCapacity: 120Gi
   logVolumeCapacity: 90Gi
   podAntiAffinity:
-    - kafka
-    - connect
-    - k2
-    - srrp
+    - zookeeper
+  #  - kafka
+  #  - connect
+  #  - k2
+  #  - srrp
   configOverrides:
     log4j:
       'log4j.appender.stdout': 'org.apache.log4j.ConsoleAppender'
@@ -356,18 +401,22 @@ zookeeper:
 
 
 kafka:
-  cfkVersion: 2.7.2
-  confluentVersion: 7.5.2
-  platformVersion: 7.5.2
+  cfkVersion: 2.10.0
+  #cfkVersion: 2.9.2
+  confluentVersion: 7.8.0
+  platformVersion: 7.8.0
+  #confluentVersion: 7.5.2
+  #platformVersion: 7.5.2
   replicas: 6
-  dataVolumeCapacity: 2500Gi
-  
+  dataVolumeCapacity: 1500Gi
   mountedSecrets:
   - secretRef: mtls-mapping
-
   authorization:
     superUsers:
       - User:serviceirisssptest
+  rackAssignment:
+    nodeLabels:
+    - topology\.kubernetes\.io/zone
   dependencies:
     kafkaRest:
       authentication:
@@ -376,10 +425,11 @@ kafka:
           secretRef: rest-credential
   oneReplicaPerNode: true
   podAntiAffinity:
-    - zookeeper
-    - srrp
-    - k2
-    - connect
+    - kafka
+  #  - zookeeper
+  #  - srrp
+  #  - k2
+  #  - connect
 
   configOverrides:
     log4j:
@@ -390,13 +440,30 @@ kafka:
     server:
       'confluent.balancer.heal.uneven.load.trigger': 'ANY_UNEVEN_LOAD'
       'confluent.cluster.link.enable': 'true'
+      'confluent.consumer.lag.emitter.enabled': 'true'
+      'confluent.consumer.lag.emitter.interval.ms': '60000'
       'ldap.com.sun.jndi.ldap.read.timeout': '60000'
       'ldap.refresh.interval.ms': '60000'
       'ldap.retry.timeout.ms': '6600000'
       'connections.max.reauth.ms': '3600000'
+      'message.max.bytes': '8388608'
+      'inter.broker.protocol.version': '3.5'
+      'password.encoder.secret': 'secret'
+      'confluent.tier.feature': 'true'
+      #'confluent.tier.enable': 'true'
+      'confluent.tier.backend': 'S3'
+      'confluent.tier.s3.bucket': 'streaming-application-data'
+      'confluent.tier.s3.prefix': 'application-data'
+      'confluent.tier.s3.region': 'eu-north-1'
     jvm:
       '-Djava.security.krb5.conf': '/etc/krb5.conf'
-      '-Dcom.sun.jndi.ldap.debug': 'true'  
+      '-Dcom.sun.jndi.ldap.debug': 'true' 
+      '-Dcom.sun.management.jmxremote.authenticate': 'false'
+      '-Dcom.sun.management.jmxremote.ssl': 'false'
+      '-Dcom.sun.management.jmxremote.local.only': 'false'
+      '-Dcom.sun.management.jmxremote.port': '7203'
+      '-Dcom.sun.management.jmxremote.rmi.port': '7203'
+#      '-Djava.rmi.server.hostname': '$(POD_IP)' 
   listeners:
     internal:
       enabled: true
@@ -474,83 +541,125 @@ kafka:
         customServerConfiguration:
           'ssl.principal.mapping.rules': '${file:/mnt/secrets/mtls-mapping/mtls-mapping.txt:mapping}'
 
-      ingressmtlsaws:
+      oauthawseid:
         port: 9096
-        loadbalancer:
-          enabled: false
-          internal: false
-        authentication:
-          type: mtls
-          principalMappingRules:
-            - DEFAULT
-        ingress:
-          domain: mtlsaws.kafka.iris-streaming.devtest.aws.scania.com
-          port: 9092
-          secretRef: kafka-tls
-        customServerConfiguration:
-          'ssl.truststore.location': '/mnt/sslcerts/truststore.p12'
-          'ssl.truststore.password': '${file:/mnt/sslcerts/jksPassword.txt:jksPassword}'
-      ingressoauthaws:
-        port: 9097
-        loadbalancer:
-          enabled: false
-          internal: false
-        authentication:
+        authentication: 
           type: plain
           jaasConfig:
             secretRef: credential
-        ingress:
-          port: 9092
-          domain: oauthaws.kafka.iris-streaming.devtest.aws.scania.com
-          secretRef: kafka-tls
+        loadbalancer:
+          enabled: true
+          internal: false
+          bootstrapPrefix: oauthawsentraid
+          sourceRanges: "13.51.132.182/32"
+        #  name: iris-streaming-devtest-oawseid
         customServerConfiguration:
           'sasl.enabled.mechanisms': 'OAUTHBEARER'
-          'sasl.oauthbearer.jwks.endpoint.url': 'https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs'
-          'sasl.oauthbearer.expected.audience': 'account'
-          'sasl.oauthbearer.sub.claim.name': 'clientId'
+          'sasl.mechanism': 'PLAIN'
+          'sasl.oauthbearer.jwks.endpoint.url': 'https://login.microsoftonline.com/common/discovery/keys'
+          'sasl.oauthbearer.expected.audience': 'afa216a4-e644-461b-a06b-8f0e28574fac'
+          'sasl.oauthbearer.sub.claim.name': 'sub'
           'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
           'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
-      ingressmtlsonprem:
-        port: 9098
-        loadbalancer: 
-          enabled: false
-          internal: false
-        authentication:
-          type: mtls
-          principalMappingRules:
-            - DEFAULT
-        customServerConfiguration:
-          'ssl.truststore.location': '/mnt/sslcerts/truststore.p12'
-          'ssl.truststore.password': '${file:/mnt/sslcerts/jksPassword.txt:jksPassword}'
-        ingress:
-          port: 9092
-          domain: mtlsonprem.kafka.iris-streaming.devtest.aws.scania.com
-          secretRef: kafka-tls
-      ingressoauthonprem:
-        port: 9099
-        loadbalancer:
-          enabled: false
-          internal: false
+
+      oauthonprementraid:
+        port: 9097
         authentication:
           type: plain
           jaasConfig:
             secretRef: credential
-        ingress:
-          port: 9092
-          domain: oauthonprem.kafka.iris-streaming.devtest.aws.scania.com
-          secretRef: kafka-tls
+        loadbalancer:
+          enabled: true
+          internal: true
+        #  name: iris-streaming-devtest-opeid
+          sourceRanges: "13.51.132.182/32"
+          bootstrapPrefix: oauthonprementraid
         customServerConfiguration:
-          'sasl.enabled.mechanisms': OAUTHBEARER
-          'sasl.mechanism': PLAIN
-          'sasl.oauthbearer.jwks.endpoint.url': 'https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs'
-          'sasl.oauthbearer.expected.audience': 'account'
-          'sasl.oauthbearer.sub.claim.name': 'clientId'
+          'sasl.enabled.mechanisms': 'OAUTHBEARER'
+          'sasl.oauthbearer.jwks.endpoint.url': 'https://login.microsoftonline.com/common/discovery/keys'
+          'sasl.oauthbearer.expected.audience': 'afa216a4-e644-461b-a06b-8f0e28574fac'
+          'sasl.oauthbearer.sub.claim.name': 'sub'
           'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
           'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
-  annotation:
-    'ad.datadoghq.com/kafka.check_names': '["confluent_platform"]'
-    'ad.datadoghq.com/kafka.init_configs': '[{"is_jmx": true, "collect_default_metrics": true, "service_check_prefix": "confluent", "new_gc_metrics": true, "collect_default_jvm_metrics": true}]'
-    'ad.datadoghq.com/kafka.instances': '[{"host": "%%host%%","port":"7203", "max_returned_metrics":8000}]'
-    'ad.datadoghq.com/kafka.logs': '[{"source":"confluent_platform","service":"confluent_platform"}]'
+
+
+      # ingressmtlsaws:
+      #   port: 9096
+      #   loadbalancer:
+      #     enabled: false
+      #     internal: false
+      #   authentication:
+      #     type: mtls
+      #     principalMappingRules:
+      #       - DEFAULT
+      #   ingress:
+      #     domain: mtlsaws.kafka.iris-streaming.devtest.aws.scania.com
+      #     port: 9092
+      #     secretRef: kafka-tls
+      #   customServerConfiguration:
+      #     'ssl.truststore.location': '/mnt/sslcerts/truststore.p12'
+      #     'ssl.truststore.password': '${file:/mnt/sslcerts/jksPassword.txt:jksPassword}'
+      # ingressoauthaws:
+      #   port: 9097
+      #   loadbalancer:
+      #     enabled: false
+      #     internal: false
+      #   authentication:
+      #     type: plain
+      #     jaasConfig:
+      #       secretRef: credential
+      #   ingress:
+      #     port: 9092
+      #     domain: oauthaws.kafka.iris-streaming.devtest.aws.scania.com
+      #     secretRef: kafka-tls
+      #   customServerConfiguration:
+      #     'sasl.enabled.mechanisms': 'OAUTHBEARER'
+      #     'sasl.oauthbearer.jwks.endpoint.url': 'https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs'
+      #     'sasl.oauthbearer.expected.audience': 'account'
+      #     'sasl.oauthbearer.sub.claim.name': 'clientId'
+      #     'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
+      #     'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
+      # ingressmtlsonprem:
+      #   port: 9098
+      #   loadbalancer: 
+      #     enabled: false
+      #     internal: false
+      #   authentication:
+      #     type: mtls
+      #     principalMappingRules:
+      #       - DEFAULT
+      #   customServerConfiguration:
+      #     'ssl.truststore.location': '/mnt/sslcerts/truststore.p12'
+      #     'ssl.truststore.password': '${file:/mnt/sslcerts/jksPassword.txt:jksPassword}'
+      #   ingress:
+      #     port: 9092
+      #     domain: mtlsonprem.kafka.iris-streaming.devtest.aws.scania.com
+      #     secretRef: kafka-tls
+      # ingressoauthonprem:
+      #   port: 9099
+      #   loadbalancer:
+      #     enabled: false
+      #     internal: false
+      #   authentication:
+      #     type: plain
+      #     jaasConfig:
+      #       secretRef: credential
+      #   ingress:
+      #     port: 9092
+      #     domain: oauthonprem.kafka.iris-streaming.devtest.aws.scania.com
+      #     secretRef: kafka-tls
+      #   customServerConfiguration:
+      #     'sasl.enabled.mechanisms': OAUTHBEARER
+      #     'sasl.mechanism': PLAIN
+      #     'sasl.oauthbearer.jwks.endpoint.url': 'https://fg.ciam.preprod.aws.scania.com/auth/realms/scania/protocol/openid-connect/certs'
+      #     'sasl.oauthbearer.expected.audience': 'account'
+      #     'sasl.oauthbearer.sub.claim.name': 'clientId'
+      #     'oauthbearer.sasl.server.callback.handler.class': 'org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerValidatorCallbackHandler'
+      #     'oauthbearer.sasl.jaas.config': 'org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;'
+  annotation: 
+    'ad.datadoghq.com/kafka.check_names': '["kafka"]'
+    'ad.datadoghq.com/kafka.init_configs': '[{"is_jmx": true, "collect_default_metrics": false}]'
+    'ad.datadoghq.com/kafka.instances': '[{"host": "%%host%%", "port": "7203", "max_returned_metrics": 25000, "conf": [{"include": {"domain": "kafka.server"}, "bean_regex": ["kafka.server:client-id=*,consumer-group=*,member=*,partition=*,topic=*,type=tenant-metrics"]}, {"include": {"domain": "kafka.producer"}, "bean_regex": ["kafka.producer:type=producer-metrics,client-id=*"]}]}]'
+    'ad.datadoghq.com/kafka.logs': '[{"source":"kafka","service":"kafka"}]'
     'secret.reloader.stakater.com/reload': mtls-mapping
-    'co.elastic.logs/enabled': "true"       
+    'co.elastic.logs/enabled': "true"

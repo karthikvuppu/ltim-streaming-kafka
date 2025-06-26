@@ -40,6 +40,12 @@ spec:
   storageClass:
     name: standard
   podTemplate:
+    resources:
+      requests:
+        memory: "4Gi"
+        cpu: "1m"
+      limits:
+        memory: "8Gi"
     podSecurityContext:
       fsGroup: 1000
       runAsGroup: 1000
@@ -52,7 +58,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - zookeeper
+                    - kafka-arm
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
            - labelSelector:

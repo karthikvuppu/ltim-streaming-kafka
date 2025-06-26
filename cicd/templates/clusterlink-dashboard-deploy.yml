@@ -1,0 +1,23 @@
+.clusterlink-dashboard-deploy:
+  stage: clusterlink-dashboard-deploy
+  extends:
+  - .helm-common
+  - .authenticate
+  script:
+    ################## Script to create kubernetes secrets and configmap for clusterlink dashboard setup on datadog ##################
+    - chmod +x cicd/scripts/.clusterlink-datadog-dashboard.sh
+    - . cicd/scripts/.clusterlink-datadog-dashboard.sh
+    ################## End of block ##################
+
+    - 'helm upgrade 
+     --install clusterlink-dashboard charts/clusterlink-dashboard
+     --namespace confluent 
+     -f tooling/clusterlink-dashboard/$ENVIRONMENT/values.yaml
+     --kube-context $EKS_CLUSTER'
+
+  rules:
+    #- if: '$CI_COMMIT_BRANCH == "prodation" || $CI_COMMIT_BRANCH == "main"'
+    #- if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - changes:
+        - tooling/clusterlink-dashboard/$ENVIRONMENT/values.yaml
+  when: manual

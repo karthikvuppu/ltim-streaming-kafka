@@ -64,11 +64,17 @@ spec:
         service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
         service.beta.kubernetes.io/aws-load-balancer-subnets: {{ .Values.subnets.public }}             
         {{- end }}
-        service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=srrp
+        service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka-arm
         service.beta.kubernetes.io/aws-load-balancer-name: {{ .Values.schemaRegistry.loadbalancer.name }}
       domain: {{ .Values.domain }}
       prefix: {{ .Values.schemaRegistry.dns.prefix }}
   podTemplate:
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "0.5m"
+      limits:
+        memory: "4Gi"
     podSecurityContext:
       fsGroup: 1000
       runAsGroup: 1000
@@ -91,7 +97,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - srrp
+                    - kafka-arm
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:

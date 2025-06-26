@@ -91,7 +91,7 @@ spec:
             {{- with.loadbalancer.sourceRanges }}
             service.beta.kubernetes.io/load-balancer-source-ranges: {{ . }}
             {{- end }}
-            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
+            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka-arm
             {{- if .loadbalancer.internal }}
             service.beta.kubernetes.io/aws-load-balancer-subnets: {{ $.Values.subnets.private}}
             service.beta.kubernetes.io/aws-load-balancer-internal: "true"
@@ -99,6 +99,7 @@ spec:
             service.beta.kubernetes.io/aws-load-balancer-scheme: internal
             {{- end }}
             {{- else }}
+            service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
             service.beta.kubernetes.io/aws-load-balancer-subnets: {{ $.Values.subnets.public }} 
             {{- end}}
       {{- end}}
@@ -136,7 +137,7 @@ spec:
             {{- with .external.loadbalancer.sourceRanges }}
             service.beta.kubernetes.io/load-balancer-source-ranges: {{ . }}
             {{- end }}
-            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka
+            service.beta.kubernetes.io/aws-load-balancer-target-node-labels: service=kafka-arm
           domain: {{ $.Values.domain }}
           bootstrapPrefix: {{ .external.loadbalancer.bootstrapPrefix }} 
           brokerPrefix: {{ .external.loadbalancer.brokerPrefix }} ##TODO check this is correct
@@ -189,6 +190,15 @@ spec:
     {{- end }}
   services:
     mds:
+      externalAccess:
+          loadBalancer:
+            annotations:
+              #service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+              service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+              service.beta.kubernetes.io/aws-load-balancer-subnets: {{ .Values.subnets.public }}
+            domain: {{ .Values.domain }}
+            prefix: mds.kafka
+          type: loadBalancer
       tls:
         enabled: true
       tokenKeyPair:
@@ -197,7 +207,9 @@ spec:
         type: ldap
         ldap:
           ##ADDRESS
-          address: ldap://ldap-proxy.confluent.svc.cluster.local:636
+          #address: ldap://ldap-proxy.confluent.svc.cluster.local:636
+          address: {{ .Values.ldap.address }}          
+          #address: ldaps://global.scd.scania.com:636
           #address: ldaps://SESOEGDC001.global.scd.scania.com:636
           #address: https://internal-Ldap-26465864.eu-north-1.elb.amazonaws.com:443
           authentication:
@@ -248,6 +260,13 @@ spec:
       enabled: true
   oneReplicaPerNode: {{ .Values.kafka.oneReplicaPerNode }}
   podTemplate:
+    resources:
+      requests:
+        memory: "16Gi"
+        cpu: "4m"
+      limits:
+        memory: "20Gi"
+    serviceAccountName: kafka
     podSecurityContext:
       fsGroup: 1000
       runAsGroup: 1000
@@ -267,7 +286,7 @@ spec:
                 - key: service
                   operator: In
                   values:
-                    - kafka
+                    - kafka-arm
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:

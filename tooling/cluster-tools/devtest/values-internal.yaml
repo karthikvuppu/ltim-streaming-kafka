@@ -21,7 +21,7 @@ datadog:
   enabled: true
 
 filebeat:
-  enabled: true
+  enabled: false #disable file beat 
 
 kafkalagexporter:
   enabled: true

@@ -107,6 +107,12 @@ spec:
      
   oneReplicaPerNode: true
   podTemplate:
+    resources:
+      requests:
+        memory: {{ .Values.controlCenter.resources.requests.memory | quote }}
+        cpu: {{ .Values.controlCenter.resources.requests.cpu | default "1m" | quote }}
+      limits:
+        memory: {{ .Values.controlCenter.resources.limits.memory | quote }}
     podSecurityContext:
       fsGroup: 1000
       runAsGroup: 1000
@@ -125,13 +131,13 @@ spec:
                   operator: In
                   values:
                     - {{ required "NodeAffinityServiceName is mandatory" .Values.controlCenter.nodeAffinityServiceName }}
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                    - zookeeper
-                    - kafka
-            topologyKey: kubernetes.io/hostname
+    #  podAntiAffinity:
+    #    requiredDuringSchedulingIgnoredDuringExecution:
+    #      - labelSelector:
+    #          matchExpressions:
+    #            - key: app
+    #              operator: In
+    #              values:
+    #                - zookeeper
+    #                - kafka
+    #        topologyKey: kubernetes.io/hostname
