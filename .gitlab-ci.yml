@@ -5,6 +5,7 @@ include:
   - 'cicd/templates/confluent-services.yml'
   - 'cicd/templates/kafka-endpoints-deploy.yml'
   - 'cicd/templates/clusterlink-dashboard-deploy.yml'
+  - 'cicd/templates/datadog-deploy.yml'
 
 variables:
   CONF_OPERATOR_VERSION: "0.1145.6"
@@ -17,6 +18,7 @@ stages:
   - confluent service
   - kafka-endpoints-deploy
   - clusterlink-dashboard-deploy
+  - datadog-deploy
 
 .helm-common:
   image: dtzar/helm-kubectl:3.10
@@ -244,6 +246,24 @@ prod-clusterlink-dashboard-deploy:
   stage: clusterlink-dashboard-deploy
   extends:
   - .clusterlink-dashboard-deploy
+  - .production
+  - .external
+  when: manual
+
+################################################### Datadog Deploy ###############################################
+devtest-datadog-deploy:
+  stage: datadog-deploy
+  extends:
+  - .datadog-deploy
+  - .dev-test
+  - .external
+  when: manual
+
+
+prod-datadog-deploy:
+  stage: datadog-deploy
+  extends:
+  - .datadog-deploy
   - .production
   - .external
   when: manual

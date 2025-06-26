@@ -1,4 +1,4 @@
-## Default values for Datadog Agent
+### Default values for Datadog Agent
 ## See Datadog helm documentation to learn more:
 ## https://docs.datadoghq.com/agent/kubernetes/helm/
 

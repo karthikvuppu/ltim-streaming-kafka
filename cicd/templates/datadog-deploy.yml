@@ -1,0 +1,21 @@
+.datadog-deploy:
+  stage: datadog-deploy
+  extends:
+  - .helm-common
+  - .authenticate
+  script:
+    - "helm repo add datadog https://helm.datadoghq.com"
+    - 'helm upgrade
+      --install
+      --version 3.20.2 
+      datadog datadog/datadog
+      --create-namespace
+      --namespace datadog
+      -f tooling/datadog/$ENVIRONMENT/values.yaml
+      --kube-context $EKS_CLUSTER'
+  rules:
+    #- if: '$CI_COMMIT_BRANCH == "prodation" || $CI_COMMIT_BRANCH == "main"'
+    #- if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - changes:
+        - tooling/datadog/$ENVIRONMENT/values.yaml
+  when: manual

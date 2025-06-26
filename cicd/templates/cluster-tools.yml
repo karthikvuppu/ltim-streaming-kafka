@@ -10,7 +10,7 @@
     - 'helm repo add external-secrets https://charts.external-secrets.io'
     - "helm repo add elastic https://helm.elastic.co"
     - "helm repo add stakater https://stakater.github.io/stakater-charts"
-    - "helm repo add datadog https://helm.datadoghq.com"
+    # - "helm repo add datadog https://helm.datadoghq.com"
     - "helm repo add jetstack https://charts.jetstack.io"
     # - "helm repo add traefik https://traefik.github.io/charts"
     # - "helm repo add kafka-lag-exporter https://seglo.github.io/kafka-lag-exporter/repo/"
@@ -45,13 +45,13 @@
       --namespace stakater-reloader 
       --create-namespace
       --kube-context $EKS_CLUSTER'
-    - 'helm upgrade
-      --install
-      --version 3.20.2 
-      datadog datadog/datadog
-      --namespace datadog
-      -f tooling/datadog/$ENVIRONMENT/values.yaml
-      --kube-context $EKS_CLUSTER'
+    # - 'helm upgrade
+    #   --install
+    #   --version 3.20.2 
+    #   datadog datadog/datadog
+    #   --namespace datadog
+    #   -f tooling/datadog/$ENVIRONMENT/values.yaml
+    #   --kube-context $EKS_CLUSTER'
     #- 'helm upgrade 
     #  --install cluster-tools charts/cluster-tools 
     #  --namespace confluent 
