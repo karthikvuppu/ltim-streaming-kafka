@@ -1,9 +1,0 @@
-apiVersion: v2
-name: kafka-endpoints-monitor
-version: 0.0.1
-description: iris kafka endpoints monitor from Datadog
-keywords:
-- kafka-endpoints-monitor-setup
-maintainers:
-- name: Iris streaming
-  email: streaming.ms@scania.com
