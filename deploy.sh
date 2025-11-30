@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Personal Kafka & Zookeeper Deployment Script for EKS
-# This script deploys a simplified, open-source Kafka cluster using Strimzi
+# Kafka on EKS Deployment Script
+# Deploys Apache Kafka using Helm chart and Strimzi operator
 
 set -e
 
 echo "=========================================="
-echo "Kafka & Zookeeper Deployment for EKS"
+echo "Kafka on EKS - Helm Deployment"
 echo "=========================================="
 echo ""
 
@@ -14,7 +14,14 @@ echo ""
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Default configuration
+NAMESPACE="kafka"
+RELEASE_NAME="kafka-eks"
+ENVIRONMENT="${1:-dev}"  # Default to dev if not specified
+HELM_CHART="./helm/kafka-eks"
 
 # Check prerequisites
 echo "Checking prerequisites..."
@@ -38,15 +45,35 @@ fi
 echo -e "${GREEN}✅ Prerequisites check passed${NC}"
 echo ""
 
-# Configuration
-NAMESPACE="kafka"
-STRIMZI_VERSION="0.39.0"
-
-echo "Configuration:"
+# Display configuration
+echo -e "${BLUE}Configuration:${NC}"
+echo "  Environment: $ENVIRONMENT"
 echo "  Namespace: $NAMESPACE"
-echo "  Strimzi Version: $STRIMZI_VERSION"
+echo "  Release Name: $RELEASE_NAME"
+echo "  Helm Chart: $HELM_CHART"
 echo ""
 
+# Select values file based on environment
+case $ENVIRONMENT in
+  dev|development)
+    VALUES_FILE="$HELM_CHART/values-dev.yaml"
+    echo -e "${YELLOW}📋 Using development configuration${NC}"
+    ;;
+  staging|stage)
+    VALUES_FILE="$HELM_CHART/values-staging.yaml"
+    echo -e "${YELLOW}📋 Using staging configuration${NC}"
+    ;;
+  prod|production)
+    VALUES_FILE="$HELM_CHART/values-prod.yaml"
+    echo -e "${YELLOW}📋 Using production configuration${NC}"
+    ;;
+  *)
+    VALUES_FILE="$HELM_CHART/values.yaml"
+    echo -e "${YELLOW}📋 Using default configuration${NC}"
+    ;;
+esac
+
+echo ""
 read -p "Continue with deployment? (y/n) " -n 1 -r
 echo ""
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -70,53 +97,43 @@ helm repo update &> /dev/null
 echo -e "${GREEN}✅ Helm repository updated${NC}"
 
 echo ""
-echo "Step 3: Installing Strimzi Kafka Operator..."
-if helm list -n $NAMESPACE | grep -q strimzi-kafka-operator; then
-    echo -e "${YELLOW}⚠️  Strimzi operator already installed${NC}"
+echo "Step 3: Deploying Kafka using Helm..."
+
+# Check if release already exists
+if helm list -n $NAMESPACE | grep -q "^$RELEASE_NAME"; then
+    echo -e "${YELLOW}⚠️  Release $RELEASE_NAME already exists${NC}"
     read -p "Upgrade existing installation? (y/n) " -n 1 -r
     echo ""
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        helm upgrade strimzi-kafka-operator strimzi/strimzi-kafka-operator \
+        helm upgrade $RELEASE_NAME $HELM_CHART \
             --namespace $NAMESPACE \
-            --version $STRIMZI_VERSION
-        echo -e "${GREEN}✅ Operator upgraded${NC}"
+            --values $VALUES_FILE \
+            --wait \
+            --timeout 15m
+        echo -e "${GREEN}✅ Helm release upgraded${NC}"
+    else
+        echo "Skipping Helm installation."
     fi
 else
-    helm install strimzi-kafka-operator strimzi/strimzi-kafka-operator \
+    helm install $RELEASE_NAME $HELM_CHART \
         --namespace $NAMESPACE \
-        --version $STRIMZI_VERSION \
-        --wait
-    echo -e "${GREEN}✅ Operator installed${NC}"
+        --values $VALUES_FILE \
+        --wait \
+        --timeout 15m
+    echo -e "${GREEN}✅ Helm release installed${NC}"
 fi
 
 echo ""
-echo "Step 4: Waiting for operator to be ready..."
-kubectl wait --for=condition=Ready pod -l name=strimzi-cluster-operator -n $NAMESPACE --timeout=300s
-echo -e "${GREEN}✅ Operator is ready${NC}"
-
+echo "Step 4: Waiting for Kafka cluster to be ready..."
+echo "  This may take 5-10 minutes..."
 echo ""
-echo "Step 5: Deploying Kafka cluster with Zookeeper..."
-kubectl apply -f kafka-cluster/kafka-cluster.yaml
-echo -e "${GREEN}✅ Kafka cluster deployment initiated${NC}"
-
-echo ""
-echo "Step 6: Waiting for Kafka cluster to be ready (this may take 5-10 minutes)..."
-echo "  - Deploying Zookeeper ensemble (3 nodes)..."
-echo "  - Deploying Kafka brokers (3 nodes)..."
-echo ""
-
-# Wait for Zookeeper
-echo "Waiting for Zookeeper..."
-kubectl wait pod -l strimzi.io/name=my-kafka-zookeeper -n $NAMESPACE --for=condition=Ready --timeout=600s
-
-# Wait for Kafka
-echo "Waiting for Kafka..."
-kubectl wait pod -l strimzi.io/name=my-kafka-kafka -n $NAMESPACE --for=condition=Ready --timeout=600s
 
 # Wait for Kafka cluster to be ready
-kubectl wait kafka/my-kafka --for=condition=Ready --timeout=600s -n $NAMESPACE
-
-echo -e "${GREEN}✅ Kafka cluster is ready!${NC}"
+if kubectl wait kafka/my-kafka --for=condition=Ready --timeout=600s -n $NAMESPACE 2>/dev/null; then
+    echo -e "${GREEN}✅ Kafka cluster is ready!${NC}"
+else
+    echo -e "${YELLOW}⚠️  Kafka cluster still starting up. Check status with: kubectl get kafka -n $NAMESPACE${NC}"
+fi
 
 echo ""
 echo "=========================================="
@@ -125,16 +142,20 @@ echo "=========================================="
 echo ""
 
 # Get cluster info
-echo "Kafka Cluster Status:"
+echo -e "${BLUE}Kafka Cluster Status:${NC}"
 kubectl get kafka -n $NAMESPACE
 
 echo ""
-echo "Pods:"
+echo -e "${BLUE}Pods:${NC}"
 kubectl get pods -n $NAMESPACE
 
 echo ""
-echo "Services:"
+echo -e "${BLUE}Services:${NC}"
 kubectl get svc -n $NAMESPACE | grep -E "NAME|kafka-bootstrap"
+
+echo ""
+echo -e "${BLUE}Helm Release:${NC}"
+helm list -n $NAMESPACE
 
 echo ""
 echo "=========================================="
@@ -142,18 +163,24 @@ echo "Next Steps"
 echo "=========================================="
 echo ""
 echo "1. Access Kafka internally:"
-echo "   Bootstrap servers: my-kafka-kafka-bootstrap.$NAMESPACE.svc.cluster.local:9092"
+echo "   ${BLUE}my-kafka-kafka-bootstrap.$NAMESPACE.svc.cluster.local:9092${NC}"
 echo ""
 echo "2. Access Kafka from your local machine:"
-echo "   kubectl port-forward -n $NAMESPACE svc/my-kafka-kafka-bootstrap 9092:9092"
+echo "   ${BLUE}kubectl port-forward -n $NAMESPACE svc/my-kafka-kafka-bootstrap 9092:9092${NC}"
 echo ""
 echo "3. Get external LoadBalancer address:"
-echo "   kubectl get svc -n $NAMESPACE my-kafka-kafka-external-bootstrap"
+echo "   ${BLUE}kubectl get svc -n $NAMESPACE my-kafka-kafka-external-bootstrap${NC}"
 echo ""
-echo "4. Create example topics:"
-echo "   kubectl apply -f kafka-cluster/kafka-topic-example.yaml"
+echo "4. View Kafka logs:"
+echo "   ${BLUE}kubectl logs -n $NAMESPACE my-kafka-kafka-0 -c kafka${NC}"
 echo ""
-echo "5. View Kafka logs:"
-echo "   kubectl logs -n $NAMESPACE my-kafka-kafka-0 -c kafka"
+echo "5. Check Helm release:"
+echo "   ${BLUE}helm status $RELEASE_NAME -n $NAMESPACE${NC}"
+echo ""
+echo "6. Upgrade configuration:"
+echo "   ${BLUE}helm upgrade $RELEASE_NAME $HELM_CHART -n $NAMESPACE -f $VALUES_FILE${NC}"
 echo ""
 echo -e "${GREEN}✅ Deployment completed successfully!${NC}"
+echo ""
+echo "Usage: ./deploy.sh [dev|staging|prod]"
+echo ""

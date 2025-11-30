@@ -1,0 +1,99 @@
+{{- if or .Values.kafka.metrics.enabled .Values.zookeeper.metrics.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.kafka.name }}-metrics
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kafka-eks.labels" . | nindent 4 }}
+data:
+  kafka-metrics-config.yml: |
+    lowercaseOutputName: true
+    rules:
+    # Special cases and very specific rules
+    - pattern: kafka.server<type=(.+), name=(.+), clientId=(.+), topic=(.+), partition=(.*)><>Value
+      name: kafka_server_$1_$2
+      type: GAUGE
+      labels:
+       clientId: "$3"
+       topic: "$4"
+       partition: "$5"
+    - pattern: kafka.server<type=(.+), name=(.+), clientId=(.+), brokerHost=(.+), brokerPort=(.+)><>Value
+      name: kafka_server_$1_$2
+      type: GAUGE
+      labels:
+       clientId: "$3"
+       broker: "$4:$5"
+    # Generic per-second counters
+    - pattern: kafka.(\w+)<type=(.+), name=(.+)PerSec\w*, (.+)=(.+), (.+)=(.+)><>Count
+      name: kafka_$1_$2_$3_total
+      type: COUNTER
+      labels:
+       "$4": "$5"
+       "$6": "$7"
+    - pattern: kafka.(\w+)<type=(.+), name=(.+)PerSec\w*, (.+)=(.+)><>Count
+      name: kafka_$1_$2_$3_total
+      type: COUNTER
+      labels:
+       "$4": "$5"
+    - pattern: kafka.(\w+)<type=(.+), name=(.+)PerSec\w*><>Count
+      name: kafka_$1_$2_$3_total
+      type: COUNTER
+    # Generic gauges
+    - pattern: kafka.(\w+)<type=(.+), name=(.+), (.+)=(.+), (.+)=(.+)><>Value
+      name: kafka_$1_$2_$3
+      type: GAUGE
+      labels:
+       "$4": "$5"
+       "$6": "$7"
+    - pattern: kafka.(\w+)<type=(.+), name=(.+), (.+)=(.+)><>Value
+      name: kafka_$1_$2_$3
+      type: GAUGE
+      labels:
+       "$4": "$5"
+    - pattern: kafka.(\w+)<type=(.+), name=(.+)><>Value
+      name: kafka_$1_$2_$3
+      type: GAUGE
+    # Emulate Prometheus 'Summary' metrics for exported 'Histogram's
+    - pattern: kafka.(\w+)<type=(.+), name=(.+), (.+)=(.+), (.+)=(.+)><>Count
+      name: kafka_$1_$2_$3_count
+      type: COUNTER
+      labels:
+       "$4": "$5"
+       "$6": "$7"
+    - pattern: kafka.(\w+)<type=(.+), name=(.+), (.+)=(.*)><>Count
+      name: kafka_$1_$2_$3_count
+      type: COUNTER
+      labels:
+       "$4": "$5"
+    - pattern: kafka.(\w+)<type=(.+), name=(.+)><>Count
+      name: kafka_$1_$2_$3_count
+      type: COUNTER
+    # Generic quantile gauges
+    - pattern: kafka.(\w+)<type=(.+), name=(.+), (.+)=(.+), (.+)=(.+)><>(\d+)thPercentile
+      name: kafka_$1_$2_$3
+      type: GAUGE
+      labels:
+       "$4": "$5"
+       "$6": "$7"
+       quantile: "0.$8"
+    - pattern: kafka.(\w+)<type=(.+), name=(.+), (.+)=(.+)><>(\d+)thPercentile
+      name: kafka_$1_$2_$3
+      type: GAUGE
+      labels:
+       "$4": "$5"
+       quantile: "0.$6"
+    - pattern: kafka.(\w+)<type=(.+), name=(.+)><>(\d+)thPercentile
+      name: kafka_$1_$2_$3
+      type: GAUGE
+      labels:
+       quantile: "0.$4"
+
+  zookeeper-metrics-config.yml: |
+    lowercaseOutputName: true
+    rules:
+    - pattern: "org.apache.ZooKeeperService<name0=(.+)><>(.+)"
+      name: "zookeeper_$2"
+      labels:
+        server: "$1"
+{{- end }}

@@ -1,0 +1,22 @@
+apiVersion: v2
+name: kafka-eks
+description: Production-ready Apache Kafka deployment on EKS using Strimzi
+type: application
+version: 1.0.0
+appVersion: "3.6.0"
+keywords:
+  - kafka
+  - zookeeper
+  - strimzi
+  - eks
+  - streaming
+home: https://github.com/karthikvuppu/ltim-streaming-kafka
+sources:
+  - https://github.com/karthikvuppu/ltim-streaming-kafka
+maintainers:
+  - name: Kafka on EKS Team
+dependencies:
+  - name: strimzi-kafka-operator
+    version: "0.39.0"
+    repository: "https://strimzi.io/charts/"
+    condition: strimzi.enabled
