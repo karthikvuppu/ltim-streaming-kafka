@@ -1,3 +1,0 @@
-clusterlinkCustomDashboard:
-##  image: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/clusterlink-topic:3
-  image: 858242954753.dkr.ecr.eu-north-1.amazonaws.com/clusterlink-topic:latest
