@@ -2,6 +2,9 @@
 
 # Kafka on EKS Deployment Script
 # Deploys Apache Kafka using Helm chart and Strimzi operator
+#
+# NOTE: This script is for local testing only.
+# For production deployments, use GitHub Actions workflows.
 
 set -e
 
@@ -22,6 +25,10 @@ NAMESPACE="kafka"
 RELEASE_NAME="kafka-eks"
 ENVIRONMENT="${1:-dev}"  # Default to dev if not specified
 HELM_CHART="./helm/kafka-eks"
+
+echo -e "${YELLOW}⚠️  NOTE: This script is for local/manual deployment.${NC}"
+echo -e "${YELLOW}⚠️  For production, use GitHub Actions workflows.${NC}"
+echo ""
 
 # Check prerequisites
 echo "Checking prerequisites..."
@@ -55,16 +62,17 @@ echo ""
 
 # Select values file based on environment
 case $ENVIRONMENT in
+  sandbox)
+    VALUES_FILE="$HELM_CHART/values-sandbox.yaml"
+    echo -e "${YELLOW}📋 Using sandbox configuration${NC}"
+    ;;
   dev|development)
     VALUES_FILE="$HELM_CHART/values-dev.yaml"
     echo -e "${YELLOW}📋 Using development configuration${NC}"
     ;;
-  staging|stage)
-    VALUES_FILE="$HELM_CHART/values-staging.yaml"
-    echo -e "${YELLOW}📋 Using staging configuration${NC}"
-    ;;
   prod|production)
     VALUES_FILE="$HELM_CHART/values-prod.yaml"
+    echo -e "${RED}⚠️  WARNING: Deploying to PRODUCTION${NC}"
     echo -e "${YELLOW}📋 Using production configuration${NC}"
     ;;
   *)
@@ -182,5 +190,10 @@ echo "   ${BLUE}helm upgrade $RELEASE_NAME $HELM_CHART -n $NAMESPACE -f $VALUES_
 echo ""
 echo -e "${GREEN}✅ Deployment completed successfully!${NC}"
 echo ""
-echo "Usage: ./deploy.sh [dev|staging|prod]"
+echo -e "${YELLOW}💡 For production deployments, use GitHub Actions:${NC}"
+echo "   - Push to 'sandbox' branch → Deploy to sandbox"
+echo "   - Push to 'develop' branch → Deploy to dev"
+echo "   - Push to 'main/master' → Deploy to prod (after dev)"
+echo ""
+echo "Usage: ./deploy.sh [sandbox|dev|prod]"
 echo ""
