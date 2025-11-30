@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ServiceMonitor
+metadata:
+  name: kafka-metrics
+  namespace: kafka
+  labels:
+    app: strimzi
+spec:
+  selector:
+    matchLabels:
+      strimzi.io/kind: Kafka
+  endpoints:
+    - port: tcp-prometheus
+      path: /metrics
+      interval: 30s
+---
+apiVersion: v1
+kind: ServiceMonitor
+metadata:
+  name: zookeeper-metrics
+  namespace: kafka
+  labels:
+    app: strimzi
+spec:
+  selector:
+    matchLabels:
+      strimzi.io/name: my-kafka-zookeeper
+  endpoints:
+    - port: tcp-prometheus
+      path: /metrics
+      interval: 30s
