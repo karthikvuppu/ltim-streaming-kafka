@@ -2,9 +2,6 @@
 
 # Kafka on EKS Deployment Script
 # Deploys Apache Kafka using Helm chart and Strimzi operator
-#
-# NOTE: This script is for local testing only.
-# For production deployments, use GitHub Actions workflows.
 
 set -e
 
@@ -25,10 +22,6 @@ NAMESPACE="kafka"
 RELEASE_NAME="kafka-eks"
 ENVIRONMENT="${1:-dev}"  # Default to dev if not specified
 HELM_CHART="./helm/kafka-eks"
-
-echo -e "${YELLOW}⚠️  NOTE: This script is for local/manual deployment.${NC}"
-echo -e "${YELLOW}⚠️  For production, use GitHub Actions workflows.${NC}"
-echo ""
 
 # Check prerequisites
 echo "Checking prerequisites..."
@@ -189,11 +182,6 @@ echo "6. Upgrade configuration:"
 echo "   ${BLUE}helm upgrade $RELEASE_NAME $HELM_CHART -n $NAMESPACE -f $VALUES_FILE${NC}"
 echo ""
 echo -e "${GREEN}✅ Deployment completed successfully!${NC}"
-echo ""
-echo -e "${YELLOW}💡 For production deployments, use GitHub Actions:${NC}"
-echo "   - Push to 'sandbox' branch → Deploy to sandbox"
-echo "   - Push to 'develop' branch → Deploy to dev"
-echo "   - Push to 'main/master' → Deploy to prod (after dev)"
 echo ""
 echo "Usage: ./deploy.sh [sandbox|dev|prod]"
 echo ""
