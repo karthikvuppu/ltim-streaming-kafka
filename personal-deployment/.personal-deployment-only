@@ -1,0 +1,32 @@
+# Personal Deployment Only
+
+This directory contains a simplified, open-source deployment of Kafka and Zookeeper.
+
+## ⚠️ IMPORTANT: Do NOT Use Enterprise Code
+
+The parent directories contain Confluent Enterprise configurations that require:
+- Commercial licenses
+- DataDog subscription
+- Enterprise features
+
+For personal use, ONLY use files in this `personal-deployment/` directory.
+
+## What's Safe to Use
+
+✅ USE THESE:
+- personal-deployment/README.md
+- personal-deployment/deploy.sh
+- personal-deployment/undeploy.sh
+- personal-deployment/test-kafka.sh
+- personal-deployment/kafka-cluster/
+- personal-deployment/monitoring-optional/
+
+❌ DO NOT USE:
+- ../charts/
+- ../operator/
+- ../confluent-services/
+- ../tooling/
+- ../secure-deploy/
+- ../.gitlab-ci.yml
+
+See REMOVED_ENTERPRISE_FEATURES.md for complete details.
