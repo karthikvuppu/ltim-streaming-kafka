@@ -1,199 +1,322 @@
 # Kafka on EKS
 
-Production-ready Apache Kafka deployment on Amazon EKS using Strimzi Kafka Operator, Helm charts, and GitHub Actions CI/CD.
+Production-ready Apache Kafka deployment on Amazon EKS using **GitHub Actions CI/CD exclusively**.
+
+## 🚀 Automated Deployment via GitHub Actions
+
+**Push to deploy automatically:**
+- Push to `sandbox` → Deploy to Sandbox
+- Push to `develop` → Deploy to Development
+- Push to `main` → Deploy to Production
 
 ## Quick Start
 
-```bash
-# Deploy to development
-./deploy.sh dev
+### 1. Configure GitHub Secrets
 
-# Deploy to staging
-./deploy.sh staging
+Add these secrets to your repository (**Settings → Secrets → Actions**):
 
-# Deploy to production
-./deploy.sh prod
 ```
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+AWS_REGION
+EKS_CLUSTER_NAME_SANDBOX
+EKS_CLUSTER_NAME_DEV
+EKS_CLUSTER_NAME_PROD
+```
+
+### 2. Push to Deploy
+
+```bash
+# Deploy to sandbox
+git checkout sandbox
+git push origin sandbox
+
+# Deploy to development
+git checkout develop
+git push origin develop
+
+# Deploy to production (requires approval)
+git checkout main
+git push origin main
+```
+
+**That's it!** GitHub Actions handles everything automatically.
 
 ## Overview
 
-This project provides a complete solution for deploying Apache Kafka with Zookeeper on Amazon EKS. It includes:
-
-- **Helm Charts** - Packaged, configurable deployments
-- **GitHub Actions** - Automated CI/CD pipelines
-- **Multi-Environment** - Dev, staging, and production configurations
-- **Monitoring** - Optional Prometheus/Grafana integration
-- **100% Open Source** - No licenses or subscriptions required
+Complete Kafka deployment solution with:
+- **GitHub Actions CI/CD** - Fully automated deployments
+- **Three Environments** - Sandbox, Development, Production
+- **Helm Charts** - Production-ready configurations
+- **Zero Manual Work** - Push to deploy
+- **100% Open Source** - No licenses required
 
 ## Features
 
+- ✅ **GitHub Actions Exclusive** - All deployments automated
 - ✅ **Apache Kafka 3.6.0** - Latest stable release
-- ✅ **Helm Charts** - Easy deployment and upgrades
-- ✅ **GitHub Actions** - Automated deployment workflows
-- ✅ **Multi-Environment** - Separate configs for dev/staging/prod
-- ✅ **Zookeeper Ensemble** - 3-5 node clusters
-- ✅ **Automated Scripts** - One-command deployment
-- ✅ **Monitoring Ready** - Prometheus/Grafana integration
-- ✅ **Production Patterns** - Best practices for Kafka on Kubernetes
+- ✅ **Three Environments** - Sandbox/Dev/Prod isolation
+- ✅ **Automated Testing** - Lint, validate, security scan
+- ✅ **Branch-based Deployment** - Simple git push to deploy
+- ✅ **Production Approval** - Manual gate for prod deployments
+- ✅ **Monitoring Ready** - Optional Prometheus integration
+- ✅ **Rollback Support** - Easy rollback via Helm
 
-## Prerequisites
+## Architecture
 
-- Running Amazon EKS cluster
-- `kubectl` configured to access your cluster
-- `helm` 3.8+ installed
-- GitHub repository (for CI/CD)
+```
+┌──────────────────────────────────────────────────────┐
+│                 GitHub Repository                     │
+│                                                       │
+│  Branch: sandbox  ──> Auto-deploy to Sandbox EKS    │
+│  Branch: develop  ──> Auto-deploy to Dev EKS        │
+│  Branch: main     ──> Auto-deploy to Prod EKS       │
+│                       (with approval)                 │
+│                                                       │
+│  Pull Request     ──> Automatic validation & tests  │
+└──────────────────────────────────────────────────────┘
+```
+
+## Environments
+
+| Environment | Branch | Auto-Deploy | Brokers | Storage | Use Case |
+|-------------|--------|-------------|---------|---------|----------|
+| **Sandbox** | `sandbox` | ✅ Yes | 1 | 10Gi | Testing & experiments |
+| **Development** | `develop` | ✅ Yes | 1 | 5Gi | Active development |
+| **Production** | `main` | ⚠️ Requires approval | 3+ | 100Gi | Live workloads |
 
 ## Repository Structure
 
 ```
 .
-├── README.md                      # This file
-├── deploy.sh                      # Automated deployment script
-├── undeploy.sh                    # Cleanup script
-├── test-kafka.sh                  # Verification script
-├── helm/                          # Helm charts
-│   └── kafka-eks/                 # Main Kafka chart
-│       ├── Chart.yaml
-│       ├── values.yaml            # Default values
-│       ├── values-dev.yaml        # Development config
-│       ├── values-staging.yaml    # Staging config
-│       ├── values-prod.yaml       # Production config
-│       ├── templates/             # Kubernetes templates
-│       └── README.md
-├── .github/workflows/             # GitHub Actions
-│   ├── deploy.yml                 # Main deployment workflow
-│   └── pr-check.yml               # PR validation workflow
-├── kafka-cluster/                 # Legacy YAML configs
-└── monitoring-optional/           # Optional monitoring setup
+├── .github/workflows/          # GitHub Actions (PRIMARY)
+│   ├── deploy.yml              # Main deployment workflow
+│   └── pr-check.yml            # PR validation
+├── helm/kafka-eks/             # Helm chart
+│   ├── values-sandbox.yaml     # Sandbox environment
+│   ├── values-dev.yaml         # Development environment
+│   ├── values-prod.yaml        # Production environment
+│   └── templates/              # Kubernetes manifests
+├── deploy.sh                   # Manual deployment (testing only)
+├── undeploy.sh                 # Manual cleanup
+├── test-kafka.sh               # Verification script
+├── README.md                   # This file
+├── GITHUB_ACTIONS_SETUP.md     # Detailed setup guide
+└── LICENSE                     # Apache 2.0
 ```
 
-## Installation
+## GitHub Actions Setup
 
-### Option 1: Using Deployment Script (Recommended)
+**Complete setup guide:** [GITHUB_ACTIONS_SETUP.md](GITHUB_ACTIONS_SETUP.md)
+
+### Prerequisites
+
+- GitHub repository with this code
+- AWS account with EKS clusters
+- AWS IAM user for GitHub Actions
+- GitHub Secrets configured
+
+### Step 1: Create EKS Clusters
 
 ```bash
-# Deploy to development (1 broker, minimal resources)
-./deploy.sh dev
+# Create sandbox cluster
+eksctl create cluster --name kafka-sandbox-eks --region us-east-1
 
-# Deploy to staging (2 brokers, moderate resources)
-./deploy.sh staging
+# Create dev cluster
+eksctl create cluster --name kafka-dev-eks --region us-east-1
 
-# Deploy to production (3+ brokers, full resources)
-./deploy.sh prod
+# Create prod cluster
+eksctl create cluster --name kafka-prod-eks --region us-east-1
 ```
 
-### Option 2: Using Helm Directly
+### Step 2: Configure AWS IAM
+
+Create IAM user `github-actions-kafka` with EKS access permissions.
+
+### Step 3: Add GitHub Secrets
 
 ```bash
-# Add Strimzi repository
-helm repo add strimzi https://strimzi.io/charts/
-helm repo update
-
-# Install for development
-helm install kafka-eks ./helm/kafka-eks \
-  --namespace kafka \
-  --create-namespace \
-  --values ./helm/kafka-eks/values-dev.yaml
-
-# Install for production
-helm install kafka-eks ./helm/kafka-eks \
-  --namespace kafka \
-  --create-namespace \
-  --values ./helm/kafka-eks/values-prod.yaml
+gh secret set AWS_ACCESS_KEY_ID
+gh secret set AWS_SECRET_ACCESS_KEY
+gh secret set AWS_REGION
+gh secret set EKS_CLUSTER_NAME_SANDBOX
+gh secret set EKS_CLUSTER_NAME_DEV
+gh secret set EKS_CLUSTER_NAME_PROD
 ```
 
-### Option 3: Using GitHub Actions
+### Step 4: Create Branches
 
-1. **Configure Secrets** in your GitHub repository:
-   - `AWS_ACCESS_KEY_ID`
-   - `AWS_SECRET_ACCESS_KEY`
-   - `AWS_REGION`
-   - `EKS_CLUSTER_NAME_DEV`
-   - `EKS_CLUSTER_NAME_STAGING`
-   - `EKS_CLUSTER_NAME_PROD`
+```bash
+git checkout -b sandbox && git push -u origin sandbox
+git checkout -b develop && git push -u origin develop
+git checkout main && git push -u origin main
+```
 
-2. **Push to trigger deployment**:
-   - Push to `develop` branch → Deploys to dev
-   - Push to `main`/`master` → Deploys to staging
-   - Manual workflow → Deploy to production
+### Step 5: Deploy!
 
-3. **Manual deployment** via GitHub Actions:
-   - Go to Actions → Deploy Kafka to EKS
-   - Click "Run workflow"
-   - Select environment and action
+```bash
+# Deploy to sandbox
+git checkout sandbox
+echo "# Test change" >> README.md
+git commit -am "Test deployment"
+git push origin sandbox
+# ✅ GitHub Actions automatically deploys to sandbox
+
+# Deploy to dev
+git checkout develop
+git merge sandbox
+git push origin develop
+# ✅ GitHub Actions automatically deploys to dev
+
+# Deploy to prod
+git checkout main
+gh pr create --base main --head develop
+# After approval and merge:
+# ✅ GitHub Actions automatically deploys to prod
+```
+
+## Deployment Workflows
+
+### Automatic Deployment
+
+**Triggered by:** Push to `sandbox`, `develop`, or `main` branch
+
+**What it does:**
+1. ✅ Lints Helm charts
+2. ✅ Deploys to corresponding EKS cluster
+3. ✅ Waits for Kafka cluster to be ready
+4. ✅ Verifies deployment
+5. ✅ Runs smoke tests (prod only)
+
+### Pull Request Validation
+
+**Triggered by:** Pull request to any branch
+
+**What it does:**
+1. ✅ Lints Helm charts (all environments)
+2. ✅ Validates YAML syntax
+3. ✅ Tests template rendering
+4. ✅ Security scanning (Trivy)
+5. ✅ Uploads test artifacts
+
+### Manual Deployment
+
+**Via GitHub UI:**
+1. Go to **Actions** tab
+2. Select **Deploy Kafka to EKS**
+3. Click **Run workflow**
+4. Choose environment and action
+5. Click **Run workflow**
+
+**Via GitHub CLI:**
+```bash
+gh workflow run deploy.yml -f environment=prod -f action=upgrade
+```
 
 ## Configuration
 
-### Environment Configurations
+### Environment-Specific Values
 
-| Environment | Brokers | Zookeeper | Storage | Resources |
-|-------------|---------|-----------|---------|-----------|
-| **Dev** | 1 | 1 | 5Gi | Minimal (1Gi/250m) |
-| **Staging** | 2 | 3 | 20Gi | Moderate (2Gi/500m) |
-| **Production** | 3 | 5 | 100Gi | Full (4Gi/2000m) |
+**Sandbox** (`helm/kafka-eks/values-sandbox.yaml`):
+```yaml
+kafka:
+  replicas: 1
+  storage:
+    size: 10Gi
+  # Minimal resources for testing
+```
 
-### Customization
-
-Edit the values files in `helm/kafka-eks/`:
-
-**values-dev.yaml** - Development environment
+**Development** (`helm/kafka-eks/values-dev.yaml`):
 ```yaml
 kafka:
   replicas: 1
   storage:
     size: 5Gi
-  resources:
-    requests:
-      memory: 1Gi
+  # Cost-effective for development
 ```
 
-**values-staging.yaml** - Staging environment
-```yaml
-kafka:
-  replicas: 2
-  storage:
-    size: 20Gi
-```
-
-**values-prod.yaml** - Production environment
+**Production** (`helm/kafka-eks/values-prod.yaml`):
 ```yaml
 kafka:
   replicas: 3
   storage:
     size: 100Gi
-    class: gp3  # Better IOPS
+    class: gp3
   listeners:
     tls:
       enabled: true
       authentication:
         type: scram-sha-512
+  # Full HA setup with security
 ```
 
-See [Helm Chart README](helm/kafka-eks/README.md) for complete configuration options.
+### Customizing Configuration
+
+```bash
+# Edit environment-specific values
+git checkout develop
+vim helm/kafka-eks/values-dev.yaml
+
+# Commit and push
+git add helm/kafka-eks/values-dev.yaml
+git commit -m "Update dev configuration"
+git push origin develop
+
+# GitHub Actions automatically deploys the changes
+```
+
+## Monitoring Deployments
+
+### Via GitHub Actions UI
+
+1. Go to **Actions** tab
+2. Click on running workflow
+3. View real-time deployment logs
+4. Check deployment status
+
+### Via GitHub CLI
+
+```bash
+# Watch deployment
+gh run watch
+
+# List recent deployments
+gh run list --workflow=deploy.yml
+
+# View specific deployment
+gh run view <run-id> --log
+```
+
+### Via kubectl
+
+```bash
+# Check Kafka cluster status
+kubectl get kafka -n kafka
+
+# Check pods
+kubectl get pods -n kafka
+
+# View logs
+kubectl logs -n kafka my-kafka-kafka-0 -c kafka
+```
 
 ## Usage
 
 ### Accessing Kafka
 
-**From within the Kubernetes cluster:**
-
+**From within cluster:**
 ```
 my-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092
 ```
 
-**From your local machine:**
-
+**From local machine:**
 ```bash
 kubectl port-forward -n kafka svc/my-kafka-kafka-bootstrap 9092:9092
-# Connect to localhost:9092
 ```
 
-**Via LoadBalancer (external access):**
-
+**Via LoadBalancer:**
 ```bash
-# Get the LoadBalancer address
 kubectl get svc -n kafka my-kafka-kafka-external-bootstrap
-# Use the EXTERNAL-IP on port 9094
 ```
 
 ### Creating Topics
@@ -211,259 +334,180 @@ spec:
   partitions: 3
   replicas: 3
   config:
-    retention.ms: 604800000  # 7 days
+    retention.ms: 604800000
 EOF
 ```
 
 ### Testing Kafka
 
 **Producer:**
-
 ```bash
-kubectl run kafka-producer -ti \
+kubectl run kafka-producer -ti -n kafka \
   --image=quay.io/strimzi/kafka:0.39.0-kafka-3.6.0 \
-  --rm=true --restart=Never -n kafka -- \
+  --rm --restart=Never -- \
   bin/kafka-console-producer.sh \
   --bootstrap-server my-kafka-kafka-bootstrap:9092 \
   --topic test-topic
 ```
 
 **Consumer:**
-
 ```bash
-kubectl run kafka-consumer -ti \
+kubectl run kafka-consumer -ti -n kafka \
   --image=quay.io/strimzi/kafka:0.39.0-kafka-3.6.0 \
-  --rm=true --restart=Never -n kafka -- \
+  --rm --restart=Never -- \
   bin/kafka-console-consumer.sh \
   --bootstrap-server my-kafka-kafka-bootstrap:9092 \
   --topic test-topic \
   --from-beginning
 ```
 
-## GitHub Actions CI/CD
+## Rollback
 
-### Workflows
+If a deployment fails or needs to be reverted:
 
-**deploy.yml** - Main deployment workflow
-- Lints Helm charts
-- Deploys to dev/staging/prod based on branch
-- Manual workflow dispatch for production
-- Smoke tests after deployment
-
-**pr-check.yml** - Pull request validation
-- Lints Helm charts
-- Validates YAML syntax
-- Tests template rendering
-- Security scanning with Trivy
-
-### Deployment Flow
-
-```
-develop branch → Dev Environment
-     ↓
-main/master → Staging Environment
-     ↓
-Manual Trigger → Production Environment
-```
-
-### Environment Protection
-
-Configure branch protection and environment rules in GitHub:
-- `development` - Auto-deploy from `develop` branch
-- `staging` - Auto-deploy from `main` branch
-- `production` - Requires manual approval
-
-## Upgrading
+### Via Git
 
 ```bash
-# Using script
-./deploy.sh prod  # Will prompt to upgrade
-
-# Using Helm
-helm upgrade kafka-eks ./helm/kafka-eks \
-  --namespace kafka \
-  --values ./helm/kafka-eks/values-prod.yaml
-
-# Dry run to preview changes
-helm upgrade kafka-eks ./helm/kafka-eks \
-  --namespace kafka \
-  --values ./helm/kafka-eks/values-prod.yaml \
-  --dry-run --debug
+# Revert to previous commit
+git revert HEAD
+git push origin main
+# GitHub Actions automatically redeploys previous version
 ```
 
-## Monitoring
-
-### Enable Prometheus Monitoring
-
-Edit values file:
-
-```yaml
-monitoring:
-  serviceMonitor:
-    enabled: true
-    namespace: monitoring
-  podMonitor:
-    enabled: true
-```
-
-### Install Prometheus Stack
+### Via Helm
 
 ```bash
-helm install prometheus prometheus-community/kube-prometheus-stack \
-  --namespace monitoring \
-  --create-namespace
+# List releases
+helm list -n kafka
+
+# Rollback to previous release
+helm rollback kafka-eks -n kafka
 ```
-
-### View Metrics
-
-```bash
-kubectl port-forward -n monitoring svc/prometheus-operated 9090:9090
-# Access http://localhost:9090
-```
-
-## Security
-
-### TLS Encryption
-
-```yaml
-kafka:
-  listeners:
-    tls:
-      enabled: true
-      port: 9093
-```
-
-### Authentication (SCRAM-SHA-512)
-
-```yaml
-kafka:
-  listeners:
-    tls:
-      enabled: true
-      authentication:
-        type: scram-sha-512
-```
-
-Create users:
-
-```yaml
-apiVersion: kafka.strimzi.io/v1beta2
-kind: KafkaUser
-metadata:
-  name: my-user
-  namespace: kafka
-  labels:
-    strimzi.io/cluster: my-kafka
-spec:
-  authentication:
-    type: scram-sha-512
-```
-
-## Cleanup
-
-```bash
-./undeploy.sh
-```
-
-This will:
-1. Uninstall Helm release
-2. Delete Kafka cluster
-3. Delete topics
-4. Optionally delete PVCs (data)
-5. Optionally delete namespace
 
 ## Troubleshooting
 
-### Check Deployment Status
+### Deployment Failed
 
-```bash
-# Helm release status
-helm status kafka-eks -n kafka
+1. Check GitHub Actions logs: **Actions** tab → Failed workflow
+2. Check Kafka cluster: `kubectl describe kafka my-kafka -n kafka`
+3. Check pods: `kubectl get pods -n kafka`
+4. Check operator: `kubectl logs -n kafka deployment/strimzi-cluster-operator`
 
-# Kafka cluster status
-kubectl get kafka -n kafka
-kubectl describe kafka my-kafka -n kafka
+### AWS Authentication Error
 
-# Pods
-kubectl get pods -n kafka
-kubectl logs -n kafka my-kafka-kafka-0 -c kafka
-
-# Operator logs
-kubectl logs -n kafka deployment/strimzi-cluster-operator
+```
+Error: Failed to authenticate to AWS
 ```
 
-### Common Issues
+**Solution:**
+- Verify GitHub Secrets are set correctly
+- Check IAM user has EKS permissions
+- Verify IAM user in EKS aws-auth ConfigMap
 
-**PVCs not binding:**
-```bash
-kubectl get pvc -n kafka
-kubectl get storageclass
-# Ensure storage class exists (gp2 or gp3 for AWS)
+### Helm Installation Failed
+
+```
+Error: Helm installation failed
 ```
 
-**LoadBalancer not provisioning:**
-```bash
-# Check service
-kubectl describe svc my-kafka-kafka-external-bootstrap -n kafka
+**Solution:**
+- Run lint locally: `helm lint helm/kafka-eks`
+- Check cluster resources: `kubectl top nodes`
+- Verify storage class exists: `kubectl get sc`
 
-# Ensure AWS Load Balancer Controller is installed
-kubectl get pods -n kube-system | grep aws-load-balancer
+## Manual Deployment (Testing Only)
+
+For local testing, use the deployment script:
+
+```bash
+# NOT recommended for production
+./deploy.sh sandbox
+./deploy.sh dev
+./deploy.sh prod  # Use GitHub Actions for prod!
 ```
 
-**Helm lint failures:**
-```bash
-# Lint chart
-helm lint ./helm/kafka-eks
+**⚠️ Production deployments should ALWAYS use GitHub Actions.**
 
-# Test template rendering
-helm template kafka-eks ./helm/kafka-eks -f ./helm/kafka-eks/values-dev.yaml
-```
+## Security
+
+### Production Security Features
+
+- ✅ TLS encryption enabled
+- ✅ SCRAM-SHA-512 authentication
+- ✅ Network policies
+- ✅ Pod security policies
+- ✅ Secrets management via GitHub Secrets
+- ✅ AWS IAM integration
+
+### Branch Protection
+
+Configure in **Settings → Branches**:
+- `main` - Require PR approval, status checks
+- `develop` - Require status checks
+- `sandbox` - Optional protections
+
+## Best Practices
+
+1. **Always use GitHub Actions for deployment**
+2. **Test in sandbox first**
+3. **Merge to develop for integration testing**
+4. **Require PR approval for main**
+5. **Monitor deployments via Actions tab**
+6. **Use semantic commit messages**
+7. **Keep environment configs in sync**
+8. **Review GitHub Actions logs regularly**
+
+## Documentation
+
+- **[GITHUB_ACTIONS_SETUP.md](GITHUB_ACTIONS_SETUP.md)** - Complete CI/CD setup guide
+- **[helm/kafka-eks/README.md](helm/kafka-eks/README.md)** - Helm chart documentation
+- **[.github/workflows/](. github/workflows/)** - Workflow definitions
 
 ## Technology Stack
 
 | Component | Version | License |
 |-----------|---------|---------|
 | Apache Kafka | 3.6.0 | Apache 2.0 |
-| Apache Zookeeper | 3.8.3 | Apache 2.0 |
+| Zookeeper | 3.8.3 | Apache 2.0 |
 | Strimzi Operator | 0.39.0 | Apache 2.0 |
-| Helm | 3.8+ | Apache 2.0 |
+| Helm | 3.13+ | Apache 2.0 |
+| GitHub Actions | Latest | - |
 
 ## Contributing
 
-Contributions are welcome! Please:
-
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run lint checks: `helm lint ./helm/kafka-eks`
-5. Submit a pull request
+2. Create feature branch from `develop`
+3. Make changes
+4. Push and create PR
+5. Wait for automated checks to pass
+6. Request review
+7. Merge after approval
 
 ## Resources
 
 - [Strimzi Documentation](https://strimzi.io/docs/)
 - [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
-- [Helm Documentation](https://helm.sh/docs/)
-- [AWS EKS Best Practices](https://aws.github.io/aws-eks-best-practices/)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [AWS EKS Best Practices](https://aws.github.io/aws-eks-best-practices/)
 
 ## License
 
-This project is open source and available under the Apache 2.0 License.
+Apache 2.0 - See [LICENSE](LICENSE) file.
 
 ---
 
-**Get started in 5 minutes:**
+## 🎯 Get Started Now
+
+1. **Configure GitHub Secrets** (5 minutes)
+2. **Create branches** (2 minutes)
+3. **Push to deploy** (1 command)
 
 ```bash
-./deploy.sh dev
+git push origin sandbox  # Deploy to sandbox!
 ```
 
-**For production deployment:**
+**GitHub Actions handles the rest automatically!** 🚀
 
-```bash
-./deploy.sh prod
-```
+---
 
-**Using GitHub Actions:**
-
-Configure secrets → Push to branch → Auto-deploy ✨
+**Questions?** See [GITHUB_ACTIONS_SETUP.md](GITHUB_ACTIONS_SETUP.md) for detailed setup instructions.

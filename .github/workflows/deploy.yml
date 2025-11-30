@@ -3,9 +3,10 @@ name: Deploy Kafka to EKS
 on:
   push:
     branches:
+      - sandbox
+      - develop
       - main
       - master
-      - develop
     paths:
       - 'helm/**'
       - '.github/workflows/deploy.yml'
@@ -13,6 +14,8 @@ on:
     branches:
       - main
       - master
+      - develop
+      - sandbox
     paths:
       - 'helm/**'
   workflow_dispatch:
@@ -22,8 +25,8 @@ on:
         required: true
         type: choice
         options:
+          - sandbox
           - dev
-          - staging
           - prod
       action:
         description: 'Action to perform'
@@ -54,10 +57,80 @@ jobs:
 
       - name: Lint Helm chart
         run: |
+          echo "🔍 Linting Helm chart..."
           helm lint helm/kafka-eks
+          helm lint helm/kafka-eks -f helm/kafka-eks/values-sandbox.yaml
           helm lint helm/kafka-eks -f helm/kafka-eks/values-dev.yaml
-          helm lint helm/kafka-eks -f helm/kafka-eks/values-staging.yaml
           helm lint helm/kafka-eks -f helm/kafka-eks/values-prod.yaml
+          echo "✅ All lints passed"
+
+  deploy-sandbox:
+    name: Deploy to Sandbox
+    runs-on: ubuntu-latest
+    needs: lint
+    if: github.ref == 'refs/heads/sandbox' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'sandbox')
+    environment:
+      name: sandbox
+      url: https://sandbox-kafka.yourdomain.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --name ${{ secrets.EKS_CLUSTER_NAME_SANDBOX }} \
+            --region ${{ secrets.AWS_REGION }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Add Strimzi Helm repository
+        run: |
+          helm repo add strimzi https://strimzi.io/charts/
+          helm repo update
+
+      - name: Create namespace
+        run: |
+          kubectl create namespace kafka --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy Kafka
+        run: |
+          ACTION="${{ github.event.inputs.action || 'upgrade' }}"
+
+          if [ "$ACTION" = "uninstall" ]; then
+            helm uninstall kafka-eks -n kafka || true
+            echo "✅ Uninstalled Kafka from Sandbox"
+          else
+            helm $ACTION kafka-eks ./helm/kafka-eks \
+              --install \
+              --namespace kafka \
+              --values helm/kafka-eks/values-sandbox.yaml \
+              --wait \
+              --timeout 10m
+            echo "✅ Deployed Kafka to Sandbox"
+          fi
+
+      - name: Verify deployment
+        if: github.event.inputs.action != 'uninstall'
+        run: |
+          echo "⏳ Waiting for Kafka cluster..."
+          kubectl wait --for=condition=Ready kafka/my-kafka -n kafka --timeout=600s
+
+          echo "📊 Cluster Status:"
+          kubectl get kafka -n kafka
+          kubectl get pods -n kafka
+
+          echo "✅ Sandbox deployment verified"
 
   deploy-dev:
     name: Deploy to Development
@@ -104,6 +177,7 @@ jobs:
 
           if [ "$ACTION" = "uninstall" ]; then
             helm uninstall kafka-eks -n kafka || true
+            echo "✅ Uninstalled Kafka from Development"
           else
             helm $ACTION kafka-eks ./helm/kafka-eks \
               --install \
@@ -111,81 +185,26 @@ jobs:
               --values helm/kafka-eks/values-dev.yaml \
               --wait \
               --timeout 10m
+            echo "✅ Deployed Kafka to Development"
           fi
 
       - name: Verify deployment
         if: github.event.inputs.action != 'uninstall'
         run: |
+          echo "⏳ Waiting for Kafka cluster..."
           kubectl wait --for=condition=Ready kafka/my-kafka -n kafka --timeout=600s
+
+          echo "📊 Cluster Status:"
           kubectl get kafka -n kafka
           kubectl get pods -n kafka
 
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: lint
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
-    environment:
-      name: staging
-      url: https://staging-kafka.yourdomain.com
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Update kubeconfig
-        run: |
-          aws eks update-kubeconfig \
-            --name ${{ secrets.EKS_CLUSTER_NAME_STAGING }} \
-            --region ${{ secrets.AWS_REGION }}
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v3
-        with:
-          version: ${{ env.HELM_VERSION }}
-
-      - name: Add Strimzi Helm repository
-        run: |
-          helm repo add strimzi https://strimzi.io/charts/
-          helm repo update
-
-      - name: Create namespace
-        run: |
-          kubectl create namespace kafka --dry-run=client -o yaml | kubectl apply -f -
-
-      - name: Deploy Kafka
-        run: |
-          ACTION="${{ github.event.inputs.action || 'upgrade' }}"
-
-          if [ "$ACTION" = "uninstall" ]; then
-            helm uninstall kafka-eks -n kafka || true
-          else
-            helm $ACTION kafka-eks ./helm/kafka-eks \
-              --install \
-              --namespace kafka \
-              --values helm/kafka-eks/values-staging.yaml \
-              --wait \
-              --timeout 10m
-          fi
-
-      - name: Verify deployment
-        if: github.event.inputs.action != 'uninstall'
-        run: |
-          kubectl wait --for=condition=Ready kafka/my-kafka -n kafka --timeout=600s
-          kubectl get kafka -n kafka
-          kubectl get pods -n kafka
+          echo "✅ Development deployment verified"
 
   deploy-prod:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: [lint, deploy-staging]
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod'
+    needs: [lint, deploy-dev]
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
     environment:
       name: production
       url: https://kafka.yourdomain.com
@@ -226,6 +245,7 @@ jobs:
 
           if [ "$ACTION" = "uninstall" ]; then
             helm uninstall kafka-eks -n kafka || true
+            echo "✅ Uninstalled Kafka from Production"
           else
             helm $ACTION kafka-eks ./helm/kafka-eks \
               --install \
@@ -233,18 +253,27 @@ jobs:
               --values helm/kafka-eks/values-prod.yaml \
               --wait \
               --timeout 15m
+            echo "✅ Deployed Kafka to Production"
           fi
 
       - name: Verify deployment
         if: github.event.inputs.action != 'uninstall'
         run: |
+          echo "⏳ Waiting for Kafka cluster..."
           kubectl wait --for=condition=Ready kafka/my-kafka -n kafka --timeout=900s
+
+          echo "📊 Cluster Status:"
           kubectl get kafka -n kafka
           kubectl get pods -n kafka
+          kubectl get svc -n kafka
+
+          echo "✅ Production deployment verified"
 
       - name: Run smoke tests
         if: github.event.inputs.action != 'uninstall'
         run: |
+          echo "🧪 Running smoke tests..."
+
           # Create test topic
           kubectl run kafka-test-producer -n kafka \
             --image=quay.io/strimzi/kafka:0.39.0-kafka-3.6.0 \
@@ -253,7 +282,13 @@ jobs:
             --bootstrap-server my-kafka-kafka-bootstrap:9092 \
             --create --if-not-exists \
             --topic smoke-test \
-            --partitions 1 \
+            --partitions 3 \
             --replication-factor 3
 
           echo "✅ Smoke tests passed"
+
+      - name: Notify deployment
+        if: success()
+        run: |
+          echo "🎉 Production deployment successful!"
+          echo "Kafka cluster is ready at: my-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092"
