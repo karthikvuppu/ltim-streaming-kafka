@@ -1,0 +1,73 @@
+# Production environment values
+# Full resources and high availability configuration
+
+kafka:
+  replicas: 3
+
+  listeners:
+    plain:
+      enabled: true
+    external:
+      enabled: true
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+        service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+        service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    tls:
+      enabled: true
+      authentication:
+        type: scram-sha-512
+
+  storage:
+    size: 100Gi
+    class: gp3  # Use gp3 for better IOPS in production
+
+  resources:
+    requests:
+      memory: 4Gi
+      cpu: 2000m
+    limits:
+      memory: 8Gi
+      cpu: 4000m
+
+  jvmOptions:
+    xms: 2048m
+    xmx: 4096m
+
+  config:
+    offsets.topic.replication.factor: 3
+    transaction.state.log.replication.factor: 3
+    transaction.state.log.min.isr: 2
+    default.replication.factor: 3
+    min.insync.replicas: 2
+    log.retention.hours: 168  # 7 days
+    log.segment.bytes: 2147483647  # 2GB
+    compression.type: lz4
+
+zookeeper:
+  replicas: 5
+
+  storage:
+    size: 20Gi
+    class: gp3
+
+  resources:
+    requests:
+      memory: 2Gi
+      cpu: 500m
+    limits:
+      memory: 4Gi
+      cpu: 2000m
+
+  jvmOptions:
+    xms: 1024m
+    xmx: 2048m
+
+# Enable monitoring in production
+monitoring:
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+  podMonitor:
+    enabled: true
+    interval: 30s

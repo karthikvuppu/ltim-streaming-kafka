@@ -1,0 +1,123 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+
+jobs:
+  helm-lint:
+    name: Lint Helm Charts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.13.0
+
+      - name: Lint Helm chart
+        run: |
+          echo "🔍 Linting Helm charts..."
+          helm lint helm/kafka-eks
+
+          echo "✅ Linting with dev values..."
+          helm lint helm/kafka-eks -f helm/kafka-eks/values-dev.yaml
+
+          echo "✅ Linting with staging values..."
+          helm lint helm/kafka-eks -f helm/kafka-eks/values-staging.yaml
+
+          echo "✅ Linting with prod values..."
+          helm lint helm/kafka-eks -f helm/kafka-eks/values-prod.yaml
+
+  helm-template:
+    name: Test Helm Templates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.13.0
+
+      - name: Add Strimzi Helm repository
+        run: |
+          helm repo add strimzi https://strimzi.io/charts/
+          helm repo update
+
+      - name: Template chart with dev values
+        run: |
+          echo "📝 Testing template rendering with dev values..."
+          helm template kafka-eks ./helm/kafka-eks \
+            --namespace kafka \
+            --values helm/kafka-eks/values-dev.yaml \
+            --debug > /tmp/dev-output.yaml
+          echo "✅ Dev template rendered successfully"
+
+      - name: Template chart with staging values
+        run: |
+          echo "📝 Testing template rendering with staging values..."
+          helm template kafka-eks ./helm/kafka-eks \
+            --namespace kafka \
+            --values helm/kafka-eks/values-staging.yaml \
+            --debug > /tmp/staging-output.yaml
+          echo "✅ Staging template rendered successfully"
+
+      - name: Template chart with prod values
+        run: |
+          echo "📝 Testing template rendering with prod values..."
+          helm template kafka-eks ./helm/kafka-eks \
+            --namespace kafka \
+            --values helm/kafka-eks/values-prod.yaml \
+            --debug > /tmp/prod-output.yaml
+          echo "✅ Prod template rendered successfully"
+
+      - name: Upload rendered templates
+        uses: actions/upload-artifact@v3
+        with:
+          name: rendered-templates
+          path: /tmp/*.yaml
+
+  validate-yaml:
+    name: Validate YAML Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Lint YAML files
+        run: |
+          yamllint -d '{extends: default, rules: {line-length: {max: 120}, indentation: {spaces: 2}}}' \
+            helm/kafka-eks/values*.yaml \
+            helm/kafka-eks/templates/*.yaml \
+            .github/workflows/*.yml
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy security scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: 'helm/kafka-eks'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'

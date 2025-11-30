@@ -1,0 +1,100 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: {{ .Values.kafka.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kafka-eks.labels" . | nindent 4 }}
+spec:
+  kafka:
+    version: {{ .Values.kafka.version }}
+    replicas: {{ .Values.kafka.replicas }}
+    listeners:
+      {{- if .Values.kafka.listeners.plain.enabled }}
+      - name: plain
+        port: {{ .Values.kafka.listeners.plain.port }}
+        type: {{ .Values.kafka.listeners.plain.type }}
+        tls: {{ .Values.kafka.listeners.plain.tls }}
+      {{- end }}
+      {{- if .Values.kafka.listeners.external.enabled }}
+      - name: external
+        port: {{ .Values.kafka.listeners.external.port }}
+        type: {{ .Values.kafka.listeners.external.type }}
+        tls: {{ .Values.kafka.listeners.external.tls }}
+        configuration:
+          bootstrap:
+            annotations:
+              {{- toYaml .Values.kafka.listeners.external.annotations | nindent 14 }}
+      {{- end }}
+      {{- if .Values.kafka.listeners.tls.enabled }}
+      - name: tls
+        port: {{ .Values.kafka.listeners.tls.port }}
+        type: {{ .Values.kafka.listeners.tls.type }}
+        tls: true
+        {{- if .Values.kafka.listeners.tls.authentication.type }}
+        authentication:
+          type: {{ .Values.kafka.listeners.tls.authentication.type }}
+        {{- end }}
+      {{- end }}
+    config:
+      {{- toYaml .Values.kafka.config | nindent 6 }}
+    storage:
+      type: {{ .Values.kafka.storage.type }}
+      volumes:
+        - id: 0
+          type: persistent-claim
+          size: {{ .Values.kafka.storage.size }}
+          deleteClaim: {{ .Values.kafka.storage.deleteClaim }}
+          class: {{ .Values.kafka.storage.class }}
+    resources:
+      {{- toYaml .Values.kafka.resources | nindent 6 }}
+    jvmOptions:
+      -Xms: {{ .Values.kafka.jvmOptions.xms }}
+      -Xmx: {{ .Values.kafka.jvmOptions.xmx }}
+    {{- if .Values.kafka.metrics.enabled }}
+    metricsConfig:
+      type: jmxPrometheusExporter
+      valueFrom:
+        configMapKeyRef:
+          name: {{ .Values.kafka.name }}-metrics
+          key: kafka-metrics-config.yml
+    {{- end }}
+    logging:
+      type: inline
+      loggers:
+        kafka.root.logger.level: {{ .Values.kafka.logging.level | quote }}
+
+  zookeeper:
+    replicas: {{ .Values.zookeeper.replicas }}
+    storage:
+      type: {{ .Values.zookeeper.storage.type }}
+      size: {{ .Values.zookeeper.storage.size }}
+      deleteClaim: {{ .Values.zookeeper.storage.deleteClaim }}
+      class: {{ .Values.zookeeper.storage.class }}
+    resources:
+      {{- toYaml .Values.zookeeper.resources | nindent 6 }}
+    jvmOptions:
+      -Xms: {{ .Values.zookeeper.jvmOptions.xms }}
+      -Xmx: {{ .Values.zookeeper.jvmOptions.xmx }}
+    {{- if .Values.zookeeper.metrics.enabled }}
+    metricsConfig:
+      type: jmxPrometheusExporter
+      valueFrom:
+        configMapKeyRef:
+          name: {{ .Values.kafka.name }}-metrics
+          key: zookeeper-metrics-config.yml
+    {{- end }}
+    logging:
+      type: inline
+      loggers:
+        zookeeper.root.logger: {{ .Values.zookeeper.logging.level | quote }}
+
+  {{- if .Values.entityOperator.enabled }}
+  entityOperator:
+    topicOperator:
+      resources:
+        {{- toYaml .Values.entityOperator.topicOperator.resources | nindent 8 }}
+    userOperator:
+      resources:
+        {{- toYaml .Values.entityOperator.userOperator.resources | nindent 8 }}
+  {{- end }}
