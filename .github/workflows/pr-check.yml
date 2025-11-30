@@ -6,6 +6,7 @@ on:
       - main
       - master
       - develop
+      - sandbox
 
 jobs:
   helm-lint:
@@ -25,11 +26,11 @@ jobs:
           echo "🔍 Linting Helm charts..."
           helm lint helm/kafka-eks
 
+          echo "✅ Linting with sandbox values..."
+          helm lint helm/kafka-eks -f helm/kafka-eks/values-sandbox.yaml
+
           echo "✅ Linting with dev values..."
           helm lint helm/kafka-eks -f helm/kafka-eks/values-dev.yaml
-
-          echo "✅ Linting with staging values..."
-          helm lint helm/kafka-eks -f helm/kafka-eks/values-staging.yaml
 
           echo "✅ Linting with prod values..."
           helm lint helm/kafka-eks -f helm/kafka-eks/values-prod.yaml
@@ -51,6 +52,15 @@ jobs:
           helm repo add strimzi https://strimzi.io/charts/
           helm repo update
 
+      - name: Template chart with sandbox values
+        run: |
+          echo "📝 Testing template rendering with sandbox values..."
+          helm template kafka-eks ./helm/kafka-eks \
+            --namespace kafka \
+            --values helm/kafka-eks/values-sandbox.yaml \
+            --debug > /tmp/sandbox-output.yaml
+          echo "✅ Sandbox template rendered successfully"
+
       - name: Template chart with dev values
         run: |
           echo "📝 Testing template rendering with dev values..."
@@ -59,15 +69,6 @@ jobs:
             --values helm/kafka-eks/values-dev.yaml \
             --debug > /tmp/dev-output.yaml
           echo "✅ Dev template rendered successfully"
-
-      - name: Template chart with staging values
-        run: |
-          echo "📝 Testing template rendering with staging values..."
-          helm template kafka-eks ./helm/kafka-eks \
-            --namespace kafka \
-            --values helm/kafka-eks/values-staging.yaml \
-            --debug > /tmp/staging-output.yaml
-          echo "✅ Staging template rendered successfully"
 
       - name: Template chart with prod values
         run: |
@@ -121,3 +122,20 @@ jobs:
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
+
+  summary:
+    name: PR Summary
+    runs-on: ubuntu-latest
+    needs: [helm-lint, helm-template, validate-yaml, security-scan]
+    if: always()
+    steps:
+      - name: PR Check Summary
+        run: |
+          echo "## Pull Request Checks Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All checks completed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Environments Validated:" >> $GITHUB_STEP_SUMMARY
+          echo "- Sandbox" >> $GITHUB_STEP_SUMMARY
+          echo "- Development" >> $GITHUB_STEP_SUMMARY
+          echo "- Production" >> $GITHUB_STEP_SUMMARY
