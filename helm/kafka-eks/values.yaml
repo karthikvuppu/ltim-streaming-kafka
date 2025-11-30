@@ -1,0 +1,174 @@
+# Default values for kafka-eks
+# This is a YAML-formatted file.
+
+# Strimzi Kafka Operator
+strimzi:
+  enabled: true
+  watchNamespaces: []
+
+# Kafka Cluster Configuration
+kafka:
+  # Cluster name
+  name: my-kafka
+
+  # Kafka version
+  version: 3.6.0
+
+  # Number of Kafka brokers
+  replicas: 3
+
+  # Listeners configuration
+  listeners:
+    plain:
+      enabled: true
+      port: 9092
+      type: internal
+      tls: false
+
+    external:
+      enabled: true
+      port: 9094
+      type: loadbalancer
+      tls: false
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+        service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+
+    tls:
+      enabled: false
+      port: 9093
+      type: internal
+      authentication:
+        type: ""  # scram-sha-512, tls, oauth
+
+  # Kafka broker configuration
+  config:
+    offsets.topic.replication.factor: 3
+    transaction.state.log.replication.factor: 3
+    transaction.state.log.min.isr: 2
+    default.replication.factor: 3
+    min.insync.replicas: 2
+    inter.broker.protocol.version: "3.6"
+    log.retention.hours: 168  # 7 days
+    log.segment.bytes: 1073741824  # 1GB
+    num.network.threads: 3
+    num.io.threads: 8
+    socket.send.buffer.bytes: 102400
+    socket.receive.buffer.bytes: 102400
+    socket.request.max.bytes: 104857600
+    auto.create.topics.enable: true
+
+  # Storage configuration
+  storage:
+    type: jbod
+    class: gp2
+    size: 10Gi
+    deleteClaim: false
+
+  # Resource limits and requests
+  resources:
+    requests:
+      memory: 2Gi
+      cpu: 500m
+    limits:
+      memory: 4Gi
+      cpu: 2000m
+
+  # JVM Options
+  jvmOptions:
+    xms: 1024m
+    xmx: 2048m
+
+  # Logging
+  logging:
+    level: INFO
+
+  # Metrics
+  metrics:
+    enabled: true
+
+# Zookeeper Configuration
+zookeeper:
+  # Number of Zookeeper nodes (must be odd)
+  replicas: 3
+
+  # Storage configuration
+  storage:
+    type: persistent-claim
+    class: gp2
+    size: 5Gi
+    deleteClaim: false
+
+  # Resource limits and requests
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 250m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+
+  # JVM Options
+  jvmOptions:
+    xms: 512m
+    xmx: 1024m
+
+  # Logging
+  logging:
+    level: INFO
+
+  # Metrics
+  metrics:
+    enabled: true
+
+# Entity Operator (Topic and User management)
+entityOperator:
+  enabled: true
+
+  topicOperator:
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+  userOperator:
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+# Example Topics (deployed with chart)
+topics:
+  enabled: false
+  topics:
+    - name: test-topic
+      partitions: 3
+      replicas: 3
+      config:
+        retention.ms: 604800000  # 7 days
+        segment.bytes: 1073741824  # 1GB
+        compression.type: producer
+        min.insync.replicas: 2
+
+# Monitoring
+monitoring:
+  # Enable Prometheus ServiceMonitor
+  serviceMonitor:
+    enabled: false
+    namespace: monitoring
+    interval: 30s
+
+  # Enable PodMonitor
+  podMonitor:
+    enabled: false
+    namespace: monitoring
+    interval: 30s
+
+# Namespace to deploy into
+namespaceOverride: ""

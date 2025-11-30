@@ -1,0 +1,41 @@
+{{- if .Values.monitoring.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Values.kafka.name }}-kafka
+  namespace: {{ .Values.monitoring.serviceMonitor.namespace }}
+  labels:
+    {{- include "kafka-eks.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      strimzi.io/kind: Kafka
+      strimzi.io/name: {{ .Values.kafka.name }}-kafka
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+    - port: tcp-prometheus
+      path: /metrics
+      interval: {{ .Values.monitoring.serviceMonitor.interval }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Values.kafka.name }}-zookeeper
+  namespace: {{ .Values.monitoring.serviceMonitor.namespace }}
+  labels:
+    {{- include "kafka-eks.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      strimzi.io/kind: Kafka
+      strimzi.io/name: {{ .Values.kafka.name }}-zookeeper
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+    - port: tcp-prometheus
+      path: /metrics
+      interval: {{ .Values.monitoring.serviceMonitor.interval }}
+{{- end }}
