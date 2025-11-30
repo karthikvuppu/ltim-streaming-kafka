@@ -2,6 +2,23 @@
 
 Production-ready Helm chart for deploying Apache Kafka on Amazon EKS using Strimzi Kafka Operator.
 
+---
+
+## ⚠️ IMPORTANT: Deployment Method
+
+**This Helm chart is deployed automatically via GitHub Actions.**
+
+👉 **See [../README.md](../../README.md) for deployment instructions**
+
+All deployments (sandbox/dev/prod) are handled by GitHub Actions workflows. Simply push to the appropriate branch:
+- Push to `sandbox` → Auto-deploy to Sandbox
+- Push to `develop` → Auto-deploy to Dev
+- Push to `main` → Auto-deploy to Prod
+
+**Manual `helm install` commands below are for reference only.**
+
+---
+
 ## Prerequisites
 
 - Kubernetes 1.24+
@@ -9,9 +26,11 @@ Production-ready Helm chart for deploying Apache Kafka on Amazon EKS using Strim
 - Running Amazon EKS cluster
 - kubectl configured to access your cluster
 
-## Installation
+## Helm Chart Reference
 
-### Quick Start
+This section documents the Helm chart structure. **For actual deployment, use GitHub Actions** (see [../README.md](../../README.md)).
+
+### Manual Installation (Local Testing Only)
 
 ```bash
 # Add Strimzi Helm repository
@@ -22,8 +41,17 @@ helm repo update
 helm install kafka-eks ./helm/kafka-eks --namespace kafka --create-namespace
 ```
 
-### Development Environment
+### Environment-Specific Installation
 
+**Sandbox Environment:**
+```bash
+helm install kafka-eks ./helm/kafka-eks \
+  --namespace kafka \
+  --create-namespace \
+  --values ./helm/kafka-eks/values-sandbox.yaml
+```
+
+**Development Environment:**
 ```bash
 helm install kafka-eks ./helm/kafka-eks \
   --namespace kafka \
@@ -31,23 +59,15 @@ helm install kafka-eks ./helm/kafka-eks \
   --values ./helm/kafka-eks/values-dev.yaml
 ```
 
-### Staging Environment
-
-```bash
-helm install kafka-eks ./helm/kafka-eks \
-  --namespace kafka \
-  --create-namespace \
-  --values ./helm/kafka-eks/values-staging.yaml
-```
-
-### Production Environment
-
+**Production Environment:**
 ```bash
 helm install kafka-eks ./helm/kafka-eks \
   --namespace kafka \
   --create-namespace \
   --values ./helm/kafka-eks/values-prod.yaml
 ```
+
+> **Note:** Production deployments should ALWAYS use GitHub Actions with proper approval workflows.
 
 ## Configuration
 
@@ -238,7 +258,7 @@ kubectl describe svc my-kafka-kafka-external-bootstrap -n kafka
 
 ## Examples
 
-See `values-dev.yaml`, `values-staging.yaml`, and `values-prod.yaml` for complete configuration examples.
+See `values-sandbox.yaml`, `values-dev.yaml`, and `values-prod.yaml` for complete configuration examples.
 
 ## Resources
 
