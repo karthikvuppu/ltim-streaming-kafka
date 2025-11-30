@@ -1,0 +1,57 @@
+# Development environment values
+# Minimal resources for cost savings
+
+kafka:
+  replicas: 1
+
+  storage:
+    size: 5Gi
+
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 250m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+
+  jvmOptions:
+    xms: 512m
+    xmx: 1024m
+
+  config:
+    offsets.topic.replication.factor: 1
+    transaction.state.log.replication.factor: 1
+    transaction.state.log.min.isr: 1
+    default.replication.factor: 1
+    min.insync.replicas: 1
+    log.retention.hours: 24  # 1 day
+
+zookeeper:
+  replicas: 1
+
+  storage:
+    size: 2Gi
+
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 100m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+  jvmOptions:
+    xms: 256m
+    xmx: 512m
+
+# Enable example topics for testing
+topics:
+  enabled: true
+  topics:
+    - name: test-topic
+      partitions: 1
+      replicas: 1
+      config:
+        retention.ms: 86400000  # 1 day
+        cleanup.policy: delete
