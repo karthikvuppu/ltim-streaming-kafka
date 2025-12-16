@@ -1,0 +1,101 @@
+# Development Environment Configuration
+# Feature Flags Only - Partial Security Enabled
+
+# ==============================================================================
+# SECURITY SETTINGS
+# ==============================================================================
+security:
+  enabled: true  # Enable security in dev
+
+  # Override specific security features
+  features:
+    authentication: true  # Enable authentication
+    authorization: true   # Enable authorization
+    encryption:
+      inTransit: true
+      atRest: false  # Disable encryption at rest in dev (cost saving)
+      interBroker: false  # Disable inter-broker TLS in dev
+    networkPolicies: false  # Disable network policies in dev
+    podSecurity: true
+    auditLogging: false  # Disable audit logging in dev
+
+# ==============================================================================
+# ENVIRONMENT-SPECIFIC OVERRIDES
+# ==============================================================================
+kafka:
+  replicas: 1
+
+  storage:
+    size: 5Gi
+    class: gp2
+
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 250m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+
+  jvmOptions:
+    xms: 512m
+    xmx: 1024m
+
+  config:
+    offsets.topic.replication.factor: 1
+    transaction.state.log.replication.factor: 1
+    transaction.state.log.min.isr: 1
+    default.replication.factor: 1
+    min.insync.replicas: 1
+    log.retention.hours: 24  # 1 day for dev
+
+zookeeper:
+  replicas: 1
+
+  storage:
+    size: 5Gi
+    class: gp2
+
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 100m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+  jvmOptions:
+    xms: 256m
+    xmx: 512m
+
+# ==============================================================================
+# MONITORING
+# ==============================================================================
+monitoring:
+  serviceMonitor:
+    enabled: false
+  podMonitor:
+    enabled: false
+
+# ==============================================================================
+# NETWORK CONFIGURATION
+# ==============================================================================
+network:
+  policies:
+    ingress:
+      allowFromNamespaces:
+        - default
+        - dev-apps
+
+# ==============================================================================
+# TOPICS
+# ==============================================================================
+topics:
+  enabled: true
+  topics:
+    - name: test-topic
+      partitions: 1
+      replicas: 1
+      config:
+        retention.ms: 86400000  # 1 day
+        cleanup.policy: delete
