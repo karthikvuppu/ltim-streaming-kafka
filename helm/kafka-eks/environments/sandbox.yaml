@@ -1,0 +1,79 @@
+# Sandbox Environment Configuration
+# Feature Flags Only - Security Module is Disabled
+
+# ==============================================================================
+# SECURITY SETTINGS
+# ==============================================================================
+security:
+  enabled: false  # All security features disabled for sandbox
+
+# ==============================================================================
+# ENVIRONMENT-SPECIFIC OVERRIDES
+# ==============================================================================
+kafka:
+  replicas: 1
+
+  storage:
+    size: 10Gi
+    class: gp2
+
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+
+  jvmOptions:
+    xms: 512m
+    xmx: 1024m
+
+  config:
+    offsets.topic.replication.factor: 1
+    transaction.state.log.replication.factor: 1
+    transaction.state.log.min.isr: 1
+    default.replication.factor: 1
+    min.insync.replicas: 1
+    log.retention.hours: 48  # 2 days for sandbox
+
+zookeeper:
+  replicas: 1
+
+  storage:
+    size: 5Gi
+    class: gp2
+
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+  jvmOptions:
+    xms: 256m
+    xmx: 512m
+
+# ==============================================================================
+# MONITORING
+# ==============================================================================
+monitoring:
+  serviceMonitor:
+    enabled: false
+  podMonitor:
+    enabled: false
+
+# ==============================================================================
+# TOPICS (Auto-created for sandbox)
+# ==============================================================================
+topics:
+  enabled: true
+  topics:
+    - name: sandbox-test-topic
+      partitions: 1
+      replicas: 1
+      config:
+        retention.ms: 172800000  # 2 days
+        cleanup.policy: delete

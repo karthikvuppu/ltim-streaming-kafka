@@ -1,0 +1,35 @@
+{{/*
+Modular KafkaUser Template
+Creates users based on roles defined in security module
+Only applied when: security.features.authentication = true AND security.features.authorization = true
+*/}}
+{{- if and (include "kafka-eks.security.authentication.enabled" .) (include "kafka-eks.security.authorization.enabled" .) }}
+{{- if .Values.users.provisioning.enabled }}
+{{- range .Values.users.defaultUsers }}
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    strimzi.io/cluster: {{ $.Values.kafka.name }}
+    {{- include "kafka-eks.labels" $ | nindent 4 }}
+    role: {{ .role }}
+spec:
+  {{/* Authentication Configuration */}}
+  authentication:
+    type: {{ .authentication.type | default $.Values.authentication.defaultMethod }}
+
+  {{/* Authorization Configuration (based on role) */}}
+  {{- $role := .role }}
+  {{- $roleConfig := index $.Values.authorization.roles $role }}
+  {{- if $roleConfig }}
+  authorization:
+    type: {{ $.Values.authorization.engine.type }}
+    acls:
+      {{- toYaml $roleConfig.permissions | nindent 6 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

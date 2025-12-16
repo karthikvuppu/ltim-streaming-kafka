@@ -1,0 +1,294 @@
+# Security Module - Shared across all environments
+# This file contains reusable security configurations
+# Environments enable/disable features via feature flags
+
+# ==============================================================================
+# AUTHENTICATION CONFIGURATION
+# ==============================================================================
+authentication:
+  # Authentication methods available
+  methods:
+    # SCRAM-SHA-512 (Username/Password)
+    scram:
+      enabled: true
+      mechanism: scram-sha-512
+
+    # Mutual TLS (Certificate-based)
+    mtls:
+      enabled: false
+
+    # OAuth/OIDC (Token-based)
+    oauth:
+      enabled: false
+      # clientId: ""
+      # clientSecret: ""
+      # tokenEndpointUri: ""
+      # jwksEndpointUri: ""
+      # validIssuerUri: ""
+
+  # Default authentication for listeners
+  defaultMethod: scram-sha-512  # scram-sha-512, tls, oauth
+
+# ==============================================================================
+# AUTHORIZATION CONFIGURATION
+# ==============================================================================
+authorization:
+  # Authorization engine
+  engine:
+    type: simple  # simple (ACL-based), opa (Open Policy Agent), custom
+    enabled: true
+
+  # Super users (bypass all ACLs)
+  superUsers:
+    - User:CN=my-kafka-entity-topic-operator
+    - User:CN=my-kafka-entity-user-operator
+    - User:CN=my-kafka-kafka-exporter
+
+  # Default ACL policy
+  defaultPolicy:
+    denyByDefault: true  # Deny all access unless explicitly allowed
+
+  # Role-based access templates
+  roles:
+    producer:
+      description: "Can produce to topics"
+      permissions:
+        - resource:
+            type: topic
+            name: "*"
+            patternType: literal
+          operations: [Write, Describe, Create]
+        - resource:
+            type: cluster
+          operations: [IdempotentWrite]
+
+    consumer:
+      description: "Can consume from topics"
+      permissions:
+        - resource:
+            type: topic
+            name: "*"
+            patternType: literal
+          operations: [Read, Describe]
+        - resource:
+            type: group
+            name: "*"
+            patternType: literal
+          operations: [Read]
+
+    admin:
+      description: "Full administrative access"
+      permissions:
+        - resource:
+            type: topic
+            name: "*"
+            patternType: literal
+          operations: [All]
+        - resource:
+            type: group
+            name: "*"
+            patternType: literal
+          operations: [All]
+        - resource:
+            type: cluster
+          operations: [All]
+
+# ==============================================================================
+# TRANSPORT SECURITY CONFIGURATION
+# ==============================================================================
+transport:
+  # TLS/SSL Configuration
+  tls:
+    # Enable TLS encryption
+    enabled: true
+
+    # Listener-specific TLS settings
+    listeners:
+      internal:
+        enabled: true
+        requireAuth: true
+      external:
+        enabled: true
+        requireAuth: true
+      interBroker:
+        enabled: true
+        mutualAuth: true
+
+    # Certificate settings (managed by Strimzi)
+    certificates:
+      autoRotation: true
+      validity:
+        clusterCA: 365  # days
+        clientCA: 365   # days
+        broker: 90      # days
+
+# ==============================================================================
+# NETWORK SECURITY CONFIGURATION
+# ==============================================================================
+network:
+  # Kubernetes NetworkPolicies
+  policies:
+    enabled: true
+
+    # Default ingress policy
+    ingress:
+      denyAll: true  # Deny all ingress by default
+      allowFromNamespaces: []  # Override in environment files
+      allowMonitoring: true
+      monitoringNamespace: monitoring
+
+    # Default egress policy
+    egress:
+      denyAll: false  # Allow egress by default (can be restricted in production)
+      allowDNS: true
+      allowKubernetesAPI: true
+
+# ==============================================================================
+# DATA PROTECTION CONFIGURATION
+# ==============================================================================
+dataProtection:
+  # Encryption at rest
+  encryptionAtRest:
+    enabled: true
+    provider: aws-kms  # aws-kms, azure-kv, gcp-kms
+
+    # KMS settings
+    kms:
+      keyRotation: true
+      keySpec: AES_256
+      # keyId: ""  # Override in environment for customer-managed keys
+
+  # Storage class configuration
+  storageClass:
+    name: kafka-encrypted
+    provisioner: ebs.csi.aws.com
+    type: gp3
+    encrypted: true
+    parameters:
+      iops: 3000
+      throughput: 125
+    volumeBindingMode: WaitForFirstConsumer
+    allowVolumeExpansion: true
+    reclaimPolicy: Retain
+
+# ==============================================================================
+# AUDIT & COMPLIANCE CONFIGURATION
+# ==============================================================================
+audit:
+  # Audit logging
+  logging:
+    enabled: true
+
+    # What to audit
+    events:
+      authentication: true
+      authorization: true
+      dataAccess: false  # Can impact performance
+      adminOperations: true
+
+    # Log retention
+    retention:
+      maxFileSize: 100MB
+      maxFiles: 10
+
+    # Log format
+    format:
+      type: log4j
+      pattern: "[%d] %p %m (%c)%n"
+
+    # Log destination
+    destination:
+      file: /var/log/kafka/kafka-authorizer.log
+      # syslog: ""  # Optional: send to syslog
+      # cloudwatch: ""  # Optional: send to CloudWatch
+
+# ==============================================================================
+# CONTAINER SECURITY CONFIGURATION
+# ==============================================================================
+container:
+  # Pod Security Standards
+  podSecurity:
+    enabled: true
+
+    # Security context for Kafka pods
+    kafka:
+      runAsNonRoot: true
+      runAsUser: 1000
+      fsGroup: 0
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+
+    # Security context for Zookeeper pods
+    zookeeper:
+      runAsNonRoot: true
+      runAsUser: 1000
+      fsGroup: 0
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+
+# ==============================================================================
+# KAFKA-SPECIFIC SECURITY CONFIGURATION
+# ==============================================================================
+kafka:
+  # Broker security settings
+  broker:
+    # Inter-broker communication
+    interBroker:
+      protocol: SSL  # PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+      requireAuth: true
+
+    # SSL/TLS settings
+    ssl:
+      clientAuth: required  # required, requested, none
+      endpointIdentification: HTTPS  # HTTPS, none
+
+    # Topic management
+    topics:
+      autoCreate: false  # Disable auto-topic creation
+
+  # Zookeeper security
+  zookeeper:
+    tls:
+      enabled: true
+    authentication:
+      enabled: false  # Zookeeper SASL (optional)
+
+# ==============================================================================
+# USER MANAGEMENT CONFIGURATION
+# ==============================================================================
+users:
+  # User provisioning
+  provisioning:
+    enabled: true
+    method: crd  # crd, ldap, external
+
+  # Password policy
+  passwordPolicy:
+    minLength: 12
+    requireUppercase: true
+    requireLowercase: true
+    requireNumbers: true
+    requireSpecialChars: true
+    expirationDays: 90
+
+  # Default users (created automatically)
+  defaultUsers:
+    - name: app-producer
+      role: producer
+      authentication:
+        type: scram-sha-512
+
+    - name: app-consumer
+      role: consumer
+      authentication:
+        type: scram-sha-512
