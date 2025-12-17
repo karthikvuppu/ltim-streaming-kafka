@@ -8,26 +8,84 @@
 authentication:
   # Authentication methods available
   methods:
-    # SCRAM-SHA-512 (Username/Password)
+    # SCRAM-SHA-512 (Username/Password) - DEPRECATED
     scram:
-      enabled: true
+      enabled: false
       mechanism: scram-sha-512
 
-    # Mutual TLS (Certificate-based)
+    # Mutual TLS (Certificate-based) - RECOMMENDED
     mtls:
-      enabled: false
+      enabled: true
+      description: "Certificate-based authentication using X.509 client certificates"
+      certificateValidation:
+        enabled: true
+        # Certificate requirements
+        requireClientCert: true
+        # CN/SAN validation
+        principalBuilderClass: "io.strimzi.kafka.oauth.server.OAuthKafkaPrincipalBuilder"
 
-    # OAuth/OIDC (Token-based)
+    # OAuth/OIDC (Token-based) - RECOMMENDED
     oauth:
-      enabled: false
-      # clientId: ""
-      # clientSecret: ""
-      # tokenEndpointUri: ""
-      # jwksEndpointUri: ""
-      # validIssuerUri: ""
+      enabled: true
+      description: "Token-based authentication using OAuth 2.0 / OIDC"
+
+      # OAuth Server Configuration
+      # Example providers: Keycloak, Auth0, Okta, Azure AD, Google, AWS Cognito
+      clientId: "kafka-broker"
+      clientSecret: ""  # Set via Kubernetes secret or environment variable
+
+      # Token validation endpoints (REQUIRED - Update for your OAuth provider)
+      tokenEndpointUri: "https://keycloak.example.com/realms/kafka/protocol/openid-connect/token"
+      jwksEndpointUri: "https://keycloak.example.com/realms/kafka/protocol/openid-connect/certs"
+      validIssuerUri: "https://keycloak.example.com/realms/kafka"
+      introspectionEndpointUri: ""  # Optional: for opaque tokens
+
+      # Token validation settings
+      checkIssuer: true
+      checkAudience: true
+      audience: "kafka"
+
+      # User claim mapping
+      usernameClaim: "preferred_username"  # or "sub", "email", "client_id"
+      fallbackUsernameClaim: "client_id"
+      fallbackUsernamePrefix: "client-account-"
+
+      # Group claim for authorization (optional)
+      groupsClaim: "groups"
+      groupsClaimDelimiter: ","
+
+      # Token type
+      accessTokenIsJwt: true  # false for opaque tokens (requires introspection)
+
+      # SSL/TLS for OAuth endpoints
+      sslTruststoreLocation: ""  # Path to truststore for OAuth server certificate
+      sslTruststorePassword: ""
+      sslTruststoreType: "JKS"
+      hostnameVerification: true
+
+      # Connection settings
+      connectTimeoutSeconds: 60
+      readTimeoutSeconds: 60
+      httpRetries: 2
+
+      # Token cache (improves performance)
+      enableMetrics: true
+      enableECDSA: true
+
+      # Custom claim checks (optional)
+      customClaimCheck: ""  # e.g., "@.aud && @.aud == 'kafka'"
 
   # Default authentication for listeners
-  defaultMethod: scram-sha-512  # scram-sha-512, tls, oauth
+  # Options:
+  #   - oauth: OAuth 2.0 / OIDC token-based (recommended for microservices)
+  #   - tls: Mutual TLS certificate-based (recommended for service-to-service)
+  #   - scram-sha-512: Username/password (legacy)
+  defaultMethod: oauth  # Change to "tls" for mTLS-only authentication
+
+  # Combined authentication (OAuth + mTLS)
+  combined:
+    enabled: false  # Set to true to require BOTH OAuth token AND valid certificate
+    description: "Require both valid X.509 certificate AND valid OAuth token (defense in depth)"
 
 # ==============================================================================
 # AUTHORIZATION CONFIGURATION
@@ -272,23 +330,58 @@ users:
     enabled: true
     method: crd  # crd, ldap, external
 
-  # Password policy
-  passwordPolicy:
-    minLength: 12
-    requireUppercase: true
-    requireLowercase: true
-    requireNumbers: true
-    requireSpecialChars: true
-    expirationDays: 90
+  # Certificate-based users (for mTLS authentication)
+  # Users are identified by their certificate CN or DN
+  certificateUsers:
+    enabled: true
+    # Certificate DN patterns for user identification
+    # Format: CN=<username>,OU=<org-unit>,O=<organization>,C=<country>
+    dnPattern: "CN={user},OU=applications,O=mycompany,C=US"
 
-  # Default users (created automatically)
+  # OAuth-based users (for OAuth authentication)
+  # Users are identified by claims in the JWT token
+  oauthUsers:
+    enabled: true
+    # OAuth claims used for user identification
+    identityClaim: "preferred_username"  # or "sub", "email"
+    # Group membership claim for authorization
+    groupsClaim: "groups"
+
+  # Default users (created automatically for initial setup)
+  # For OAuth: These represent service accounts with client credentials
+  # For mTLS: These represent certificate subjects
   defaultUsers:
     - name: app-producer
       role: producer
       authentication:
-        type: scram-sha-512
+        type: oauth  # oauth, tls, scram-sha-512
+      oauth:
+        clientId: "kafka-producer-app"
+        # clientSecret stored in Kubernetes secret
+      certificate:
+        # For mTLS: Certificate subject/CN
+        cn: "kafka-producer-app"
+        ou: "applications"
+        o: "mycompany"
 
     - name: app-consumer
       role: consumer
       authentication:
-        type: scram-sha-512
+        type: oauth  # oauth, tls, scram-sha-512
+      oauth:
+        clientId: "kafka-consumer-app"
+        # clientSecret stored in Kubernetes secret
+      certificate:
+        # For mTLS: Certificate subject/CN
+        cn: "kafka-consumer-app"
+        ou: "applications"
+        o: "mycompany"
+
+    - name: admin-user
+      role: admin
+      authentication:
+        type: tls  # Use mTLS for admin access
+      certificate:
+        cn: "kafka-admin"
+        ou: "admins"
+        o: "mycompany"
