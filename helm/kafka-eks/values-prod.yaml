@@ -1,14 +1,39 @@
 # Production environment values
 # Full resources and high availability configuration
 
+storageClass:
+  enabled: true
+  name: kafka-gp3-encrypted
+  provisioner: ebs.csi.aws.com
+  type: gp3
+  encrypted: true  # SECURITY: Enable EBS encryption at rest
+  # kmsKeyId: "arn:aws:kms:region:account:key/key-id"  # Optional: Use customer-managed KMS key
+  iops: 16000  # Production IOPS
+  throughput: 1000  # Production throughput
+  volumeBindingMode: WaitForFirstConsumer
+  allowVolumeExpansion: true
+  reclaimPolicy: Retain
+
 kafka:
   replicas: 3
 
+  # SECURITY: Pod Security Context for production
+  podSecurityContext:
+    enabled: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 0
+    seccompProfile:
+      type: RuntimeDefault
+
   listeners:
     plain:
-      enabled: true
+      enabled: false  # SECURITY: Disabled plaintext in production - use TLS only
     external:
       enabled: true
+      tls: true  # SECURITY: Enable TLS encryption on external listener
+      authentication:
+        type: scram-sha-512  # SECURITY: Require authentication for external access
       annotations:
         service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
         service.beta.kubernetes.io/aws-load-balancer-internal: "true"
@@ -20,7 +45,7 @@ kafka:
 
   storage:
     size: 100Gi
-    class: gp3  # Use gp3 for better IOPS in production
+    class: kafka-gp3-encrypted  # Use encrypted storage class
 
   resources:
     requests:
@@ -34,6 +59,29 @@ kafka:
     xms: 2048m
     xmx: 4096m
 
+  # SECURITY: Enable audit logging for production
+  logging:
+    level: INFO
+    auditLogging:
+      enabled: true
+      loggers:
+        kafka.authorizer.logger: "INFO, AUTHORIZERAPPENDER"
+      appenders: |
+        # Audit log appender for authorization events
+        log4j.appender.AUTHORIZERAPPENDER=org.apache.log4j.RollingFileAppender
+        log4j.appender.AUTHORIZERAPPENDER.File=/var/log/kafka/kafka-authorizer.log
+        log4j.appender.AUTHORIZERAPPENDER.MaxFileSize=100MB
+        log4j.appender.AUTHORIZERAPPENDER.MaxBackupIndex=10
+        log4j.appender.AUTHORIZERAPPENDER.layout=org.apache.log4j.PatternLayout
+        log4j.appender.AUTHORIZERAPPENDER.layout.ConversionPattern=[%d] %p %m (%c)%n
+
+  authorization:
+    type: simple  # SECURITY: Enable ACL-based authorization
+    superUsers:
+      - User:CN=my-kafka-entity-topic-operator
+      - User:CN=my-kafka-entity-user-operator
+      - User:CN=my-kafka-kafka-exporter
+
   config:
     offsets.topic.replication.factor: 3
     transaction.state.log.replication.factor: 3
@@ -43,13 +91,31 @@ kafka:
     log.retention.hours: 168  # 7 days
     log.segment.bytes: 2147483647  # 2GB
     compression.type: lz4
+    auto.create.topics.enable: false  # SECURITY: Disable auto-topic creation in production
+    # SECURITY: Inter-broker TLS encryption
+    security.inter.broker.protocol: SSL
+    ssl.client.auth: required
+    ssl.endpoint.identification.algorithm: HTTPS
 
 zookeeper:
   replicas: 5
 
+  # SECURITY: Enable TLS for Zookeeper
+  tls:
+    enabled: true
+
+  # SECURITY: Pod Security Context for Zookeeper
+  podSecurityContext:
+    enabled: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 0
+    seccompProfile:
+      type: RuntimeDefault
+
   storage:
     size: 20Gi
-    class: gp3
+    class: kafka-gp3-encrypted  # Use encrypted storage class
 
   resources:
     requests:
@@ -63,6 +129,15 @@ zookeeper:
     xms: 1024m
     xmx: 2048m
 
+# Network Policy for production
+networkPolicy:
+  enabled: true
+  allowedNamespaces:
+    - default
+    - app-namespace  # Add your application namespaces here
+  monitoringNamespace: monitoring
+  allowExternalEgress: false  # Restrict external egress in production
+
 # Enable monitoring in production
 monitoring:
   serviceMonitor:
@@ -71,3 +146,39 @@ monitoring:
   podMonitor:
     enabled: true
     interval: 30s
+
+# Kafka Users with ACLs (examples - customize per application)
+users:
+  enabled: true
+  users:
+    - name: app-producer
+      authentication:
+        type: scram-sha-512
+      authorization:
+        type: simple
+        acls:
+          - resource:
+              type: topic
+              name: "*"
+              patternType: literal
+            operations: [Write, Describe, Create]
+          - resource:
+              type: cluster
+            operations: [IdempotentWrite]
+
+    - name: app-consumer
+      authentication:
+        type: scram-sha-512
+      authorization:
+        type: simple
+        acls:
+          - resource:
+              type: topic
+              name: "*"
+              patternType: literal
+            operations: [Read, Describe]
+          - resource:
+              type: group
+              name: "*"
+              patternType: literal
+            operations: [Read]

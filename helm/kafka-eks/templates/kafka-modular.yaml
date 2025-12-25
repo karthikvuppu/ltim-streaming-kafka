@@ -1,0 +1,233 @@
+{{/*
+Modular Kafka CRD Template
+Same code across all environments - controlled by security.enabled flag
+*/}}
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: {{ .Values.kafka.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kafka-eks.labels" . | nindent 4 }}
+    environment: {{ .Values.environment | default "dev" }}
+spec:
+  kafka:
+    version: {{ .Values.kafka.version }}
+    replicas: {{ .Values.kafka.replicas }}
+
+    {{/* ========================================================================
+         POD SECURITY CONTEXT (Modular)
+         Applied when: security.features.podSecurity = true
+    ======================================================================== */}}
+    {{- if include "kafka-eks.security.podSecurity.enabled" . }}
+    template:
+      pod:
+        securityContext:
+          runAsNonRoot: {{ .Values.container.podSecurity.kafka.runAsNonRoot }}
+          runAsUser: {{ .Values.container.podSecurity.kafka.runAsUser }}
+          fsGroup: {{ .Values.container.podSecurity.kafka.fsGroup }}
+          {{- if .Values.container.podSecurity.kafka.seccompProfile }}
+          seccompProfile:
+            type: {{ .Values.container.podSecurity.kafka.seccompProfile.type }}
+          {{- end }}
+        containers:
+          - name: kafka
+            securityContext:
+              allowPrivilegeEscalation: {{ .Values.container.podSecurity.kafka.allowPrivilegeEscalation }}
+              capabilities:
+                drop:
+                  {{- toYaml .Values.container.podSecurity.kafka.capabilities.drop | nindent 18 }}
+              readOnlyRootFilesystem: {{ .Values.container.podSecurity.kafka.readOnlyRootFilesystem }}
+    {{- end }}
+
+    {{/* ========================================================================
+         LISTENERS CONFIGURATION (Modular)
+         Plaintext: Disabled when security.enabled = true
+         TLS: Enabled when security.features.encryption.inTransit = true
+         Authentication: Applied when security.features.authentication = true
+    ======================================================================== */}}
+    listeners:
+      {{/* Plaintext listener (only for non-secure environments) */}}
+      {{- if include "kafka-eks.security.plaintextEnabled" . }}
+      - name: plain
+        port: {{ .Values.kafka.listeners.plain.port }}
+        type: {{ .Values.kafka.listeners.plain.type }}
+        tls: false
+      {{- end }}
+
+      {{/* External listener (always enabled, TLS based on security flag) */}}
+      {{- if .Values.kafka.listeners.external.enabled }}
+      - name: external
+        port: {{ .Values.kafka.listeners.external.port }}
+        type: {{ .Values.kafka.listeners.external.type }}
+        tls: {{ include "kafka-eks.security.tls.enabled" . | ternary true false }}
+        {{- if include "kafka-eks.security.authentication.enabled" . }}
+        authentication:
+          type: {{ include "kafka-eks.security.authMethod" . }}
+        {{- end }}
+        configuration:
+          bootstrap:
+            annotations:
+              {{- toYaml .Values.kafka.listeners.external.annotations | nindent 14 }}
+      {{- end }}
+
+      {{/* TLS listener (enabled when security is on) */}}
+      {{- if include "kafka-eks.security.tlsListenerEnabled" . }}
+      - name: tls
+        port: {{ .Values.kafka.listeners.tls.port }}
+        type: {{ .Values.kafka.listeners.tls.type }}
+        tls: true
+        {{- if include "kafka-eks.security.authentication.enabled" . }}
+        authentication:
+          type: {{ include "kafka-eks.security.authMethod" . }}
+        {{- end }}
+      {{- end }}
+
+    {{/* ========================================================================
+         AUTHORIZATION CONFIGURATION (Modular)
+         Applied when: security.features.authorization = true
+    ======================================================================== */}}
+    {{- if include "kafka-eks.security.authorization.enabled" . }}
+    authorization:
+      type: {{ .Values.authorization.engine.type }}
+      {{- if .Values.authorization.superUsers }}
+      superUsers:
+        {{- toYaml .Values.authorization.superUsers | nindent 8 }}
+      {{- end }}
+    {{- end }}
+
+    {{/* ========================================================================
+         KAFKA BROKER CONFIGURATION (Modular)
+         Security settings injected based on feature flags
+    ======================================================================== */}}
+    config:
+      {{- toYaml .Values.kafka.config | nindent 6 }}
+      {{/* Auto-create topics - disabled when security is on */}}
+      {{- if include "kafka-eks.security.enabled" . }}
+      auto.create.topics.enable: {{ .Values.kafka.topics.autoCreate | default false }}
+      {{- end }}
+      {{/* Inter-broker security protocol */}}
+      {{- if include "kafka-eks.security.interBrokerTLS.enabled" . }}
+      security.inter.broker.protocol: {{ include "kafka-eks.security.interBrokerProtocol" . }}
+      ssl.client.auth: {{ .Values.kafka.broker.ssl.clientAuth }}
+      ssl.endpoint.identification.algorithm: {{ .Values.kafka.broker.ssl.endpointIdentification }}
+      {{- end }}
+
+    {{/* ========================================================================
+         STORAGE CONFIGURATION (Modular)
+         Encrypted storage class used when encryption at rest is enabled
+    ======================================================================== */}}
+    storage:
+      type: {{ .Values.kafka.storage.type }}
+      volumes:
+        - id: 0
+          type: persistent-claim
+          size: {{ .Values.kafka.storage.size }}
+          deleteClaim: {{ .Values.kafka.storage.deleteClaim }}
+          class: {{ include "kafka-eks.security.storageClass" . }}
+
+    {{/* ========================================================================
+         RESOURCES & JVM
+    ======================================================================== */}}
+    resources:
+      {{- toYaml .Values.kafka.resources | nindent 6 }}
+
+    jvmOptions:
+      -Xms: {{ .Values.kafka.jvmOptions.xms }}
+      -Xmx: {{ .Values.kafka.jvmOptions.xmx }}
+
+    {{/* ========================================================================
+         METRICS
+    ======================================================================== */}}
+    {{- if .Values.kafka.metrics.enabled }}
+    metricsConfig:
+      type: jmxPrometheusExporter
+      valueFrom:
+        configMapKeyRef:
+          name: {{ .Values.kafka.name }}-metrics
+          key: kafka-metrics-config.yml
+    {{- end }}
+
+    {{/* ========================================================================
+         LOGGING (Modular)
+         Audit logging enabled when: security.features.auditLogging = true
+    ======================================================================== */}}
+    logging:
+      type: inline
+      loggers:
+        kafka.root.logger.level: {{ .Values.kafka.logging.level | quote }}
+        {{- if include "kafka-eks.security.auditLogging.enabled" . }}
+        {{- range $key, $value := .Values.audit.logging.events }}
+        {{- if $value }}
+        kafka.authorizer.logger: "INFO, AUTHORIZERAPPENDER"
+        {{- end }}
+        {{- end }}
+        {{- end }}
+
+  {{/* ==========================================================================
+       ZOOKEEPER CONFIGURATION (Modular)
+  ========================================================================== */}}
+  zookeeper:
+    replicas: {{ .Values.zookeeper.replicas }}
+
+    {{/* Pod Security Context */}}
+    {{- if include "kafka-eks.security.podSecurity.enabled" . }}
+    template:
+      pod:
+        securityContext:
+          runAsNonRoot: {{ .Values.container.podSecurity.zookeeper.runAsNonRoot }}
+          runAsUser: {{ .Values.container.podSecurity.zookeeper.runAsUser }}
+          fsGroup: {{ .Values.container.podSecurity.zookeeper.fsGroup }}
+          {{- if .Values.container.podSecurity.zookeeper.seccompProfile }}
+          seccompProfile:
+            type: {{ .Values.container.podSecurity.zookeeper.seccompProfile.type }}
+          {{- end }}
+        containers:
+          - name: zookeeper
+            securityContext:
+              allowPrivilegeEscalation: {{ .Values.container.podSecurity.zookeeper.allowPrivilegeEscalation }}
+              capabilities:
+                drop:
+                  {{- toYaml .Values.container.podSecurity.zookeeper.capabilities.drop | nindent 18 }}
+              readOnlyRootFilesystem: {{ .Values.container.podSecurity.zookeeper.readOnlyRootFilesystem }}
+    {{- end }}
+
+    storage:
+      type: {{ .Values.zookeeper.storage.type }}
+      size: {{ .Values.zookeeper.storage.size }}
+      deleteClaim: {{ .Values.zookeeper.storage.deleteClaim }}
+      class: {{ include "kafka-eks.security.zookeeperStorageClass" . }}
+
+    resources:
+      {{- toYaml .Values.zookeeper.resources | nindent 6 }}
+
+    jvmOptions:
+      -Xms: {{ .Values.zookeeper.jvmOptions.xms }}
+      -Xmx: {{ .Values.zookeeper.jvmOptions.xmx }}
+
+    {{- if .Values.zookeeper.metrics.enabled }}
+    metricsConfig:
+      type: jmxPrometheusExporter
+      valueFrom:
+        configMapKeyRef:
+          name: {{ .Values.kafka.name }}-metrics
+          key: zookeeper-metrics-config.yml
+    {{- end }}
+
+    logging:
+      type: inline
+      loggers:
+        zookeeper.root.logger: {{ .Values.zookeeper.logging.level | quote }}
+
+  {{/* ==========================================================================
+       ENTITY OPERATOR
+  ========================================================================== */}}
+  {{- if .Values.entityOperator.enabled }}
+  entityOperator:
+    topicOperator:
+      resources:
+        {{- toYaml .Values.entityOperator.topicOperator.resources | nindent 8 }}
+    userOperator:
+      resources:
+        {{- toYaml .Values.entityOperator.userOperator.resources | nindent 8 }}
+  {{- end }}

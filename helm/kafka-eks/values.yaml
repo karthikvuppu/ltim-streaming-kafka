@@ -17,6 +17,15 @@ kafka:
   # Number of Kafka brokers
   replicas: 3
 
+  # Pod Security Context (enable in production)
+  podSecurityContext:
+    enabled: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 0
+    seccompProfile:
+      type: RuntimeDefault
+
   # Listeners configuration
   listeners:
     plain:
@@ -29,7 +38,9 @@ kafka:
       enabled: true
       port: 9094
       type: loadbalancer
-      tls: false
+      tls: false  # Set to true in production environments
+      authentication:
+        type: ""  # Set to scram-sha-512 in production environments
       annotations:
         service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
         service.beta.kubernetes.io/aws-load-balancer-internal: "true"
@@ -40,6 +51,11 @@ kafka:
       type: internal
       authentication:
         type: ""  # scram-sha-512, tls, oauth
+
+  # Authorization configuration
+  authorization:
+    type: ""  # Set to "simple" in production for ACL-based authorization
+    superUsers: []
 
   # Kafka broker configuration
   config:
@@ -56,7 +72,7 @@ kafka:
     socket.send.buffer.bytes: 102400
     socket.receive.buffer.bytes: 102400
     socket.request.max.bytes: 104857600
-    auto.create.topics.enable: true
+    auto.create.topics.enable: true  # Disable in production (set to false)
 
   # Storage configuration
   storage:
@@ -82,6 +98,19 @@ kafka:
   # Logging
   logging:
     level: INFO
+    # Audit logging configuration (enable in production)
+    auditLogging:
+      enabled: false
+      loggers:
+        kafka.authorizer.logger: "INFO, AUTHORIZERAPPENDER"
+      appenders: |
+        # Audit log appender
+        log4j.appender.AUTHORIZERAPPENDER=org.apache.log4j.RollingFileAppender
+        log4j.appender.AUTHORIZERAPPENDER.File=/var/log/kafka/kafka-authorizer.log
+        log4j.appender.AUTHORIZERAPPENDER.MaxFileSize=100MB
+        log4j.appender.AUTHORIZERAPPENDER.MaxBackupIndex=10
+        log4j.appender.AUTHORIZERAPPENDER.layout=org.apache.log4j.PatternLayout
+        log4j.appender.AUTHORIZERAPPENDER.layout.ConversionPattern=[%d] %p %m (%c)%n
 
   # Metrics
   metrics:
@@ -91,6 +120,19 @@ kafka:
 zookeeper:
   # Number of Zookeeper nodes (must be odd)
   replicas: 3
+
+  # TLS configuration (enable in production)
+  tls:
+    enabled: false
+
+  # Pod Security Context (enable in production)
+  podSecurityContext:
+    enabled: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 0
+    seccompProfile:
+      type: RuntimeDefault
 
   # Storage configuration
   storage:
@@ -172,3 +214,47 @@ monitoring:
 
 # Namespace to deploy into
 namespaceOverride: ""
+
+# Storage Class (for encrypted volumes)
+storageClass:
+  enabled: false  # Enable in production
+  name: kafka-gp3-encrypted
+  provisioner: ebs.csi.aws.com
+  type: gp3
+  encrypted: true
+  kmsKeyId: ""  # Optional: Specify KMS key ARN for encryption
+  iops: 3000
+  throughput: 125
+  volumeBindingMode: WaitForFirstConsumer
+  allowVolumeExpansion: true
+  reclaimPolicy: Retain
+
+# Network Policy
+networkPolicy:
+  enabled: false  # Enable in production
+  allowedNamespaces:
+    - default  # List namespaces that can access Kafka
+  monitoringNamespace: monitoring
+  allowExternalEgress: true  # Allow Kafka to make external connections
+
+# Kafka Users (for ACL-based authentication)
+users:
+  enabled: false
+  users: []
+    # Example user configuration:
+    # - name: my-app-user
+    #   authentication:
+    #     type: scram-sha-512
+    #   authorization:
+    #     type: simple
+    #     acls:
+    #       - resource:
+    #           type: topic
+    #           name: my-topic
+    #           patternType: literal
+    #         operations: [Read, Write, Describe]
+    #       - resource:
+    #           type: group
+    #           name: my-consumer-group
+    #           patternType: literal
+    #         operations: [Read]

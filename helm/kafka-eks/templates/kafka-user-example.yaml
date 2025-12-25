@@ -1,0 +1,24 @@
+{{- if .Values.users.enabled }}
+{{- range .Values.users.users }}
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    strimzi.io/cluster: {{ $.Values.kafka.name }}
+    {{- include "kafka-eks.labels" $ | nindent 4 }}
+spec:
+  authentication:
+    type: {{ .authentication.type | default "scram-sha-512" }}
+  {{- if .authorization }}
+  authorization:
+    type: {{ .authorization.type | default "simple" }}
+    {{- if .authorization.acls }}
+    acls:
+      {{- toYaml .authorization.acls | nindent 6 }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- end }}
