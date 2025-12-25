@@ -1,0 +1,110 @@
+# Production Environment Configuration
+# Feature Flags Only - Full Security Enabled
+
+# ==============================================================================
+# SECURITY SETTINGS
+# ==============================================================================
+security:
+  enabled: true  # Enable ALL security features in production
+
+  # All features enabled (override if needed)
+  features:
+    authentication: true
+    authorization: true
+    encryption:
+      inTransit: true
+      atRest: true
+      interBroker: true
+    networkPolicies: true
+    podSecurity: true
+    auditLogging: true
+
+# ==============================================================================
+# ENVIRONMENT-SPECIFIC OVERRIDES
+# ==============================================================================
+kafka:
+  replicas: 3  # High availability
+
+  storage:
+    size: 100Gi
+    class: kafka-encrypted  # Use encrypted storage class
+
+  resources:
+    requests:
+      memory: 4Gi
+      cpu: 2000m
+    limits:
+      memory: 8Gi
+      cpu: 4000m
+
+  jvmOptions:
+    xms: 2048m
+    xmx: 4096m
+
+  config:
+    offsets.topic.replication.factor: 3
+    transaction.state.log.replication.factor: 3
+    transaction.state.log.min.isr: 2
+    default.replication.factor: 3
+    min.insync.replicas: 2
+    log.retention.hours: 168  # 7 days
+    log.segment.bytes: 2147483647  # 2GB
+    compression.type: lz4
+
+zookeeper:
+  replicas: 5  # Quorum for HA
+
+  storage:
+    size: 20Gi
+    class: kafka-encrypted
+
+  resources:
+    requests:
+      memory: 2Gi
+      cpu: 500m
+    limits:
+      memory: 4Gi
+      cpu: 2000m
+
+  jvmOptions:
+    xms: 1024m
+    xmx: 2048m
+
+# ==============================================================================
+# MONITORING
+# ==============================================================================
+monitoring:
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+  podMonitor:
+    enabled: true
+    interval: 30s
+
+# ==============================================================================
+# NETWORK CONFIGURATION
+# ==============================================================================
+network:
+  policies:
+    ingress:
+      allowFromNamespaces:
+        - default
+        - production-apps
+        - api-gateway
+    egress:
+      denyAll: false  # Restrict egress in production
+
+# ==============================================================================
+# DATA PROTECTION
+# ==============================================================================
+dataProtection:
+  storageClass:
+    parameters:
+      iops: 16000  # Production IOPS
+      throughput: 1000  # Production throughput
+
+# ==============================================================================
+# TOPICS (Managed via GitOps in production)
+# ==============================================================================
+topics:
+  enabled: false  # Topics created via separate process in production

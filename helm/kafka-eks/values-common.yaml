@@ -1,0 +1,177 @@
+# Common Configuration - Shared across all environments
+# Environment-specific files override these values with feature flags
+
+# ==============================================================================
+# SECURITY FEATURE FLAGS
+# ==============================================================================
+security:
+  # Master security switch
+  enabled: false  # Override per environment
+
+  # Individual security features (all controlled by security.enabled)
+  features:
+    authentication: true
+    authorization: true
+    encryption:
+      inTransit: true
+      atRest: true
+      interBroker: true
+    networkPolicies: true
+    podSecurity: true
+    auditLogging: true
+
+# ==============================================================================
+# KAFKA CLUSTER CONFIGURATION
+# ==============================================================================
+kafka:
+  name: my-kafka
+  version: 3.6.0
+  replicas: 1  # Override per environment
+
+  # Listeners configuration
+  listeners:
+    # Internal plaintext listener (disabled when security.enabled = true)
+    plain:
+      enabled: true  # Auto-disabled if security.enabled = true
+      port: 9092
+      type: internal
+
+    # External listener
+    external:
+      enabled: true
+      port: 9094
+      type: loadbalancer
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+        service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+
+    # TLS listener (enabled when security.enabled = true)
+    tls:
+      enabled: false  # Auto-enabled if security.enabled = true
+      port: 9093
+      type: internal
+
+  # Storage configuration
+  storage:
+    type: jbod
+    class: gp2  # Override per environment
+    size: 10Gi  # Override per environment
+    deleteClaim: false
+
+  # Resource limits (override per environment)
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+
+  # JVM options
+  jvmOptions:
+    xms: 512m
+    xmx: 1024m
+
+  # Logging
+  logging:
+    level: INFO
+
+  # Metrics
+  metrics:
+    enabled: true
+
+  # Kafka broker configuration
+  config:
+    offsets.topic.replication.factor: 1  # Override per environment
+    transaction.state.log.replication.factor: 1
+    transaction.state.log.min.isr: 1
+    default.replication.factor: 1
+    min.insync.replicas: 1
+    inter.broker.protocol.version: "3.6"
+    log.retention.hours: 168
+    log.segment.bytes: 1073741824
+    num.network.threads: 3
+    num.io.threads: 8
+    socket.send.buffer.bytes: 102400
+    socket.receive.buffer.bytes: 102400
+    socket.request.max.bytes: 104857600
+
+# ==============================================================================
+# ZOOKEEPER CONFIGURATION
+# ==============================================================================
+zookeeper:
+  replicas: 1  # Override per environment
+
+  storage:
+    type: persistent-claim
+    class: gp2  # Override per environment
+    size: 5Gi
+    deleteClaim: false
+
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+  jvmOptions:
+    xms: 256m
+    xmx: 512m
+
+  logging:
+    level: INFO
+
+  metrics:
+    enabled: true
+
+# ==============================================================================
+# ENTITY OPERATOR CONFIGURATION
+# ==============================================================================
+entityOperator:
+  enabled: true
+
+  topicOperator:
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+  userOperator:
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+# ==============================================================================
+# MONITORING CONFIGURATION
+# ==============================================================================
+monitoring:
+  serviceMonitor:
+    enabled: false
+    namespace: monitoring
+    interval: 30s
+
+  podMonitor:
+    enabled: false
+    namespace: monitoring
+    interval: 30s
+
+# ==============================================================================
+# TOPICS CONFIGURATION
+# ==============================================================================
+topics:
+  enabled: false
+  topics: []
+
+# ==============================================================================
+# NAMESPACE CONFIGURATION
+# ==============================================================================
+namespaceOverride: ""

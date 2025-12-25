@@ -1,0 +1,29 @@
+{{/*
+Modular StorageClass Template
+Only applied when: security.features.encryption.atRest = true
+*/}}
+{{- if include "kafka-eks.security.encryptionAtRest.enabled" . }}
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.dataProtection.storageClass.name }}
+  labels:
+    {{- include "kafka-eks.labels" . | nindent 4 }}
+provisioner: {{ .Values.dataProtection.storageClass.provisioner }}
+parameters:
+  type: {{ .Values.dataProtection.storageClass.type }}
+  encrypted: "{{ .Values.dataProtection.storageClass.encrypted }}"
+  {{- if .Values.dataProtection.kms.keyId }}
+  kmsKeyId: {{ .Values.dataProtection.kms.keyId }}
+  {{- end }}
+  {{- if .Values.dataProtection.storageClass.parameters.iops }}
+  iops: "{{ .Values.dataProtection.storageClass.parameters.iops }}"
+  {{- end }}
+  {{- if .Values.dataProtection.storageClass.parameters.throughput }}
+  throughput: "{{ .Values.dataProtection.storageClass.parameters.throughput }}"
+  {{- end }}
+volumeBindingMode: {{ .Values.dataProtection.storageClass.volumeBindingMode }}
+allowVolumeExpansion: {{ .Values.dataProtection.storageClass.allowVolumeExpansion }}
+reclaimPolicy: {{ .Values.dataProtection.storageClass.reclaimPolicy }}
+{{- end }}

@@ -1,0 +1,83 @@
+{{/*
+OAuth/mTLS Kafka ConfigMap
+Contains OAuth client configuration for Kafka brokers
+*/}}
+{{- if and (include "kafka-eks.security.authentication.enabled" .) .Values.authentication.methods.oauth.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.kafka.name }}-oauth-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kafka-eks.labels" . | nindent 4 }}
+data:
+  # OAuth Configuration for Kafka Brokers
+  oauth-config.properties: |
+    # OAuth Provider Configuration
+    oauth.client.id={{ .Values.authentication.methods.oauth.clientId }}
+    oauth.token.endpoint.uri={{ .Values.authentication.methods.oauth.tokenEndpointUri }}
+    oauth.jwks.endpoint.uri={{ .Values.authentication.methods.oauth.jwksEndpointUri }}
+    oauth.valid.issuer.uri={{ .Values.authentication.methods.oauth.validIssuerUri }}
+    {{- if .Values.authentication.methods.oauth.introspectionEndpointUri }}
+    oauth.introspection.endpoint.uri={{ .Values.authentication.methods.oauth.introspectionEndpointUri }}
+    {{- end }}
+
+    # Token Validation
+    oauth.check.issuer={{ .Values.authentication.methods.oauth.checkIssuer }}
+    oauth.check.audience={{ .Values.authentication.methods.oauth.checkAudience }}
+    {{- if .Values.authentication.methods.oauth.audience }}
+    oauth.audience={{ .Values.authentication.methods.oauth.audience }}
+    {{- end }}
+
+    # User Claim Mapping
+    oauth.username.claim={{ .Values.authentication.methods.oauth.usernameClaim }}
+    {{- if .Values.authentication.methods.oauth.fallbackUsernameClaim }}
+    oauth.fallback.username.claim={{ .Values.authentication.methods.oauth.fallbackUsernameClaim }}
+    oauth.fallback.username.prefix={{ .Values.authentication.methods.oauth.fallbackUsernamePrefix }}
+    {{- end }}
+
+    # Groups Claim (for authorization)
+    {{- if .Values.authentication.methods.oauth.groupsClaim }}
+    oauth.groups.claim={{ .Values.authentication.methods.oauth.groupsClaim }}
+    oauth.groups.claim.delimiter={{ .Values.authentication.methods.oauth.groupsClaimDelimiter }}
+    {{- end }}
+
+    # Token Type
+    oauth.access.token.is.jwt={{ .Values.authentication.methods.oauth.accessTokenIsJwt }}
+
+    # SSL/TLS Configuration for OAuth endpoints
+    {{- if .Values.authentication.methods.oauth.sslTruststoreLocation }}
+    oauth.ssl.truststore.location={{ .Values.authentication.methods.oauth.sslTruststoreLocation }}
+    oauth.ssl.truststore.password={{ .Values.authentication.methods.oauth.sslTruststorePassword }}
+    oauth.ssl.truststore.type={{ .Values.authentication.methods.oauth.sslTruststoreType }}
+    {{- end }}
+    oauth.ssl.endpoint.identification.algorithm={{ if .Values.authentication.methods.oauth.hostnameVerification }}HTTPS{{ else }}{{ end }}
+
+    # Connection Settings
+    oauth.connect.timeout.seconds={{ .Values.authentication.methods.oauth.connectTimeoutSeconds }}
+    oauth.read.timeout.seconds={{ .Values.authentication.methods.oauth.readTimeoutSeconds }}
+    oauth.http.retries={{ .Values.authentication.methods.oauth.httpRetries }}
+
+    # Metrics
+    oauth.enable.metrics={{ .Values.authentication.methods.oauth.enableMetrics }}
+
+    # Custom Claim Checks
+    {{- if .Values.authentication.methods.oauth.customClaimCheck }}
+    oauth.custom.claim.check={{ .Values.authentication.methods.oauth.customClaimCheck }}
+    {{- end }}
+
+  # OAuth JAAS Configuration
+  oauth-jaas.conf: |
+    KafkaServer {
+      org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required
+      unsecuredLoginStringClaim_sub="admin";
+    };
+
+    KafkaClient {
+      org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required
+      oauth.client.id="{{ .Values.authentication.methods.oauth.clientId }}"
+      oauth.token.endpoint.uri="{{ .Values.authentication.methods.oauth.tokenEndpointUri }}"
+      oauth.jwks.endpoint.uri="{{ .Values.authentication.methods.oauth.jwksEndpointUri }}";
+    };
+{{- end }}

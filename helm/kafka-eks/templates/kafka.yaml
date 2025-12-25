@@ -9,6 +9,26 @@ spec:
   kafka:
     version: {{ .Values.kafka.version }}
     replicas: {{ .Values.kafka.replicas }}
+    {{- if .Values.kafka.podSecurityContext.enabled }}
+    template:
+      pod:
+        securityContext:
+          runAsNonRoot: {{ .Values.kafka.podSecurityContext.runAsNonRoot }}
+          runAsUser: {{ .Values.kafka.podSecurityContext.runAsUser }}
+          fsGroup: {{ .Values.kafka.podSecurityContext.fsGroup }}
+          {{- if .Values.kafka.podSecurityContext.seccompProfile }}
+          seccompProfile:
+            type: {{ .Values.kafka.podSecurityContext.seccompProfile.type }}
+          {{- end }}
+        containers:
+          - name: kafka
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
+              readOnlyRootFilesystem: false
+    {{- end }}
     listeners:
       {{- if .Values.kafka.listeners.plain.enabled }}
       - name: plain
@@ -21,6 +41,10 @@ spec:
         port: {{ .Values.kafka.listeners.external.port }}
         type: {{ .Values.kafka.listeners.external.type }}
         tls: {{ .Values.kafka.listeners.external.tls }}
+        {{- if .Values.kafka.listeners.external.authentication.type }}
+        authentication:
+          type: {{ .Values.kafka.listeners.external.authentication.type }}
+        {{- end }}
         configuration:
           bootstrap:
             annotations:
@@ -36,6 +60,14 @@ spec:
           type: {{ .Values.kafka.listeners.tls.authentication.type }}
         {{- end }}
       {{- end }}
+    {{- if .Values.kafka.authorization.type }}
+    authorization:
+      type: {{ .Values.kafka.authorization.type }}
+      {{- if .Values.kafka.authorization.superUsers }}
+      superUsers:
+        {{- toYaml .Values.kafka.authorization.superUsers | nindent 8 }}
+      {{- end }}
+    {{- end }}
     config:
       {{- toYaml .Values.kafka.config | nindent 6 }}
     storage:
@@ -63,9 +95,36 @@ spec:
       type: inline
       loggers:
         kafka.root.logger.level: {{ .Values.kafka.logging.level | quote }}
+        {{- if .Values.kafka.logging.auditLogging.enabled }}
+        {{- range $key, $value := .Values.kafka.logging.auditLogging.loggers }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
 
   zookeeper:
     replicas: {{ .Values.zookeeper.replicas }}
+    {{- if or .Values.zookeeper.tls.enabled .Values.zookeeper.podSecurityContext.enabled }}
+    template:
+      pod:
+        {{- if .Values.zookeeper.podSecurityContext.enabled }}
+        securityContext:
+          runAsNonRoot: {{ .Values.zookeeper.podSecurityContext.runAsNonRoot }}
+          runAsUser: {{ .Values.zookeeper.podSecurityContext.runAsUser }}
+          fsGroup: {{ .Values.zookeeper.podSecurityContext.fsGroup }}
+          {{- if .Values.zookeeper.podSecurityContext.seccompProfile }}
+          seccompProfile:
+            type: {{ .Values.zookeeper.podSecurityContext.seccompProfile.type }}
+          {{- end }}
+        containers:
+          - name: zookeeper
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
+              readOnlyRootFilesystem: false
+        {{- end }}
+    {{- end }}
     storage:
       type: {{ .Values.zookeeper.storage.type }}
       size: {{ .Values.zookeeper.storage.size }}
