@@ -36,23 +36,11 @@ kafka:
       type: internal
       tls: false
 
-    # External access via INTERNAL NLB (VPC only)
+    # External access via INTERNET-FACING NLB (accessible from internet and VPC)
+    # ⚠️ POC/Testing only - Enable TLS and authentication for production
     external:
       enabled: true
       port: 9094
-      type: loadbalancer
-      tls: false
-      authentication:
-        type: ""
-      annotations:
-        service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
-        service.beta.kubernetes.io/aws-load-balancer-internal: "true"
-
-    # External access via INTERNET-FACING NLB (Public Internet)
-    # ⚠️ POC/Testing only - Enable TLS and authentication for production
-    public:
-      enabled: true
-      port: 9095
       type: loadbalancer
       tls: false  # Set to true for production
       authentication:

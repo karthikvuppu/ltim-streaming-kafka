@@ -50,20 +50,6 @@ spec:
             annotations:
               {{- toYaml .Values.kafka.listeners.external.annotations | nindent 14 }}
       {{- end }}
-      {{- if .Values.kafka.listeners.public.enabled }}
-      - name: public
-        port: {{ .Values.kafka.listeners.public.port }}
-        type: {{ .Values.kafka.listeners.public.type }}
-        tls: {{ .Values.kafka.listeners.public.tls }}
-        {{- if .Values.kafka.listeners.public.authentication.type }}
-        authentication:
-          type: {{ .Values.kafka.listeners.public.authentication.type }}
-        {{- end }}
-        configuration:
-          bootstrap:
-            annotations:
-              {{- toYaml .Values.kafka.listeners.public.annotations | nindent 14 }}
-      {{- end }}
       {{- if .Values.kafka.listeners.tls.enabled }}
       - name: tls
         port: {{ .Values.kafka.listeners.tls.port }}
