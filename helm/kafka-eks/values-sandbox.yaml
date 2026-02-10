@@ -27,6 +27,48 @@ kafka:
     min.insync.replicas: 1
     log.retention.hours: 48  # 2 days
 
+  # Kafka listeners configuration
+  listeners:
+    # Internal cluster access (pod-to-pod)
+    plain:
+      enabled: true
+      port: 9092
+      type: internal
+      tls: false
+
+    # External access via INTERNAL NLB (VPC only)
+    external:
+      enabled: true
+      port: 9094
+      type: loadbalancer
+      tls: false
+      authentication:
+        type: ""
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+        service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+
+    # External access via INTERNET-FACING NLB (Public Internet)
+    # ⚠️ POC/Testing only - Enable TLS and authentication for production
+    public:
+      enabled: true
+      port: 9095
+      type: loadbalancer
+      tls: false  # Set to true for production
+      authentication:
+        type: ""  # Set to scram-sha-512 for production
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+        service.beta.kubernetes.io/aws-load-balancer-internal: "false"
+        service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+        # Restrict access to specific IPs in production
+        # service.beta.kubernetes.io/load-balancer-source-ranges: "YOUR_IP/32"
+
+    # TLS listener (disabled for sandbox)
+    tls:
+      enabled: false
+      port: 9093
+
 zookeeper:
   replicas: 1
 
