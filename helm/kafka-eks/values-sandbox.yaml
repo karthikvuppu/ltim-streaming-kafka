@@ -82,6 +82,17 @@ monitoring:
   podMonitor:
     enabled: false
 
+# Kafka UI - enabled with internet-facing NLB for sandbox testing
+kafkaUI:
+  enabled: true
+  service:
+    type: LoadBalancer
+    port: 8080
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      service.beta.kubernetes.io/aws-load-balancer-internal: "false"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+
 # Enable example topics for sandbox testing
 topics:
   enabled: true

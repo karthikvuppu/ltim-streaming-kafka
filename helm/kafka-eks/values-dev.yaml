@@ -45,6 +45,13 @@ zookeeper:
     xms: 256m
     xmx: 512m
 
+# Kafka UI - enabled with ClusterIP (access via port-forward)
+kafkaUI:
+  enabled: true
+  service:
+    type: ClusterIP
+    port: 8080
+
 # Enable example topics for testing
 topics:
   enabled: true

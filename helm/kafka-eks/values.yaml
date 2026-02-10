@@ -212,6 +212,29 @@ monitoring:
     namespace: monitoring
     interval: 30s
 
+# Kafka UI (provectuslabs/kafka-ui)
+kafkaUI:
+  enabled: false
+  image:
+    repository: provectuslabs/kafka-ui
+    tag: latest
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 200m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  service:
+    type: ClusterIP  # ClusterIP or LoadBalancer
+    port: 8080
+    annotations: {}
+  auth:
+    enabled: false
+    username: admin
+    password: ""  # Set in environment-specific values
+
 # Namespace to deploy into
 namespaceOverride: ""
 

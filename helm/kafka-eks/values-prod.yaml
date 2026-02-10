@@ -147,6 +147,11 @@ monitoring:
     enabled: true
     interval: 30s
 
+# Kafka UI - disabled by default in production
+# Enable with internal NLB and authentication if needed
+kafkaUI:
+  enabled: false
+
 # Kafka Users with ACLs (examples - customize per application)
 users:
   enabled: true
