@@ -92,10 +92,34 @@ else
 fi
 
 echo ""
-echo "Step 2: Adding Strimzi Helm repository..."
+echo "Step 2: Adding Helm repositories..."
 helm repo add strimzi https://strimzi.io/charts/ &> /dev/null || true
+helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/ &> /dev/null || true
 helm repo update &> /dev/null
-echo -e "${GREEN}✅ Helm repository updated${NC}"
+echo -e "${GREEN}✅ Helm repositories updated${NC}"
+
+echo ""
+echo "Step 2a: Deploying ExternalDNS..."
+EXTERNAL_DNS_NAMESPACE="external-dns"
+EXTERNAL_DNS_VALUES="../eks-kafka/external-dns-values.yaml"
+
+if ! kubectl get namespace $EXTERNAL_DNS_NAMESPACE &> /dev/null; then
+    kubectl create namespace $EXTERNAL_DNS_NAMESPACE
+fi
+
+if helm list -n $EXTERNAL_DNS_NAMESPACE | grep -q "^external-dns"; then
+    echo -e "${YELLOW}⚠️  ExternalDNS already installed, upgrading...${NC}"
+    helm upgrade external-dns external-dns/external-dns \
+        --namespace $EXTERNAL_DNS_NAMESPACE \
+        --values $EXTERNAL_DNS_VALUES \
+        --wait --timeout 3m
+else
+    helm install external-dns external-dns/external-dns \
+        --namespace $EXTERNAL_DNS_NAMESPACE \
+        --values $EXTERNAL_DNS_VALUES \
+        --wait --timeout 3m
+fi
+echo -e "${GREEN}✅ ExternalDNS deployed${NC}"
 
 echo ""
 echo "Step 3: Deploying Kafka using Helm..."
@@ -179,13 +203,32 @@ if kubectl get svc -n $NAMESPACE kafka-ui-external &> /dev/null 2>&1; then
 echo "   External:     ${BLUE}$(kubectl get svc -n $NAMESPACE kafka-ui-external -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'):8080${NC}"
 fi
 echo ""
-echo "5. View Kafka logs:"
+echo "5. AWS Glue Schema Registry:"
+echo "   Registry: ${BLUE}ltim-sandbox-kafka-registry (eu-north-1)${NC}"
+echo "   ServiceAccount: ${BLUE}kafka-schema-registry-sa (namespace: $NAMESPACE)${NC}"
+echo "   Config:   ${BLUE}kubectl get cm glue-schema-registry-config -n $NAMESPACE -o yaml${NC}"
+echo ""
+echo "   Maven dependency:"
+echo "   ${BLUE}software.amazon.glue:schema-registry-serde:1.1.20${NC}"
+echo ""
+echo "   Producer config:"
+echo "   ${BLUE}value.serializer=com.amazonaws.services.schemaregistry.serializers.GlueSchemaRegistryKafkaSerializer${NC}"
+echo "   ${BLUE}schemaAutoRegistrationEnabled=true${NC}"
+echo "   ${BLUE}region=eu-north-1${NC}"
+echo "   ${BLUE}registryName=ltim-sandbox-kafka-registry${NC}"
+echo ""
+echo "   Consumer config:"
+echo "   ${BLUE}value.deserializer=com.amazonaws.services.schemaregistry.deserializers.GlueSchemaRegistryKafkaDeserializer${NC}"
+echo "   ${BLUE}region=eu-north-1${NC}"
+echo "   ${BLUE}registryName=ltim-sandbox-kafka-registry${NC}"
+echo ""
+echo "6. View Kafka logs:"
 echo "   ${BLUE}kubectl logs -n $NAMESPACE my-kafka-kafka-0 -c kafka${NC}"
 echo ""
-echo "6. Check Helm release:"
+echo "7. Check Helm release:"
 echo "   ${BLUE}helm status $RELEASE_NAME -n $NAMESPACE${NC}"
 echo ""
-echo "7. Upgrade configuration:"
+echo "8. Upgrade configuration:"
 echo "   ${BLUE}helm upgrade $RELEASE_NAME $HELM_CHART -n $NAMESPACE -f $VALUES_FILE${NC}"
 echo ""
 echo -e "${GREEN}✅ Deployment completed successfully!${NC}"

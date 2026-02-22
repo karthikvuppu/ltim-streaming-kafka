@@ -35,6 +35,10 @@ spec:
         port: {{ .Values.kafka.listeners.plain.port }}
         type: {{ .Values.kafka.listeners.plain.type }}
         tls: {{ .Values.kafka.listeners.plain.tls }}
+        {{- if .Values.kafka.listeners.plain.authentication.type }}
+        authentication:
+          type: {{ .Values.kafka.listeners.plain.authentication.type }}
+        {{- end }}
       {{- end }}
       {{- if .Values.kafka.listeners.external.enabled }}
       - name: external

@@ -33,6 +33,8 @@ kafka:
       port: 9092
       type: internal
       tls: false
+      authentication:
+        type: ""  # Set to scram-sha-512 to require authentication
 
     external:
       enabled: true
@@ -259,6 +261,20 @@ networkPolicy:
     - default  # List namespaces that can access Kafka
   monitoringNamespace: monitoring
   allowExternalEgress: true  # Allow Kafka to make external connections
+
+# AWS Glue Schema Registry Integration
+# Application pods use GlueSchemaRegistryKafkaSerializer/Deserializer via IRSA
+# No extra server required - fully managed AWS service
+glueSchemaRegistry:
+  enabled: false
+  region: ""                    # AWS region, e.g. eu-north-1
+  registryName: ""              # Glue registry name, e.g. ltim-sandbox-kafka-registry
+  compatibility: BACKWARD       # Schema compatibility: NONE | DISABLED | BACKWARD | FORWARD | FULL
+  autoRegistration: true        # Auto-register new schemas on first produce
+  serviceAccount:
+    create: true
+    name: kafka-schema-registry-sa
+    roleArn: ""                 # Set from Terraform output: kafka_schema_registry_role_arn
 
 # Kafka Users (for ACL-based authentication)
 users:

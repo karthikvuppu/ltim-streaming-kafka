@@ -26,29 +26,40 @@ kafka:
     default.replication.factor: 1
     min.insync.replicas: 1
     log.retention.hours: 48  # 2 days
+    auto.create.topics.enable: false  # Disabled - required when ACLs are enabled
+
+  # ACL-based authorization
+  authorization:
+    type: simple
+    superUsers:
+      - User:CN=my-kafka-entity-topic-operator   # Strimzi Topic Operator (TLS cert)
+      - User:CN=my-kafka-entity-user-operator    # Strimzi User Operator (TLS cert)
+      - User:CN=my-kafka-kafka-exporter          # Kafka Exporter metrics user (TLS cert)
 
   # Kafka listeners configuration
   listeners:
-    # Internal cluster access (pod-to-pod)
+    # Internal cluster access with SCRAM-SHA-512 authentication
     plain:
       enabled: true
       port: 9092
       type: internal
       tls: false
+      authentication:
+        type: scram-sha-512
 
-    # External access via INTERNET-FACING NLB (accessible from internet and VPC)
-    # ⚠️ POC/Testing only - Enable TLS and authentication for production
+    # External access via INTERNET-FACING NLB with SCRAM-SHA-512 authentication
     external:
       enabled: true
       port: 9094
       type: loadbalancer
-      tls: false  # Set to true for production
+      tls: false
       authentication:
-        type: ""  # Set to scram-sha-512 for production
+        type: scram-sha-512
       annotations:
         service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
         service.beta.kubernetes.io/aws-load-balancer-internal: "false"
         service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+        external-dns.alpha.kubernetes.io/hostname: "kafka-sandbox.aws.internal"
         # Restrict access to specific IPs in production
         # service.beta.kubernetes.io/load-balancer-source-ranges: "YOUR_IP/32"
 
@@ -92,6 +103,19 @@ kafkaUI:
       service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
       service.beta.kubernetes.io/aws-load-balancer-internal: "false"
       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+      external-dns.alpha.kubernetes.io/hostname: "kafka-ui-sandbox.aws.internal"
+
+# AWS Glue Schema Registry - enabled for sandbox testing
+# After terraform apply, set roleArn from:
+#   terraform -chdir=../eks-kafka/environments/sandbox output kafka_schema_registry_role_arn
+glueSchemaRegistry:
+  enabled: true
+  region: eu-north-1
+  registryName: ltim-sandbox-kafka-registry
+  compatibility: BACKWARD
+  autoRegistration: true
+  serviceAccount:
+    roleArn: ""  # TODO: paste ARN after terraform apply
 
 # Enable example topics for sandbox testing
 topics:
@@ -103,3 +127,73 @@ topics:
       config:
         retention.ms: 172800000  # 2 days
         cleanup.policy: delete
+
+# Kafka users with SCRAM-SHA-512 auth and ACL-based authorization
+# Strimzi User Operator creates a Kubernetes Secret for each user with generated credentials:
+#   kubectl get secret <username> -n kafka -o jsonpath='{.data.password}' | base64 -d
+users:
+  enabled: true
+  users:
+    # Producer: can write to all topics
+    - name: kafka-producer
+      authentication:
+        type: scram-sha-512
+      authorization:
+        type: simple
+        acls:
+          - resource:
+              type: topic
+              name: "*"
+              patternType: literal
+            operations:
+              - Write
+              - Describe
+              - Create
+
+    # Consumer: can read from all topics and manage consumer groups
+    - name: kafka-consumer
+      authentication:
+        type: scram-sha-512
+      authorization:
+        type: simple
+        acls:
+          - resource:
+              type: topic
+              name: "*"
+              patternType: literal
+            operations:
+              - Read
+              - Describe
+          - resource:
+              type: group
+              name: "*"
+              patternType: literal
+            operations:
+              - Read
+              - Describe
+
+    # Admin: full access to all topics and groups
+    - name: kafka-admin
+      authentication:
+        type: scram-sha-512
+      authorization:
+        type: simple
+        acls:
+          - resource:
+              type: topic
+              name: "*"
+              patternType: literal
+            operations:
+              - All
+          - resource:
+              type: group
+              name: "*"
+              patternType: literal
+            operations:
+              - All
+          - resource:
+              type: cluster
+              name: kafka-cluster
+              patternType: literal
+            operations:
+              - All

@@ -1,0 +1,15 @@
+{{- if .Values.glueSchemaRegistry.enabled }}
+---
+# ServiceAccount for Kafka producer/consumer pods to access AWS Glue Schema Registry
+# Uses IRSA (IAM Roles for Service Accounts) - no static credentials needed
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.glueSchemaRegistry.serviceAccount.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kafka-eks.labels" . | nindent 4 }}
+    app: glue-schema-registry
+  annotations:
+    eks.amazonaws.com/role-arn: {{ .Values.glueSchemaRegistry.serviceAccount.roleArn | quote }}
+{{- end }}
