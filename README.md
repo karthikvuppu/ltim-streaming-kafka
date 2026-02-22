@@ -1,184 +1,263 @@
-# Kafka on EKS
+# LTIM Streaming Kafka
 
-Production-ready Apache Kafka deployment on Amazon EKS using Strimzi Kafka Operator and Helm.
+Apache Kafka deployment on Amazon EKS using the Strimzi Kafka Operator and Helm. Supports Sandbox, Dev, and Production environments with ACL-based authorization, SCRAM-SHA-512 authentication, ExternalDNS, and AWS Glue Schema Registry integration.
 
-## Overview
+## Features
 
-Deploy Apache Kafka and Zookeeper on Amazon EKS with three pre-configured environments:
-- **Sandbox** - Testing and experiments (1 broker, minimal resources)
-- **Development** - Active development (1 broker, cost-effective)
-- **Production** - Live workloads (3+ brokers, HA, TLS, authentication)
+- Apache Kafka 3.6.0 + ZooKeeper (Strimzi Operator 0.39.0)
+- SCRAM-SHA-512 authentication on all listeners
+- ACL-based authorization (Kafka SimpleAclAuthorizer)
+- AWS Glue Schema Registry — Avro, JSON Schema, Protobuf (IRSA, no credentials in code)
+- ExternalDNS — automatic Route53 DNS record management
+- Internet-facing NLB for external Kafka and Kafka UI access
+- Kafka UI (provectuslabs/kafka-ui) web dashboard
+- Pre-configured users: `kafka-producer`, `kafka-consumer`, `kafka-admin`
 
-### Features
+---
 
-- ✅ **Apache Kafka 3.6.0** - Latest stable release
-- ✅ **Apache Zookeeper 3.8.3** - Reliable coordination
-- ✅ **Strimzi Operator 0.39.0** - Kubernetes-native management
-- ✅ **Production Ready** - HA, TLS, SCRAM-SHA-512, monitoring
-- ✅ **AWS Integration** - NLB, EBS gp3, optimized for EKS
-- ✅ **100% Open Source** - No enterprise licenses required
+## Repository Structure
 
-## Quick Start
-
-### Prerequisites
-
-- Amazon EKS cluster (Kubernetes 1.24+)
-- kubectl configured for your cluster
-- Helm 3.8 or higher
-- AWS CLI configured
-
-### Deploy in 3 Steps
-
-**1. Add Strimzi Helm repository:**
-```bash
-helm repo add strimzi https://strimzi.io/charts/
-helm repo update
+```
+.
+├── deploy.sh                            # One-command deployment script
+├── external-dns-values.yaml             # ExternalDNS Helm configuration
+└── helm/kafka-eks/
+    ├── Chart.yaml                       # Chart + Strimzi v0.39.0 dependency
+    ├── values.yaml                      # Global defaults (all environments)
+    ├── values-sandbox.yaml              # Sandbox overrides (active)
+    ├── values-dev.yaml                  # Dev overrides
+    ├── values-prod.yaml                 # Production overrides
+    └── templates/
+        ├── kafka.yaml                   # Kafka + ZooKeeper CRDs (Strimzi)
+        ├── kafka-ui.yaml                # Kafka UI deployment + services
+        ├── topics.yaml                  # KafkaTopic resources
+        ├── users.yaml                   # KafkaUser resources (SCRAM + ACLs)
+        ├── glue-schema-registry.yaml    # ServiceAccount for Glue IRSA
+        ├── storageclass.yaml            # EBS gp3 encrypted storage class
+        ├── networkpolicy.yaml           # Network policies
+        └── servicemonitor.yaml          # Prometheus ServiceMonitor
 ```
 
-**2. Deploy Kafka:**
+---
+
+## Prerequisites
+
+- EKS cluster provisioned via `eks-kafka` Terraform repo
+- `kubectl` configured: `aws eks update-kubeconfig --name ltim-sandbox-eks --region eu-north-1`
+- Helm 3.x installed
+- AWS CLI configured
+- Glue IRSA role ARN from Terraform output (for sandbox/prod)
+
+---
+
+## Deploy
+
 ```bash
-# Sandbox environment
+# Sandbox
 ./deploy.sh sandbox
 
-# OR Development environment
+# Dev
 ./deploy.sh dev
 
-# OR Production environment
+# Production
 ./deploy.sh prod
 ```
 
-**3. Verify deployment:**
-```bash
-kubectl get kafka -n kafka
-kubectl get pods -n kafka
-```
+The script automatically:
+1. Creates the `kafka` namespace
+2. Adds Strimzi + ExternalDNS Helm repositories
+3. Deploys ExternalDNS (from `../eks-kafka/external-dns-values.yaml`)
+4. Deploys Kafka cluster via Helm
+5. Waits for cluster readiness
+6. Prints endpoints + schema registry config
 
-That's it! Kafka is now running on your EKS cluster.
+### Before sandbox deploy — set the Glue IRSA role ARN
 
-## Manual Deployment
-
-### Using Helm Directly
-
-**Sandbox:**
-```bash
-helm install kafka-eks ./helm/kafka-eks \
-  --namespace kafka \
-  --create-namespace \
-  --values ./helm/kafka-eks/values-sandbox.yaml
-```
-
-**Development:**
-```bash
-helm install kafka-eks ./helm/kafka-eks \
-  --namespace kafka \
-  --create-namespace \
-  --values ./helm/kafka-eks/values-dev.yaml
-```
-
-**Production:**
-```bash
-helm install kafka-eks ./helm/kafka-eks \
-  --namespace kafka \
-  --create-namespace \
-  --values ./helm/kafka-eks/values-prod.yaml
-```
-
-### Using Deployment Script
+After `terraform apply` in the `eks-kafka` repo:
 
 ```bash
-./deploy.sh <environment>
+cd ../eks-kafka/environments/sandbox
+terraform output kafka_schema_registry_role_arn
 ```
 
-**Options:**
-- `sandbox` - Testing environment (1 broker, 10Gi storage)
-- `dev` - Development environment (1 broker, 5Gi storage)
-- `prod` - Production environment (3 brokers, 100Gi storage, HA)
+Paste the ARN into [helm/kafka-eks/values-sandbox.yaml](helm/kafka-eks/values-sandbox.yaml):
 
-The script will:
-1. ✅ Check prerequisites (kubectl, helm)
-2. ✅ Create kafka namespace
-3. ✅ Add Strimzi Helm repository
-4. ✅ Deploy Kafka cluster
-5. ✅ Wait for cluster to be ready
-6. ✅ Display connection information
+```yaml
+glueSchemaRegistry:
+  serviceAccount:
+    roleArn: "arn:aws:iam::292481751409:role/ltim-sandbox-kafka-schema-registry-role"
+```
+
+---
 
 ## Environment Comparison
 
-| Feature | Sandbox | Development | Production |
-|---------|---------|-------------|------------|
-| **Kafka Brokers** | 1 | 1 | 3 |
-| **Zookeeper Nodes** | 1 | 1 | 5 |
-| **Storage** | 10Gi (gp2) | 5Gi (gp2) | 100Gi (gp3) |
-| **Memory** | 1Gi | 1Gi | 4Gi |
-| **TLS** | ❌ | ❌ | ✅ |
-| **Authentication** | ❌ | ❌ | ✅ SCRAM-SHA-512 |
-| **Monitoring** | ❌ | ❌ | ✅ Prometheus |
-| **HA** | ❌ | ❌ | ✅ |
-| **Replication Factor** | 1 | 1 | 3 |
-| **Retention** | 7 days | 1 day | 7 days |
+| Feature | Sandbox | Dev | Production |
+|---|---|---|---|
+| Kafka Brokers | 1 | 1 | 3 |
+| ZooKeeper Nodes | 1 | 1 | 5 |
+| Storage | 10Gi gp2 | 5Gi gp2 | 100Gi gp3 encrypted |
+| Memory (broker) | 2Gi | 2Gi | 4Gi |
+| TLS | No | No | Yes |
+| Authentication | SCRAM-SHA-512 | No | SCRAM-SHA-512 |
+| ACL Authorization | Yes | No | Yes |
+| Replication Factor | 1 | 1 | 3 |
+| Kafka UI | Yes (NLB) | Yes | Yes |
+| Glue Schema Registry | Yes | No | Yes |
+| Network Policies | No | No | Yes |
+| Encrypted Storage | No | No | Yes |
+| Log Retention | 2 days | 1 day | 7 days |
 
-## Accessing Kafka
+---
 
-### Internal (from within cluster)
+## Connecting to Kafka
 
+### From inside the cluster (pod-to-pod)
+
+```properties
+bootstrap.servers=my-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=SCRAM-SHA-512
+sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required \
+  username="kafka-producer" password="<from-secret>";
 ```
-my-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092
+
+### From outside the cluster (internet-facing NLB)
+
+```properties
+bootstrap.servers=kafka-sandbox.aws.internal:9094
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=SCRAM-SHA-512
+sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required \
+  username="kafka-producer" password="<from-secret>";
 ```
 
-### External (via AWS NLB)
-
-```bash
-# Get LoadBalancer endpoint
-kubectl get svc -n kafka my-kafka-kafka-external-bootstrap
-```
-
-### Port Forwarding (local testing)
+### Local development (port-forward)
 
 ```bash
 kubectl port-forward -n kafka svc/my-kafka-kafka-bootstrap 9092:9092
+# Connect to localhost:9092 with SCRAM credentials
 ```
 
-Now connect to `localhost:9092`
+### Get user credentials
 
-## Testing Kafka
-
-### Quick Test
+Strimzi generates passwords automatically and stores them as Kubernetes Secrets:
 
 ```bash
-./test-kafka.sh
+kubectl get secret kafka-producer -n kafka -o jsonpath='{.data.password}' | base64 -d
+kubectl get secret kafka-consumer -n kafka -o jsonpath='{.data.password}' | base64 -d
+kubectl get secret kafka-admin    -n kafka -o jsonpath='{.data.password}' | base64 -d
 ```
 
-This script will:
-1. Create a test topic
-2. Send test messages (producer)
-3. Consume and verify messages (consumer)
+---
 
-### Manual Testing
+## Pre-configured Users and ACLs
 
-**Producer:**
-```bash
-kubectl run kafka-producer -ti -n kafka \
-  --image=quay.io/strimzi/kafka:0.39.0-kafka-3.6.0 \
-  --rm --restart=Never -- \
-  bin/kafka-console-producer.sh \
-  --bootstrap-server my-kafka-kafka-bootstrap:9092 \
-  --topic test-topic
+| User | Topic Permissions | Group Permissions |
+|---|---|---|
+| `kafka-producer` | Write, Describe, Create on `*` | — |
+| `kafka-consumer` | Read, Describe on `*` | Read, Describe on `*` |
+| `kafka-admin` | All on `*` | All on `*` + Cluster All |
+
+### Add a custom user with scoped ACLs
+
+Add to `users.users` in your values file:
+
+```yaml
+users:
+  enabled: true
+  users:
+    - name: my-app-user
+      authentication:
+        type: scram-sha-512
+      authorization:
+        type: simple
+        acls:
+          - resource:
+              type: topic
+              name: my-topic
+              patternType: literal
+            operations:
+              - Read
+              - Write
+              - Describe
+          - resource:
+              type: group
+              name: my-consumer-group
+              patternType: literal
+            operations:
+              - Read
 ```
 
-**Consumer:**
-```bash
-kubectl run kafka-consumer -ti -n kafka \
-  --image=quay.io/strimzi/kafka:0.39.0-kafka-3.6.0 \
-  --rm --restart=Never -- \
-  bin/kafka-console-consumer.sh \
-  --bootstrap-server my-kafka-kafka-bootstrap:9092 \
-  --topic test-topic \
-  --from-beginning
+---
+
+## AWS Glue Schema Registry
+
+Fully managed schema registry — no extra server to deploy or maintain. Application pods use the AWS Glue SerDe library and authenticate via IRSA (no AWS credentials in code or environment variables).
+
+### Maven Dependency
+
+```xml
+<dependency>
+    <groupId>software.amazon.glue</groupId>
+    <artifactId>schema-registry-serde</artifactId>
+    <version>1.1.20</version>
+</dependency>
 ```
 
-## Common Operations
+### Producer config (append to Kafka producer properties)
 
-### Create Topic
+```properties
+value.serializer=com.amazonaws.services.schemaregistry.serializers.GlueSchemaRegistryKafkaSerializer
+schemaAutoRegistrationEnabled=true
+region=eu-north-1
+registryName=ltim-sandbox-kafka-registry
+dataFormat=AVRO
+```
+
+### Consumer config (append to Kafka consumer properties)
+
+```properties
+value.deserializer=com.amazonaws.services.schemaregistry.deserializers.GlueSchemaRegistryKafkaDeserializer
+region=eu-north-1
+registryName=ltim-sandbox-kafka-registry
+```
+
+### Required: pod must use the IRSA service account
+
+```yaml
+spec:
+  serviceAccountName: kafka-schema-registry-sa   # namespace: kafka
+```
+
+---
+
+## Kafka UI
+
+| Access | URL |
+|---|---|
+| Internal (VPC DNS) | `http://kafka-ui-sandbox.aws.internal:8080` |
+| Local port-forward | `kubectl port-forward -n kafka svc/kafka-ui 8080:8080` → `http://localhost:8080` |
+
+---
+
+## Managing Topics
+
+### Via Helm values (recommended)
+
+```yaml
+topics:
+  enabled: true
+  topics:
+    - name: my-topic
+      partitions: 3
+      replicas: 1
+      config:
+        retention.ms: 604800000
+        cleanup.policy: delete
+```
+
+### Via kubectl
 
 ```bash
 kubectl apply -f - <<EOF
@@ -191,256 +270,126 @@ metadata:
     strimzi.io/cluster: my-kafka
 spec:
   partitions: 3
-  replicas: 3
+  replicas: 1
   config:
-    retention.ms: 604800000  # 7 days
-    compression.type: producer
-    min.insync.replicas: 2
+    retention.ms: 604800000
 EOF
 ```
 
-### Create User (Production)
+> `auto.create.topics.enable` is `false` in sandbox. All topics must be created explicitly (required when ACLs are enabled).
+
+---
+
+## Common Operations
 
 ```bash
-kubectl apply -f - <<EOF
-apiVersion: kafka.strimzi.io/v1beta2
-kind: KafkaUser
-metadata:
-  name: my-user
-  namespace: kafka
-  labels:
-    strimzi.io/cluster: my-kafka
-spec:
-  authentication:
-    type: scram-sha-512
-  authorization:
-    type: simple
-    acls:
-      - resource:
-          type: topic
-          name: my-topic
-        operations: [Read, Write, Describe]
-EOF
-```
-
-**Get password:**
-```bash
-kubectl get secret my-user -n kafka -o jsonpath='{.data.password}' | base64 -d
-```
-
-### Upgrade Configuration
-
-**1. Edit values file:**
-```bash
-vim helm/kafka-eks/values-prod.yaml
-```
-
-**2. Apply changes:**
-```bash
-helm upgrade kafka-eks ./helm/kafka-eks \
-  --namespace kafka \
-  --values ./helm/kafka-eks/values-prod.yaml
-```
-
-**3. Monitor rollout:**
-```bash
-kubectl rollout status statefulset/my-kafka-kafka -n kafka
-```
-
-### Scale Brokers
-
-**Update values file:**
-```yaml
-kafka:
-  replicas: 5  # Scale from 3 to 5
-```
-
-**Apply:**
-```bash
-helm upgrade kafka-eks ./helm/kafka-eks -n kafka -f ./helm/kafka-eks/values-prod.yaml
-```
-
-Strimzi handles rolling update and partition rebalancing automatically.
-
-## Monitoring
-
-### Check Cluster Status
-
-```bash
-# Kafka cluster
+# Cluster health
 kubectl get kafka -n kafka
-
-# Pods
 kubectl get pods -n kafka
+kubectl get kafkatopic -n kafka
+kubectl get kafkauser -n kafka
 
-# Services
-kubectl get svc -n kafka
-```
-
-### View Logs
-
-```bash
-# Kafka broker logs
+# Broker logs
 kubectl logs -n kafka my-kafka-kafka-0 -c kafka
 
-# Zookeeper logs
+# ZooKeeper logs
 kubectl logs -n kafka my-kafka-zookeeper-0
 
-# Operator logs
+# Strimzi operator logs
 kubectl logs -n kafka deployment/strimzi-cluster-operator
+
+# ExternalDNS logs
+kubectl logs -n external-dns -l app.kubernetes.io/name=external-dns
+
+# Helm status
+helm list -n kafka
+helm status kafka-eks -n kafka
+
+# Upgrade after config change
+helm upgrade kafka-eks ./helm/kafka-eks -n kafka -f ./helm/kafka-eks/values-sandbox.yaml
 ```
 
-### Prometheus Metrics
-
-**Production environment has Prometheus integration enabled.**
-
-Metrics endpoints:
-- Kafka: `<pod>:9404/metrics`
-- Zookeeper: `<pod>:9405/metrics`
-
-Port-forward to view:
-```bash
-kubectl port-forward -n kafka my-kafka-kafka-0 9404:9404
-curl http://localhost:9404/metrics
-```
+---
 
 ## Cleanup
 
-### Remove Deployment (Keep Data)
-
-```bash
-./undeploy.sh <environment>
-```
-
-OR
+### Remove Kafka only (keep data)
 
 ```bash
 helm uninstall kafka-eks -n kafka
 ```
 
-### Remove Deployment and Data
-
-```bash
-./undeploy.sh <environment> --delete-data
-```
-
-OR
+### Remove Kafka and all data
 
 ```bash
 helm uninstall kafka-eks -n kafka
-kubectl delete pvc -n kafka --all  # ⚠️  Deletes all data!
+kubectl delete pvc --all -n kafka   # Deletes EBS volumes
 kubectl delete namespace kafka
 ```
 
+### Remove ExternalDNS
+
+```bash
+helm uninstall external-dns -n external-dns
+kubectl delete namespace external-dns
+```
+
+---
+
 ## Troubleshooting
 
-### Pods Not Starting
-
+**Pods not starting:**
 ```bash
 kubectl describe pod my-kafka-kafka-0 -n kafka
 kubectl logs my-kafka-kafka-0 -n kafka -c kafka
 ```
 
-**Common causes:**
-- Insufficient cluster resources
-- PVC binding issues
-- Image pull errors
-
-### PVCs Not Binding
-
+**PVCs not binding:**
 ```bash
 kubectl get pvc -n kafka
 kubectl get storageclass
+# Ensure EBS CSI driver is installed and gp2 storage class exists
 ```
 
-**Solution:**
-- Ensure EBS CSI driver is installed
-- Verify storage class exists (gp2/gp3)
-
-### LoadBalancer Pending
-
+**NLB stuck in Pending:**
 ```bash
 kubectl describe svc my-kafka-kafka-external-bootstrap -n kafka
+kubectl get pods -n kube-system | grep aws-load-balancer
 ```
 
-**Solution:**
-- Install AWS Load Balancer Controller
-- Check VPC subnet tags
-- Verify IAM permissions
-
-## Repository Structure
-
-```
-.
-├── helm/kafka-eks/              # Helm chart
-│   ├── Chart.yaml              # Chart metadata
-│   ├── values.yaml             # Default values
-│   ├── values-sandbox.yaml     # Sandbox config
-│   ├── values-dev.yaml         # Development config
-│   ├── values-prod.yaml        # Production config
-│   └── templates/              # Kubernetes manifests
-├── deploy.sh                    # Deployment script
-├── undeploy.sh                  # Cleanup script
-├── test-kafka.sh                # Testing script
-├── README.md                    # This file
-├── ARCHITECTURE.md              # Detailed architecture docs
-└── LICENSE                      # Apache 2.0
-```
-
-## Documentation
-
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed architecture, configuration reference, and advanced topics
-- **[LICENSE](LICENSE)** - Apache 2.0 license
-
-## Technology Stack
-
-| Component | Version | Image |
-|-----------|---------|-------|
-| Apache Kafka | 3.6.0 | quay.io/strimzi/kafka:0.39.0-kafka-3.6.0 |
-| Apache Zookeeper | 3.8.3 | quay.io/strimzi/kafka:0.39.0-kafka-3.6.0 |
-| Strimzi Operator | 0.39.0 | quay.io/strimzi/operator:0.39.0 |
-| Helm | 3.8+ | - |
-
-## Support & Resources
-
-- **Strimzi Documentation:** https://strimzi.io/docs/
-- **Apache Kafka Documentation:** https://kafka.apache.org/documentation/
-- **AWS EKS Best Practices:** https://aws.github.io/aws-eks-best-practices/
-
-## License
-
-Apache 2.0 - See [LICENSE](LICENSE) file.
-
----
-
-## Quick Reference
-
+**DNS not resolving:**
 ```bash
-# Deploy
-./deploy.sh sandbox    # Sandbox environment
-./deploy.sh dev        # Development environment
-./deploy.sh prod       # Production environment
-
-# Test
-./test-kafka.sh        # Run producer/consumer test
-
-# Monitor
-kubectl get kafka -n kafka
-kubectl get pods -n kafka
-kubectl logs -n kafka my-kafka-kafka-0 -c kafka
-
-# Cleanup
-./undeploy.sh sandbox
-./undeploy.sh prod --delete-data
-
-# Helm commands
-helm install kafka-eks ./helm/kafka-eks -n kafka -f ./helm/kafka-eks/values-prod.yaml
-helm upgrade kafka-eks ./helm/kafka-eks -n kafka -f ./helm/kafka-eks/values-prod.yaml
-helm uninstall kafka-eks -n kafka
+kubectl logs -n external-dns -l app.kubernetes.io/name=external-dns
+# Verify annotation exists on service
+kubectl get svc -n kafka -o yaml | grep external-dns
 ```
 
-For detailed configuration options, architecture details, security setup, and troubleshooting, see **[ARCHITECTURE.md](ARCHITECTURE.md)**.
+**Authentication failure (SCRAM):**
+```bash
+# Re-fetch the generated password
+kubectl get secret kafka-producer -n kafka -o jsonpath='{.data.password}' | base64 -d
+```
+
+**Glue Schema Registry access denied:**
+```bash
+# Verify IRSA annotation on the service account
+kubectl get sa kafka-schema-registry-sa -n kafka -o yaml | grep role-arn
+# Verify pod is using the right service account
+kubectl get pod <pod-name> -n kafka -o yaml | grep serviceAccountName
+```
 
 ---
 
-**Ready to deploy Kafka on EKS!** 🚀
+## Related Repository
+
+**`eks-kafka`** — Terraform infrastructure (EKS, VPC, IAM, Route53, Glue) that this Helm chart runs on.
+
+---
+
+## Resources
+
+- [Strimzi Documentation](https://strimzi.io/docs/)
+- [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
+- [AWS Glue Schema Registry](https://docs.aws.amazon.com/glue/latest/dg/schema-registry.html)
+- [AWS Glue Schema Registry SerDe (GitHub)](https://github.com/awslabs/aws-glue-schema-registry)
+- [AWS EKS Best Practices](https://aws.github.io/aws-eks-best-practices/)
