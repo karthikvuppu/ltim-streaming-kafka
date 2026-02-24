@@ -96,6 +96,9 @@ monitoring:
 # Kafka UI - enabled with internet-facing NLB for sandbox testing
 kafkaUI:
   enabled: true
+  kafka:
+    sasl:
+      enabled: true  # Kafka requires SCRAM-SHA-512 on port 9092
   service:
     type: LoadBalancer
     port: 8080
@@ -115,7 +118,7 @@ glueSchemaRegistry:
   compatibility: BACKWARD
   autoRegistration: true
   serviceAccount:
-    roleArn: ""  # TODO: paste ARN after terraform apply
+    roleArn: "arn:aws:iam::292481751409:role/ltim-sandbox-kafka-schema-registry-role"
 
 # Enable example topics for sandbox testing
 topics:

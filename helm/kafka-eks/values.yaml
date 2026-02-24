@@ -236,6 +236,11 @@ kafkaUI:
     enabled: false
     username: admin
     password: ""  # Set in environment-specific values
+  kafka:
+    sasl:
+      enabled: false       # Set to true when Kafka requires SCRAM-SHA-512 auth
+      username: kafka-admin
+      secretName: kafka-admin  # Strimzi-generated secret for kafka-admin user
 
 # Namespace to deploy into
 namespaceOverride: ""

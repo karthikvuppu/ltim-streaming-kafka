@@ -32,6 +32,19 @@ spec:
               value: {{ .Values.kafka.name }}
             - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
               value: "{{ .Values.kafka.name }}-kafka-bootstrap:9092"
+            {{- if .Values.kafkaUI.kafka.sasl.enabled }}
+            - name: KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL
+              value: "SASL_PLAINTEXT"
+            - name: KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM
+              value: "SCRAM-SHA-512"
+            - name: _KAFKA_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.kafkaUI.kafka.sasl.secretName }}
+                  key: password
+            - name: KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG
+              value: 'org.apache.kafka.common.security.scram.ScramLoginModule required username="{{ .Values.kafkaUI.kafka.sasl.username }}" password="$(_KAFKA_ADMIN_PASSWORD)";'
+            {{- end }}
             {{- if .Values.kafkaUI.auth.enabled }}
             - name: AUTH_TYPE
               value: "LOGIN_FORM"
