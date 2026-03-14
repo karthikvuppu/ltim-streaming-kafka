@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kafka-portal-sandbox
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/karthikvuppu/ltim-streaming-kafka
+    targetRevision: main
+    path: helm/kafka-portal
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-sandbox.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kafka-portal
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 2m
+      limit: 3
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
