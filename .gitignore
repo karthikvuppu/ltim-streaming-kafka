@@ -51,8 +51,20 @@ charts/*.tgz
 # Terraform
 *.tfstate
 *.tfstate.*
-.terraform/
-terraform.tfvars
+**/.terraform/
+*tfplan*
+planfile.tf
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+# Exception: keep environment tfvars (non-sensitive config)
+!terraform/environments/**/*.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*.terraformrc
+terraform.rc
 
 # Python
 __pycache__/

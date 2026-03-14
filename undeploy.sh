@@ -74,5 +74,5 @@ fi
 echo ""
 echo -e "${GREEN}✅ Cleanup completed!${NC}"
 echo ""
-echo "To redeploy, run: ./deploy.sh [dev|staging|prod]"
+echo "To redeploy, run: ./deploy.sh sandbox"
 echo ""

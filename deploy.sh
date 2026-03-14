@@ -94,32 +94,9 @@ fi
 echo ""
 echo "Step 2: Adding Helm repositories..."
 helm repo add strimzi https://strimzi.io/charts/ &> /dev/null || true
-helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/ &> /dev/null || true
 helm repo update &> /dev/null
 echo -e "${GREEN}✅ Helm repositories updated${NC}"
-
-echo ""
-echo "Step 2a: Deploying ExternalDNS..."
-EXTERNAL_DNS_NAMESPACE="external-dns"
-EXTERNAL_DNS_VALUES="../eks-kafka/external-dns-values.yaml"
-
-if ! kubectl get namespace $EXTERNAL_DNS_NAMESPACE &> /dev/null; then
-    kubectl create namespace $EXTERNAL_DNS_NAMESPACE
-fi
-
-if helm list -n $EXTERNAL_DNS_NAMESPACE | grep -q "^external-dns"; then
-    echo -e "${YELLOW}⚠️  ExternalDNS already installed, upgrading...${NC}"
-    helm upgrade external-dns external-dns/external-dns \
-        --namespace $EXTERNAL_DNS_NAMESPACE \
-        --values $EXTERNAL_DNS_VALUES \
-        --wait --timeout 3m
-else
-    helm install external-dns external-dns/external-dns \
-        --namespace $EXTERNAL_DNS_NAMESPACE \
-        --values $EXTERNAL_DNS_VALUES \
-        --wait --timeout 3m
-fi
-echo -e "${GREEN}✅ ExternalDNS deployed${NC}"
+echo -e "${YELLOW}  Note: ExternalDNS is managed by Terraform (terraform/environments/sandbox)${NC}"
 
 echo ""
 echo "Step 3: Deploying Kafka using Helm..."
