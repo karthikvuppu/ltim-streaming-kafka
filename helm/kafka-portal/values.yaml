@@ -18,15 +18,29 @@ fastapi:
   service:
     type: ClusterIP
     port: 8000
-  # Secret name created manually via kubectl before deploying:
+  # IRSA ServiceAccount — gives the pod permission to call Bedrock (no API key needed)
+  # Set roleArn after: terraform -chdir=../eks-kafka/environments/sandbox apply
+  #   output: kafka_portal_bedrock_role_arn
+  serviceAccount:
+    create: true
+    name: kafka-portal-api-sa
+    roleArn: ""   # set in values-sandbox.yaml
+
+  # Bedrock config (no secret needed — IAM via IRSA)
+  env:
+    BEDROCK_REGION: "eu-west-1"
+    BEDROCK_MODEL: "anthropic.claude-3-5-sonnet-20240620-v1:0"
+    BEDROCK_REVIEW_MODEL: "anthropic.claude-3-haiku-20240307-v1:0"
+    KAFKA_CLUSTER_NAME: "my-kafka"
+    GITHUB_REPO: "karthikvuppu/ltim-streaming-kafka"
+
+  # Secret name for remaining sensitive values (GITHUB_TOKEN, Cognito):
   #   kubectl create secret generic kafka-portal-secrets \
-  #     --from-literal=OPENAI_API_KEY=sk-... \
   #     --from-literal=GITHUB_TOKEN=ghp_... \
   #     --from-literal=COGNITO_REGION=eu-north-1 \
-  #     --from-literal=COGNITO_USER_POOL_ID=eu-north-1_xxx \
-  #     --from-literal=COGNITO_CLIENT_ID=xxx \
-  #     --from-literal=KAFKA_CLUSTER_NAME=my-kafka \
-  #     --from-literal=GITHUB_REPO=your-org/ltim-streaming-kafka \
+  #     --from-literal=COGNITO_USER_POOL_ID=eu-north-1_lYnTusC49 \
+  #     --from-literal=COGNITO_CLIENT_ID=232lq00pndiakq3ldfvnqhf2ed \
+  #     --from-literal=COGNITO_CLIENT_SECRET=70o15kkjsg2f2ordu9kr9bn5d5s8mh64go72ku87j3c2j9ajn8e \
   #     -n kafka-portal
   secretName: kafka-portal-secrets
 

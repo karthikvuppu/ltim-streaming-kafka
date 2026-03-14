@@ -6,6 +6,8 @@
 fastapi:
   image:
     tag: "latest"
+  serviceAccount:
+    roleArn: "arn:aws:iam::292481751409:role/ltim-sandbox-kafka-portal-bedrock-role"
 
 streamlit:
   image:

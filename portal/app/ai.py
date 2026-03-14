@@ -1,21 +1,39 @@
 """
-OpenAI YAML generation + self-review.
-Generates KafkaTopic and KafkaUser manifests, then asks the model to validate them.
+Amazon Bedrock YAML generation + self-review.
+Uses Claude via Bedrock — no API key needed, credentials come from IRSA.
 """
 
 import os
+import json
+import boto3
 import yaml
-from openai import OpenAI
 
-client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+BEDROCK_REGION = os.environ.get("BEDROCK_REGION", "eu-west-1")
+GENERATE_MODEL = os.environ.get("BEDROCK_MODEL", "anthropic.claude-3-5-sonnet-20240620-v1:0")
+REVIEW_MODEL   = os.environ.get("BEDROCK_REVIEW_MODEL", "anthropic.claude-3-haiku-20240307-v1:0")
 
 KAFKA_CLUSTER_NAME = os.environ.get("KAFKA_CLUSTER_NAME", "my-kafka")
+
+# boto3 picks up credentials automatically via IRSA (projected service account token)
+_bedrock = boto3.client("bedrock-runtime", region_name=BEDROCK_REGION)
+
+
+def _invoke(model_id: str, prompt: str) -> str:
+    body = json.dumps({
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 2048,
+        "temperature": 0,
+        "messages": [{"role": "user", "content": prompt}],
+    })
+    response = _bedrock.invoke_model(modelId=model_id, body=body)
+    result = json.loads(response["body"].read())
+    return result["content"][0]["text"].strip()
 
 
 def generate_yaml(body, topic_name: str, requested_by: str) -> tuple[str, str]:
     """
-    Returns (topic_yaml, user_yaml) as plain strings.
-    Raises ValueError if the model's self-review flags invalid YAML.
+    Returns (topic_yaml, user_yaml).
+    Raises ValueError if Bedrock self-review flags invalid YAML.
     """
     retention_ms = body.retention_hours * 3600 * 1000
 
@@ -61,29 +79,15 @@ spec:
         operations:
           - Write
           - Describe
-      - resource:
-          type: topic
-          name: {topic_name}
-          patternType: literal
-        host: "*"
-        operations:
-          - Write
 
 Return ONLY the two YAML documents separated by ---
-No markdown code blocks. No explanation. No extra text.
-"""
+No markdown code blocks. No explanation. No extra text."""
 
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0,
-    )
-
-    raw = response.choices[0].message.content.strip()
-    # Strip markdown code fences if model adds them anyway
+    raw = _invoke(GENERATE_MODEL, prompt)
+    # Strip markdown fences if model adds them anyway
     raw = raw.replace("```yaml", "").replace("```", "").strip()
 
-    # --- Self-review ---
+    # Self-review with smaller/faster Haiku model
     review_prompt = f"""Review these two Kubernetes YAML manifests for Strimzi Kafka.
 
 Check ALL of the following:
@@ -92,25 +96,17 @@ Check ALL of the following:
 3. kind is KafkaTopic or KafkaUser
 4. metadata.name is present
 5. metadata.labels contains strimzi.io/cluster
-6. spec fields match the Strimzi schema
 
 Reply with only one of:
   VALID
   INVALID: <short reason>
 
 ---
-{raw}
-"""
+{raw}"""
 
-    review = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": review_prompt}],
-        temperature=0,
-    )
-
-    verdict = review.choices[0].message.content.strip()
+    verdict = _invoke(REVIEW_MODEL, review_prompt)
     if verdict.upper().startswith("INVALID"):
-        raise ValueError(f"AI self-review failed: {verdict}")
+        raise ValueError(f"Bedrock self-review failed: {verdict}")
 
     # Parse and re-serialize for consistent formatting
     docs = list(yaml.safe_load_all(raw))
@@ -128,6 +124,6 @@ Reply with only one of:
             user_yaml = serialized
 
     if not topic_yaml:
-        raise ValueError("AI did not generate a KafkaTopic manifest")
+        raise ValueError("Bedrock did not generate a KafkaTopic manifest")
 
     return topic_yaml, user_yaml

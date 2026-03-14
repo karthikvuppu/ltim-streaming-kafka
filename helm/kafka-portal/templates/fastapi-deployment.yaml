@@ -17,13 +17,22 @@ spec:
       labels:
         app: kafka-portal-api
     spec:
+      {{- if .Values.fastapi.serviceAccount.create }}
+      serviceAccountName: {{ .Values.fastapi.serviceAccount.name }}
+      {{- end }}
       containers:
         - name: api
           image: "{{ .Values.fastapi.image.repository }}:{{ .Values.fastapi.image.tag }}"
           imagePullPolicy: {{ .Values.fastapi.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.fastapi.port }}
-          # All secrets loaded from a single Kubernetes Secret
+          # Non-sensitive config from values (Bedrock region, model IDs, etc.)
+          env:
+            {{- range $key, $val := .Values.fastapi.env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+          # Sensitive values from secret (GITHUB_TOKEN, Cognito IDs)
           envFrom:
             - secretRef:
                 name: {{ .Values.fastapi.secretName }}
