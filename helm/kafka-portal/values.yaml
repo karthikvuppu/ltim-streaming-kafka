@@ -29,8 +29,8 @@ fastapi:
   # Bedrock config (no secret needed — IAM via IRSA)
   env:
     BEDROCK_REGION: "eu-west-1"
-    BEDROCK_MODEL: "eu.anthropic.claude-3-haiku-20240307-v1:0"
-    BEDROCK_REVIEW_MODEL: "eu.anthropic.claude-3-haiku-20240307-v1:0"
+    BEDROCK_MODEL: "eu.anthropic.claude-haiku-4-5-20251001-v1:0"
+    BEDROCK_REVIEW_MODEL: "eu.anthropic.claude-haiku-4-5-20251001-v1:0"
     KAFKA_CLUSTER_NAME: "my-kafka"
     GITHUB_REPO: "karthikvuppu/ltim-streaming-kafka"
 
