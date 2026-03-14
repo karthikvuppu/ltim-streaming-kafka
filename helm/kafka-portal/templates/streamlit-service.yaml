@@ -1,0 +1,22 @@
+{{- if .Values.streamlit.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-portal-ui
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kafka-portal-ui
+    {{- include "kafka-portal.labels" . | nindent 4 }}
+  {{- with .Values.streamlit.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.streamlit.service.type }}
+  selector:
+    app: kafka-portal-ui
+  ports:
+    - name: http
+      port: {{ .Values.streamlit.service.port }}
+      targetPort: {{ .Values.streamlit.port }}
+{{- end }}

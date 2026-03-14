@@ -1,0 +1,18 @@
+{{- if .Values.fastapi.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-portal-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kafka-portal-api
+    {{- include "kafka-portal.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.fastapi.service.type }}
+  selector:
+    app: kafka-portal-api
+  ports:
+    - name: http
+      port: {{ .Values.fastapi.service.port }}
+      targetPort: {{ .Values.fastapi.port }}
+{{- end }}

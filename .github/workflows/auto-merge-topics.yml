@@ -1,0 +1,97 @@
+# Auto-merge PRs that only touch gitops/sandbox/kafka/
+# Triggered when FastAPI creates a PR for a new topic request
+# PRs touching anything else require manual review
+
+name: Auto Merge Kafka Topic PRs
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths:
+      - "gitops/sandbox/kafka/**"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      only_gitops: ${{ steps.check.outputs.only_gitops }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR only touches gitops/sandbox/kafka/
+        id: check
+        run: |
+          # Get list of changed files in this PR
+          git fetch origin ${{ github.base_ref }}
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          # Fail if any file is outside gitops/sandbox/kafka/
+          OUTSIDE=$(echo "$CHANGED" | grep -v "^gitops/sandbox/kafka/" || true)
+          if [ -n "$OUTSIDE" ]; then
+            echo "only_gitops=false" >> $GITHUB_OUTPUT
+            echo "::error::PR touches files outside gitops/sandbox/kafka/: $OUTSIDE"
+            exit 1
+          fi
+
+          echo "only_gitops=true" >> $GITHUB_OUTPUT
+
+      - name: Validate YAML files
+        run: |
+          pip install pyyaml --quiet
+          python - <<'EOF'
+          import yaml, glob, sys
+
+          files = glob.glob("gitops/sandbox/kafka/**/*.yaml", recursive=True)
+          errors = []
+
+          for f in files:
+              try:
+                  with open(f) as fh:
+                      docs = list(yaml.safe_load_all(fh))
+                  for doc in docs:
+                      if doc is None:
+                          continue
+                      kind = doc.get("kind", "")
+                      api  = doc.get("apiVersion", "")
+                      name = doc.get("metadata", {}).get("name", "")
+
+                      if kind not in ("KafkaTopic", "KafkaUser"):
+                          errors.append(f"{f}: unexpected kind '{kind}' — only KafkaTopic and KafkaUser allowed")
+                      if "kafka.strimzi.io" not in api:
+                          errors.append(f"{f}: wrong apiVersion '{api}'")
+                      if not name:
+                          errors.append(f"{f}: missing metadata.name")
+              except yaml.YAMLError as e:
+                  errors.append(f"{f}: invalid YAML — {e}")
+
+          if errors:
+              for e in errors:
+                  print(f"ERROR: {e}")
+              sys.exit(1)
+
+          print(f"Validated {len(files)} file(s) — all OK")
+          EOF
+
+  auto-merge:
+    runs-on: ubuntu-latest
+    needs: validate
+    if: needs.validate.outputs.only_gitops == 'true'
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Merge PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} \
+            --squash \
+            --delete-branch

@@ -1,0 +1,117 @@
+# Build and push portal Docker images to ECR
+# Triggers when portal/app/ or portal/ui/ code changes on main
+#
+# After pushing images, updates values-sandbox.yaml with the new image tag.
+# ArgoCD detects the commit and redeploys the pods automatically.
+#
+# Required GitHub Secrets:
+#   AWS_ACCESS_KEY_ID       — IAM user with ECR push permissions
+#   AWS_SECRET_ACCESS_KEY   — matching secret key
+
+name: Build and Push Portal Images
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "portal/app/**"
+      - "portal/ui/**"
+
+env:
+  AWS_REGION:    eu-north-1
+  AWS_ACCOUNT:   292481751409
+  API_REPO:      292481751409.dkr.ecr.eu-north-1.amazonaws.com/kafka-portal-api
+  UI_REPO:       292481751409.dkr.ecr.eu-north-1.amazonaws.com/kafka-portal-ui
+
+jobs:
+  build-api:
+    name: Build FastAPI image
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image tag
+        id: tag
+        run: echo "tag=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push FastAPI image
+        run: |
+          TAG=${{ steps.tag.outputs.tag }}
+          docker build -t $API_REPO:$TAG -t $API_REPO:latest portal/app
+          docker push $API_REPO:$TAG
+          docker push $API_REPO:latest
+
+  build-ui:
+    name: Build Streamlit image
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image tag
+        id: tag
+        run: echo "tag=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Streamlit image
+        run: |
+          TAG=${{ steps.tag.outputs.tag }}
+          docker build -t $UI_REPO:$TAG -t $UI_REPO:latest portal/ui
+          docker push $UI_REPO:$TAG
+          docker push $UI_REPO:latest
+
+  update-helm-tag:
+    name: Update image tags in values-sandbox.yaml
+    runs-on: ubuntu-latest
+    needs: [build-api, build-ui]
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update image tags
+        run: |
+          TAG=${GITHUB_SHA::8}
+
+          # Update fastapi.image.tag
+          sed -i "/^fastapi:/,/^[^ ]/ s|tag: .*|tag: \"$TAG\"|" \
+            helm/kafka-portal/values-sandbox.yaml
+
+          # Update streamlit.image.tag
+          sed -i "/^streamlit:/,/^[^ ]/ s|tag: .*|tag: \"$TAG\"|" \
+            helm/kafka-portal/values-sandbox.yaml
+
+      - name: Commit updated tags
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add helm/kafka-portal/values-sandbox.yaml
+          git diff --staged --quiet || git commit -m "ci: update portal image tags to ${GITHUB_SHA::8}"
+          git push

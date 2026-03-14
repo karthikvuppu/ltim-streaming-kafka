@@ -1,0 +1,44 @@
+{{- if .Values.fastapi.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-portal-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kafka-portal-api
+    {{- include "kafka-portal.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.fastapi.replicas }}
+  selector:
+    matchLabels:
+      app: kafka-portal-api
+  template:
+    metadata:
+      labels:
+        app: kafka-portal-api
+    spec:
+      containers:
+        - name: api
+          image: "{{ .Values.fastapi.image.repository }}:{{ .Values.fastapi.image.tag }}"
+          imagePullPolicy: {{ .Values.fastapi.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.fastapi.port }}
+          # All secrets loaded from a single Kubernetes Secret
+          envFrom:
+            - secretRef:
+                name: {{ .Values.fastapi.secretName }}
+          resources:
+            {{- toYaml .Values.fastapi.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.fastapi.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.fastapi.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+{{- end }}

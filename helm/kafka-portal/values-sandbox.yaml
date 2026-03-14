@@ -1,0 +1,24 @@
+# Sandbox overrides
+# After terraform apply, fill in the Cognito values from:
+#   terraform -chdir=../eks-kafka/environments/sandbox output cognito_domain
+#   terraform -chdir=../eks-kafka/environments/sandbox output cognito_client_id
+
+fastapi:
+  image:
+    tag: "latest"
+
+streamlit:
+  image:
+    tag: "latest"
+  service:
+    type: LoadBalancer
+    port: 8501
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+      external-dns.alpha.kubernetes.io/hostname: "kafka-portal-sandbox.aws.internal"
+  env:
+    API_URL: "http://kafka-portal-api:8000"
+    REDIRECT_URI: "https://kafka-portal-sandbox.aws.internal"
+    # Set after Cognito is provisioned:
+    COGNITO_DOMAIN: "ltim-sandbox-kafka-portal.auth.eu-north-1.amazoncognito.com"

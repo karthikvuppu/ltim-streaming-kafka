@@ -1,0 +1,57 @@
+# Default values — override per environment
+
+fastapi:
+  enabled: true
+  image:
+    repository: "292481751409.dkr.ecr.eu-north-1.amazonaws.com/kafka-portal-api"
+    tag: "latest"
+    pullPolicy: Always
+  replicas: 1
+  port: 8000
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  service:
+    type: ClusterIP
+    port: 8000
+  # Secret name created manually via kubectl before deploying:
+  #   kubectl create secret generic kafka-portal-secrets \
+  #     --from-literal=OPENAI_API_KEY=sk-... \
+  #     --from-literal=GITHUB_TOKEN=ghp_... \
+  #     --from-literal=COGNITO_REGION=eu-north-1 \
+  #     --from-literal=COGNITO_USER_POOL_ID=eu-north-1_xxx \
+  #     --from-literal=COGNITO_CLIENT_ID=xxx \
+  #     --from-literal=KAFKA_CLUSTER_NAME=my-kafka \
+  #     --from-literal=GITHUB_REPO=your-org/ltim-streaming-kafka \
+  #     -n kafka-portal
+  secretName: kafka-portal-secrets
+
+streamlit:
+  enabled: true
+  image:
+    repository: "292481751409.dkr.ecr.eu-north-1.amazonaws.com/kafka-portal-ui"
+    tag: "latest"
+    pullPolicy: Always
+  replicas: 1
+  port: 8501
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  service:
+    type: ClusterIP
+    port: 8501
+  # Env vars injected into Streamlit (non-sensitive — override in values-sandbox.yaml)
+  env:
+    API_URL: "http://kafka-portal-api:8000"
+    REDIRECT_URI: "http://localhost:8501"
+    COGNITO_DOMAIN: ""
+  # Sensitive Streamlit config (CLIENT_ID, CLIENT_SECRET) also from secretName above
+  secretName: kafka-portal-secrets
