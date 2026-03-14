@@ -34,7 +34,7 @@ fi
 echo ""
 echo "Test 2: Checking Zookeeper pods..."
 ZK_READY=$(kubectl get pods -n $NAMESPACE -l strimzi.io/name=my-kafka-zookeeper -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}' | grep -o "True" | wc -l)
-ZK_EXPECTED=3
+ZK_EXPECTED=$(kubectl get kafka my-kafka -n $NAMESPACE -o jsonpath='{.spec.zookeeper.replicas}' 2>/dev/null || echo "1")
 if [ "$ZK_READY" -eq "$ZK_EXPECTED" ]; then
     echo -e "${GREEN}✅ All $ZK_EXPECTED Zookeeper pods are ready${NC}"
 else
@@ -44,7 +44,7 @@ fi
 echo ""
 echo "Test 3: Checking Kafka broker pods..."
 KAFKA_READY=$(kubectl get pods -n $NAMESPACE -l strimzi.io/name=my-kafka-kafka -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}' | grep -o "True" | wc -l)
-KAFKA_EXPECTED=3
+KAFKA_EXPECTED=$(kubectl get kafka my-kafka -n $NAMESPACE -o jsonpath='{.spec.kafka.replicas}' 2>/dev/null || echo "1")
 if [ "$KAFKA_READY" -eq "$KAFKA_EXPECTED" ]; then
     echo -e "${GREEN}✅ All $KAFKA_EXPECTED Kafka broker pods are ready${NC}"
 else

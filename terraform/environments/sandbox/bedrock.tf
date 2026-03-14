@@ -16,8 +16,8 @@ resource "aws_iam_role" "kafka_portal_bedrock" {
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
-            "${module.eks.oidc_provider_url}:sub" = "system:serviceaccount:kafka-portal:kafka-portal-api-sa"
-            "${module.eks.oidc_provider_url}:aud" = "sts.amazonaws.com"
+            "${replace(module.eks.oidc_provider_url, "https://", "")}:sub" = "system:serviceaccount:kafka-portal:kafka-portal-api-sa"
+            "${replace(module.eks.oidc_provider_url, "https://", "")}:aud" = "sts.amazonaws.com"
           }
         }
       }

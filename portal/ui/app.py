@@ -195,23 +195,27 @@ def _portal_page():
                 st.error("Cannot reach the API. Is the kafka-portal-api service running?")
                 st.stop()
 
+        try:
+            body = resp.json()
+        except Exception:
+            body = {"detail": resp.text or "No response body"}
+
         if resp.status_code == 200:
-            result = resp.json()
             st.success("Topic request submitted!")
-            st.markdown(f"**PR:** [{result['pr_url']}]({result['pr_url']})")
+            st.markdown(f"**PR:** [{body['pr_url']}]({body['pr_url']})")
             st.caption("The PR will be auto-merged after YAML validation. ArgoCD will apply it within ~30 seconds.")
             with st.expander("KafkaTopic YAML"):
-                st.code(result["topic_yaml"], language="yaml")
+                st.code(body["topic_yaml"], language="yaml")
             with st.expander("KafkaUser YAML"):
-                st.code(result["user_yaml"], language="yaml")
+                st.code(body["user_yaml"], language="yaml")
         elif resp.status_code == 400:
-            st.error(f"Validation failed: {resp.json().get('detail')}")
+            st.error(f"Validation failed: {body.get('detail')}")
         elif resp.status_code == 401:
             st.warning("Session expired. Please login again.")
             del st.session_state["token"]
             st.rerun()
         else:
-            st.error(f"Error {resp.status_code}: {resp.json().get('detail', 'Unknown error')}")
+            st.error(f"Error {resp.status_code}: {body.get('detail', resp.text)}")
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
