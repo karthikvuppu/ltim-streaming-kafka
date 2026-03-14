@@ -1,17 +1,30 @@
 # LTIM Streaming Kafka
 
-Apache Kafka deployment on Amazon EKS using the Strimzi Kafka Operator and Helm. Supports Sandbox, Dev, and Production environments with ACL-based authorization, SCRAM-SHA-512 authentication, ExternalDNS, and AWS Glue Schema Registry integration.
+Self-service Kafka platform on Amazon EKS. Teams request topics through a web portal; an AI-assisted workflow validates, generates, and auto-merges the required Kafka configuration via GitOps.
 
-## Features
+---
 
-- Apache Kafka 3.6.0 + ZooKeeper (Strimzi Operator 0.39.0)
-- SCRAM-SHA-512 authentication on all listeners
-- ACL-based authorization (Kafka SimpleAclAuthorizer)
-- AWS Glue Schema Registry — Avro, JSON Schema, Protobuf (IRSA, no credentials in code)
-- ExternalDNS — automatic Route53 DNS record management
-- Internet-facing NLB for external Kafka and Kafka UI access
-- Kafka UI (provectuslabs/kafka-ui) web dashboard
-- Pre-configured users: `kafka-producer`, `kafka-consumer`, `kafka-admin`
+## Architecture
+
+```
+Developer → Kafka Portal (Streamlit UI)
+                ↓ Cognito OAuth2
+            FastAPI (Bedrock AI)
+                ↓ GitHub PR
+            gitops/sandbox/kafka/
+                ↓ ArgoCD sync
+            Strimzi Operator → KafkaTopic / KafkaUser
+```
+
+**Infrastructure** (Terraform → EKS):
+- VPC, EKS 1.32, node groups, IAM roles, OIDC
+- Strimzi Kafka Operator + Apache Kafka 3.6.0
+- AWS Cognito (hosted UI + JWT auth)
+- Amazon Bedrock (Claude 3.5 Sonnet via IRSA — no API key)
+- AWS Glue Schema Registry (Avro/JSON/Protobuf via IRSA)
+- ExternalDNS → Route53 private zone (`aws.internal`)
+- ArgoCD (GitOps controller)
+- ECR (container images for portal)
 
 ---
 
@@ -19,100 +32,183 @@ Apache Kafka deployment on Amazon EKS using the Strimzi Kafka Operator and Helm.
 
 ```
 .
-├── deploy.sh                            # One-command deployment script
-├── external-dns-values.yaml             # ExternalDNS Helm configuration
-└── helm/kafka-eks/
-    ├── Chart.yaml                       # Chart + Strimzi v0.39.0 dependency
-    ├── values.yaml                      # Global defaults (all environments)
-    ├── values-sandbox.yaml              # Sandbox overrides (active)
-    ├── values-dev.yaml                  # Dev overrides
-    ├── values-prod.yaml                 # Production overrides
-    └── templates/
-        ├── kafka.yaml                   # Kafka + ZooKeeper CRDs (Strimzi)
-        ├── kafka-ui.yaml                # Kafka UI deployment + services
-        ├── topics.yaml                  # KafkaTopic resources
-        ├── users.yaml                   # KafkaUser resources (SCRAM + ACLs)
-        ├── glue-schema-registry.yaml    # ServiceAccount for Glue IRSA
-        ├── storageclass.yaml            # EBS gp3 encrypted storage class
-        ├── networkpolicy.yaml           # Network policies
-        └── servicemonitor.yaml          # Prometheus ServiceMonitor
+├── terraform/
+│   ├── environments/sandbox/     # Terraform entrypoint — EKS, IAM, Cognito, ArgoCD, Bedrock
+│   └── modules/                  # vpc, eks, iam, iam-oidc
+│
+├── helm/
+│   ├── kafka-eks/                # Strimzi operator + Kafka cluster + Kafka UI
+│   └── kafka-portal/             # FastAPI + Streamlit portal
+│
+├── portal/
+│   ├── app/                      # FastAPI — Bedrock AI, JWT auth, GitHub PR creation
+│   └── ui/                       # Streamlit — Cognito OAuth2 login, topic request form
+│
+├── gitops/sandbox/kafka/
+│   ├── topics/                   # KafkaTopic YAMLs (managed by ArgoCD)
+│   └── users/                    # KafkaUser YAMLs (managed by ArgoCD)
+│
+├── argocd/
+│   └── kafka-topics-app.yaml     # ArgoCD Application manifest
+│
+├── .github/workflows/
+│   ├── build-push.yml            # Build + push portal images to ECR on portal/** push
+│   └── auto-merge-topics.yml     # Validate + auto-merge GitOps PRs
+│
+├── deploy.sh                     # Deploy Kafka (helm/kafka-eks) to sandbox
+├── undeploy.sh                   # Tear down Kafka
+└── test-kafka.sh                 # Verify Kafka cluster health
 ```
 
 ---
 
-## Prerequisites
+## Infrastructure — Terraform
 
-- EKS cluster provisioned via `eks-kafka` Terraform repo
-- `kubectl` configured: `aws eks update-kubeconfig --name ltim-sandbox-eks --region eu-north-1`
-- Helm 3.x installed
-- AWS CLI configured
-- Glue IRSA role ARN from Terraform output (for sandbox/prod)
+All infrastructure lives in `terraform/environments/sandbox/`.
+
+```bash
+cd terraform/environments/sandbox
+
+# First time
+terraform init -backend-config=vars/backend.hcl
+
+# Deploy everything (~20-25 min)
+terraform apply -auto-approve
+```
+
+**What it creates:**
+| Resource | Details |
+|---|---|
+| VPC | `10.0.0.0/16`, 3 AZs, public + private subnets |
+| EKS | `ltim-sandbox-eks`, Kubernetes 1.32, t3.medium nodes |
+| ArgoCD | Helm-deployed, internet-facing NLB |
+| Cognito | User Pool, hosted UI, 5 team groups, OAuth2 App Client |
+| Bedrock IRSA | `ltim-sandbox-kafka-portal-bedrock-role` → Claude models |
+| Glue Registry | `ltim-sandbox-kafka-registry` |
+| ExternalDNS | Route53 private zone `aws.internal` |
+| ECR | `kafka-portal-api`, `kafka-portal-ui` |
+
+After apply, update kubeconfig:
+```bash
+aws eks update-kubeconfig --region eu-north-1 --name ltim-sandbox-eks
+```
 
 ---
 
-## Deploy
+## Kafka — Deploy
 
 ```bash
-# Sandbox
 ./deploy.sh sandbox
-
-# Dev
-./deploy.sh dev
-
-# Production
-./deploy.sh prod
 ```
 
-The script automatically:
-1. Creates the `kafka` namespace
-2. Adds Strimzi + ExternalDNS Helm repositories
-3. Deploys ExternalDNS (from `../eks-kafka/external-dns-values.yaml`)
-4. Deploys Kafka cluster via Helm
-5. Waits for cluster readiness
-6. Prints endpoints + schema registry config
+Or manually:
+```bash
+helm upgrade --install kafka-eks ./helm/kafka-eks \
+  --namespace kafka --create-namespace \
+  -f ./helm/kafka-eks/values.yaml \
+  -f ./helm/kafka-eks/values-sandbox.yaml \
+  --wait --timeout 15m
+```
 
-### Before sandbox deploy — set the Glue IRSA role ARN
+**Kafka endpoints:**
 
-After `terraform apply` in the `eks-kafka` repo:
+| Access | Address |
+|---|---|
+| Internal (cluster) | `my-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092` |
+| External (NLB) | `kafka-sandbox.aws.internal:9094` |
+| Port-forward | `kubectl port-forward -n kafka svc/my-kafka-kafka-bootstrap 9092:9092` |
+| Kafka UI | `http://kafka-ui-sandbox.aws.internal:8080` |
+
+---
+
+## Kafka Portal — Self-Service Topic Requests
+
+### Deploy the portal
 
 ```bash
-cd ../eks-kafka/environments/sandbox
-terraform output kafka_schema_registry_role_arn
+# Create the Kubernetes secret first
+kubectl create secret generic kafka-portal-secrets \
+  --from-literal=GITHUB_TOKEN=ghp_... \
+  --from-literal=COGNITO_REGION=eu-north-1 \
+  --from-literal=COGNITO_USER_POOL_ID=eu-north-1_lYnTusC49 \
+  --from-literal=COGNITO_CLIENT_ID=232lq00pndiakq3ldfvnqhf2ed \
+  --from-literal=COGNITO_CLIENT_SECRET=<secret> \
+  -n kafka-portal
+
+# Deploy
+helm upgrade --install kafka-portal ./helm/kafka-portal \
+  --namespace kafka-portal --create-namespace \
+  -f ./helm/kafka-portal/values.yaml \
+  -f ./helm/kafka-portal/values-sandbox.yaml
 ```
 
-Paste the ARN into [helm/kafka-eks/values-sandbox.yaml](helm/kafka-eks/values-sandbox.yaml):
+**Portal URL:** `https://kafka-portal-sandbox.aws.internal`
 
-```yaml
-glueSchemaRegistry:
-  serviceAccount:
-    roleArn: "arn:aws:iam::292481751409:role/ltim-sandbox-kafka-schema-registry-role"
+### How topic requests work
+
+1. Developer logs in via **Cognito** (team-scoped groups)
+2. Fills in: topic name, partitions, retention, consumer teams, description
+3. **FastAPI** validates via inline OPA rules (naming: `<team>.<entity>.<event_type>`, partition quota, retention limit)
+4. **Amazon Bedrock** (Claude 3.5 Sonnet, eu-west-1) generates `KafkaTopic` + `KafkaUser` YAML
+5. Claude 3 Haiku self-reviews the YAML
+6. FastAPI opens a **GitHub PR** to `gitops/sandbox/kafka/`
+7. GitHub Actions validates (only KafkaTopic/KafkaUser allowed) and **auto-merges**
+8. **ArgoCD** detects the merge and applies the YAML to the cluster
+9. **Strimzi** creates the topic and user in Kafka
+
+### Topic naming convention
+
+```
+<team>.<entity>.<event_type>
+```
+
+Examples: `payments.order.created`, `analytics.session.updated`
+
+Allowed event types: `created`, `updated`, `deleted`, `processed`, `failed`, `requested`, `completed`
+
+---
+
+## ArgoCD
+
+ArgoCD is deployed by Terraform and watches `gitops/sandbox/kafka/` for KafkaTopic/KafkaUser changes.
+
+**Register the GitOps application** (one-time after Terraform apply):
+```bash
+kubectl apply -f argocd/kafka-topics-app.yaml
+```
+
+**Access ArgoCD UI:**
+```bash
+# Get initial admin password
+kubectl get secret argocd-initial-admin-secret -n argocd \
+  -o jsonpath='{.data.password}' | base64 -d
+
+# Port-forward
+kubectl port-forward -n argocd svc/argocd-server 8080:80
+# Open http://localhost:8080
 ```
 
 ---
 
-## Environment Comparison
+## CI/CD — GitHub Actions
 
-| Feature | Sandbox | Dev | Production |
-|---|---|---|---|
-| Kafka Brokers | 1 | 1 | 3 |
-| ZooKeeper Nodes | 1 | 1 | 5 |
-| Storage | 10Gi gp2 | 5Gi gp2 | 100Gi gp3 encrypted |
-| Memory (broker) | 2Gi | 2Gi | 4Gi |
-| TLS | No | No | Yes |
-| Authentication | SCRAM-SHA-512 | No | SCRAM-SHA-512 |
-| ACL Authorization | Yes | No | Yes |
-| Replication Factor | 1 | 1 | 3 |
-| Kafka UI | Yes (NLB) | Yes | Yes |
-| Glue Schema Registry | Yes | No | Yes |
-| Network Policies | No | No | Yes |
-| Encrypted Storage | No | No | Yes |
-| Log Retention | 2 days | 1 day | 7 days |
+### Image build (`build-push.yml`)
+
+Triggers on push to `portal/**`. Builds `kafka-portal-api` and `kafka-portal-ui`, tags with git SHA + `latest`, pushes to ECR, commits updated image tag back to `values-sandbox.yaml`.
+
+**Required GitHub secrets:**
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+
+### Auto-merge topics (`auto-merge-topics.yml`)
+
+Validates PRs that only touch `gitops/sandbox/kafka/**`. Checks that all YAMLs are `KafkaTopic` or `KafkaUser` kind, then squash-merges automatically.
 
 ---
 
 ## Connecting to Kafka
 
-### From inside the cluster (pod-to-pod)
+### From inside the cluster
 
 ```properties
 bootstrap.servers=my-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092
@@ -122,7 +218,7 @@ sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule require
   username="kafka-producer" password="<from-secret>";
 ```
 
-### From outside the cluster (internet-facing NLB)
+### From outside (NLB)
 
 ```properties
 bootstrap.servers=kafka-sandbox.aws.internal:9094
@@ -132,16 +228,7 @@ sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule require
   username="kafka-producer" password="<from-secret>";
 ```
 
-### Local development (port-forward)
-
-```bash
-kubectl port-forward -n kafka svc/my-kafka-kafka-bootstrap 9092:9092
-# Connect to localhost:9092 with SCRAM credentials
-```
-
-### Get user credentials
-
-Strimzi generates passwords automatically and stores them as Kubernetes Secrets:
+### Get credentials
 
 ```bash
 kubectl get secret kafka-producer -n kafka -o jsonpath='{.data.password}' | base64 -d
@@ -151,132 +238,27 @@ kubectl get secret kafka-admin    -n kafka -o jsonpath='{.data.password}' | base
 
 ---
 
-## Pre-configured Users and ACLs
-
-| User | Topic Permissions | Group Permissions |
-|---|---|---|
-| `kafka-producer` | Write, Describe, Create on `*` | — |
-| `kafka-consumer` | Read, Describe on `*` | Read, Describe on `*` |
-| `kafka-admin` | All on `*` | All on `*` + Cluster All |
-
-### Add a custom user with scoped ACLs
-
-Add to `users.users` in your values file:
-
-```yaml
-users:
-  enabled: true
-  users:
-    - name: my-app-user
-      authentication:
-        type: scram-sha-512
-      authorization:
-        type: simple
-        acls:
-          - resource:
-              type: topic
-              name: my-topic
-              patternType: literal
-            operations:
-              - Read
-              - Write
-              - Describe
-          - resource:
-              type: group
-              name: my-consumer-group
-              patternType: literal
-            operations:
-              - Read
-```
-
----
-
 ## AWS Glue Schema Registry
 
-Fully managed schema registry — no extra server to deploy or maintain. Application pods use the AWS Glue SerDe library and authenticate via IRSA (no AWS credentials in code or environment variables).
+Registry name: `ltim-sandbox-kafka-registry` (eu-north-1)
 
-### Maven Dependency
-
-```xml
-<dependency>
-    <groupId>software.amazon.glue</groupId>
-    <artifactId>schema-registry-serde</artifactId>
-    <version>1.1.20</version>
-</dependency>
-```
-
-### Producer config (append to Kafka producer properties)
+Pods authenticate via IRSA — no credentials needed in code.
 
 ```properties
+# Producer
 value.serializer=com.amazonaws.services.schemaregistry.serializers.GlueSchemaRegistryKafkaSerializer
 schemaAutoRegistrationEnabled=true
 region=eu-north-1
 registryName=ltim-sandbox-kafka-registry
 dataFormat=AVRO
-```
 
-### Consumer config (append to Kafka consumer properties)
-
-```properties
+# Consumer
 value.deserializer=com.amazonaws.services.schemaregistry.deserializers.GlueSchemaRegistryKafkaDeserializer
 region=eu-north-1
 registryName=ltim-sandbox-kafka-registry
 ```
 
-### Required: pod must use the IRSA service account
-
-```yaml
-spec:
-  serviceAccountName: kafka-schema-registry-sa   # namespace: kafka
-```
-
----
-
-## Kafka UI
-
-| Access | URL |
-|---|---|
-| Internal (VPC DNS) | `http://kafka-ui-sandbox.aws.internal:8080` |
-| Local port-forward | `kubectl port-forward -n kafka svc/kafka-ui 8080:8080` → `http://localhost:8080` |
-
----
-
-## Managing Topics
-
-### Via Helm values (recommended)
-
-```yaml
-topics:
-  enabled: true
-  topics:
-    - name: my-topic
-      partitions: 3
-      replicas: 1
-      config:
-        retention.ms: 604800000
-        cleanup.policy: delete
-```
-
-### Via kubectl
-
-```bash
-kubectl apply -f - <<EOF
-apiVersion: kafka.strimzi.io/v1beta2
-kind: KafkaTopic
-metadata:
-  name: my-topic
-  namespace: kafka
-  labels:
-    strimzi.io/cluster: my-kafka
-spec:
-  partitions: 3
-  replicas: 1
-  config:
-    retention.ms: 604800000
-EOF
-```
-
-> `auto.create.topics.enable` is `false` in sandbox. All topics must be created explicitly (required when ACLs are enabled).
+Pod must use `serviceAccountName: kafka-schema-registry-sa` (namespace: `kafka`).
 
 ---
 
@@ -289,11 +271,11 @@ kubectl get pods -n kafka
 kubectl get kafkatopic -n kafka
 kubectl get kafkauser -n kafka
 
+# Portal pods
+kubectl get pods -n kafka-portal
+
 # Broker logs
 kubectl logs -n kafka my-kafka-kafka-0 -c kafka
-
-# ZooKeeper logs
-kubectl logs -n kafka my-kafka-zookeeper-0
 
 # Strimzi operator logs
 kubectl logs -n kafka deployment/strimzi-cluster-operator
@@ -301,37 +283,34 @@ kubectl logs -n kafka deployment/strimzi-cluster-operator
 # ExternalDNS logs
 kubectl logs -n external-dns -l app.kubernetes.io/name=external-dns
 
+# ArgoCD app status
+kubectl get application -n argocd
+
 # Helm status
 helm list -n kafka
-helm status kafka-eks -n kafka
-
-# Upgrade after config change
-helm upgrade kafka-eks ./helm/kafka-eks -n kafka -f ./helm/kafka-eks/values-sandbox.yaml
+helm list -n kafka-portal
+helm list -n argocd
 ```
 
 ---
 
 ## Cleanup
 
-### Remove Kafka only (keep data)
-
 ```bash
-helm uninstall kafka-eks -n kafka
-```
+# Remove portal
+helm uninstall kafka-portal -n kafka-portal
 
-### Remove Kafka and all data
-
-```bash
+# Remove Kafka (keep data)
 helm uninstall kafka-eks -n kafka
-kubectl delete pvc --all -n kafka   # Deletes EBS volumes
+
+# Remove Kafka + all data
+helm uninstall kafka-eks -n kafka
+kubectl delete pvc --all -n kafka
 kubectl delete namespace kafka
-```
 
-### Remove ExternalDNS
-
-```bash
-helm uninstall external-dns -n external-dns
-kubectl delete namespace external-dns
+# Destroy all infrastructure
+cd terraform/environments/sandbox
+terraform destroy -auto-approve
 ```
 
 ---
@@ -344,11 +323,23 @@ kubectl describe pod my-kafka-kafka-0 -n kafka
 kubectl logs my-kafka-kafka-0 -n kafka -c kafka
 ```
 
-**PVCs not binding:**
+**Portal can't call Bedrock:**
 ```bash
-kubectl get pvc -n kafka
-kubectl get storageclass
-# Ensure EBS CSI driver is installed and gp2 storage class exists
+# Verify IRSA annotation
+kubectl get sa kafka-portal-api-sa -n kafka-portal -o yaml | grep role-arn
+# Enable model access: AWS Console → Bedrock → Model access → eu-west-1
+```
+
+**ArgoCD app out of sync:**
+```bash
+kubectl annotate application kafka-topics-sandbox -n argocd \
+  argocd.argoproj.io/refresh=hard
+```
+
+**GitHub PR not auto-merging:**
+```bash
+# Check workflow logs in GitHub Actions
+# Verify GITHUB_TOKEN has repo write permissions
 ```
 
 **NLB stuck in Pending:**
@@ -357,33 +348,6 @@ kubectl describe svc my-kafka-kafka-external-bootstrap -n kafka
 kubectl get pods -n kube-system | grep aws-load-balancer
 ```
 
-**DNS not resolving:**
-```bash
-kubectl logs -n external-dns -l app.kubernetes.io/name=external-dns
-# Verify annotation exists on service
-kubectl get svc -n kafka -o yaml | grep external-dns
-```
-
-**Authentication failure (SCRAM):**
-```bash
-# Re-fetch the generated password
-kubectl get secret kafka-producer -n kafka -o jsonpath='{.data.password}' | base64 -d
-```
-
-**Glue Schema Registry access denied:**
-```bash
-# Verify IRSA annotation on the service account
-kubectl get sa kafka-schema-registry-sa -n kafka -o yaml | grep role-arn
-# Verify pod is using the right service account
-kubectl get pod <pod-name> -n kafka -o yaml | grep serviceAccountName
-```
-
----
-
-## Related Repository
-
-**`eks-kafka`** — Terraform infrastructure (EKS, VPC, IAM, Route53, Glue) that this Helm chart runs on.
-
 ---
 
 ## Resources
@@ -391,5 +355,6 @@ kubectl get pod <pod-name> -n kafka -o yaml | grep serviceAccountName
 - [Strimzi Documentation](https://strimzi.io/docs/)
 - [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
 - [AWS Glue Schema Registry](https://docs.aws.amazon.com/glue/latest/dg/schema-registry.html)
-- [AWS Glue Schema Registry SerDe (GitHub)](https://github.com/awslabs/aws-glue-schema-registry)
+- [Amazon Bedrock](https://docs.aws.amazon.com/bedrock/)
+- [ArgoCD Documentation](https://argo-cd.readthedocs.io/)
 - [AWS EKS Best Practices](https://aws.github.io/aws-eks-best-practices/)
