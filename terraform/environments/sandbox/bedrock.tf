@@ -42,7 +42,11 @@ resource "aws_iam_policy" "kafka_portal_bedrock" {
         ]
         Resource = [
           "arn:aws:bedrock:eu-west-1::foundation-model/anthropic.claude-3-5-sonnet-20240620-v1:0",
-          "arn:aws:bedrock:eu-west-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
+          "arn:aws:bedrock:eu-west-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0",
+          "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-5-sonnet-20240620-v1:0",
+          "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-haiku-20240307-v1:0",
+          "arn:aws:bedrock:eu-west-1:292481751409:inference-profile/eu.anthropic.claude-3-5-sonnet-20240620-v1:0",
+          "arn:aws:bedrock:eu-west-1:292481751409:inference-profile/eu.anthropic.claude-3-haiku-20240307-v1:0"
         ]
       }
     ]

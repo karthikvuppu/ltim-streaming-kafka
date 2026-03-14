@@ -9,8 +9,8 @@ import boto3
 import yaml
 
 BEDROCK_REGION = os.environ.get("BEDROCK_REGION", "eu-west-1")
-GENERATE_MODEL = os.environ.get("BEDROCK_MODEL", "anthropic.claude-3-5-sonnet-20240620-v1:0")
-REVIEW_MODEL   = os.environ.get("BEDROCK_REVIEW_MODEL", "anthropic.claude-3-haiku-20240307-v1:0")
+GENERATE_MODEL = os.environ.get("BEDROCK_MODEL", "eu.anthropic.claude-3-5-sonnet-20240620-v1:0")
+REVIEW_MODEL   = os.environ.get("BEDROCK_REVIEW_MODEL", "eu.anthropic.claude-3-haiku-20240307-v1:0")
 
 KAFKA_CLUSTER_NAME = os.environ.get("KAFKA_CLUSTER_NAME", "my-kafka")
 
