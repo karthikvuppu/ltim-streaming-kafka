@@ -1,39 +1,34 @@
 """
-Amazon Bedrock YAML generation + self-review.
-Uses Claude via Bedrock — no API key needed, credentials come from IRSA.
+OpenAI API YAML generation + self-review.
+Set OPENAI_API_KEY env var (stored in kafka-portal-secrets).
 """
 
 import os
-import json
-import boto3
 import yaml
+from openai import OpenAI
 
-BEDROCK_REGION = os.environ.get("BEDROCK_REGION", "eu-west-1")
-GENERATE_MODEL = os.environ.get("BEDROCK_MODEL", "eu.anthropic.claude-3-5-sonnet-20240620-v1:0")
-REVIEW_MODEL   = os.environ.get("BEDROCK_REVIEW_MODEL", "eu.anthropic.claude-3-haiku-20240307-v1:0")
+GENERATE_MODEL = os.environ.get("OPENAI_MODEL", "gpt-3.5-turbo")
+REVIEW_MODEL   = os.environ.get("OPENAI_REVIEW_MODEL", "gpt-3.5-turbo")
 
 KAFKA_CLUSTER_NAME = os.environ.get("KAFKA_CLUSTER_NAME", "my-kafka")
 
-# boto3 picks up credentials automatically via IRSA (projected service account token)
-_bedrock = boto3.client("bedrock-runtime", region_name=BEDROCK_REGION)
+_client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 
 def _invoke(model_id: str, prompt: str) -> str:
-    body = json.dumps({
-        "anthropic_version": "bedrock-2023-05-31",
-        "max_tokens": 2048,
-        "temperature": 0,
-        "messages": [{"role": "user", "content": prompt}],
-    })
-    response = _bedrock.invoke_model(modelId=model_id, body=body)
-    result = json.loads(response["body"].read())
-    return result["content"][0]["text"].strip()
+    response = _client.chat.completions.create(
+        model=model_id,
+        temperature=0,
+        max_tokens=2048,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content.strip()
 
 
 def generate_yaml(body, topic_name: str, requested_by: str) -> tuple[str, str]:
     """
     Returns (topic_yaml, user_yaml).
-    Raises ValueError if Bedrock self-review flags invalid YAML.
+    Raises ValueError if self-review flags invalid YAML.
     """
     retention_ms = body.retention_hours * 3600 * 1000
 
@@ -84,10 +79,8 @@ Return ONLY the two YAML documents separated by ---
 No markdown code blocks. No explanation. No extra text."""
 
     raw = _invoke(GENERATE_MODEL, prompt)
-    # Strip markdown fences if model adds them anyway
     raw = raw.replace("```yaml", "").replace("```", "").strip()
 
-    # Self-review with smaller/faster Haiku model
     review_prompt = f"""Review these two Kubernetes YAML manifests for Strimzi Kafka.
 
 Check ALL of the following:
@@ -106,9 +99,8 @@ Reply with only one of:
 
     verdict = _invoke(REVIEW_MODEL, review_prompt)
     if verdict.upper().startswith("INVALID"):
-        raise ValueError(f"Bedrock self-review failed: {verdict}")
+        raise ValueError(f"Self-review failed: {verdict}")
 
-    # Parse and re-serialize for consistent formatting
     docs = list(yaml.safe_load_all(raw))
 
     topic_yaml = ""
@@ -124,6 +116,6 @@ Reply with only one of:
             user_yaml = serialized
 
     if not topic_yaml:
-        raise ValueError("Bedrock did not generate a KafkaTopic manifest")
+        raise ValueError("Model did not generate a KafkaTopic manifest")
 
     return topic_yaml, user_yaml
