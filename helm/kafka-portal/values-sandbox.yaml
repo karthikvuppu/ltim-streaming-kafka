@@ -5,13 +5,13 @@
 
 fastapi:
   image:
-    tag: "61514b79"
+    tag: "cad5d1bd"
   serviceAccount:
     roleArn: "arn:aws:iam::292481751409:role/ltim-sandbox-kafka-portal-bedrock-role"
 
 streamlit:
   image:
-    tag: "61514b79"
+    tag: "cad5d1bd"
   service:
     type: LoadBalancer
     port: 8501
