@@ -20,18 +20,20 @@ fastapi:
     port: 8000
   serviceAccount:
     create: false
+    name: kafka-portal-api-sa
 
   env:
     KAFKA_CLUSTER_NAME: "my-kafka"
     GITHUB_REPO: "karthikvuppu/ltim-streaming-kafka"
 
-  # Secret name for remaining sensitive values (GITHUB_TOKEN, Cognito):
+  # Secret name — create once per cluster:
   #   kubectl create secret generic kafka-portal-secrets \
   #     --from-literal=GITHUB_TOKEN=ghp_... \
+  #     --from-literal=OPENAI_API_KEY=sk-... \
   #     --from-literal=COGNITO_REGION=eu-north-1 \
-  #     --from-literal=COGNITO_USER_POOL_ID=eu-north-1_lYnTusC49 \
-  #     --from-literal=COGNITO_CLIENT_ID=232lq00pndiakq3ldfvnqhf2ed \
-  #     --from-literal=COGNITO_CLIENT_SECRET=70o15kkjsg2f2ordu9kr9bn5d5s8mh64go72ku87j3c2j9ajn8e \
+  #     --from-literal=COGNITO_USER_POOL_ID=<pool-id> \
+  #     --from-literal=COGNITO_CLIENT_ID=<client-id> \
+  #     --from-literal=COGNITO_CLIENT_SECRET=<client-secret> \
   #     -n kafka-portal
   secretName: kafka-portal-secrets
 
@@ -53,10 +55,7 @@ streamlit:
   service:
     type: ClusterIP
     port: 8501
-  # Env vars injected into Streamlit (non-sensitive — override in values-sandbox.yaml)
   env:
     API_URL: "http://kafka-portal-api:8000"
-    REDIRECT_URI: "http://localhost:8501"
-    COGNITO_DOMAIN: ""
   # Sensitive Streamlit config (CLIENT_ID, CLIENT_SECRET) also from secretName above
   secretName: kafka-portal-secrets

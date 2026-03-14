@@ -8,8 +8,8 @@ Self-service Kafka platform on Amazon EKS. Teams request topics through a web po
 
 ```
 Developer → Kafka Portal (Streamlit UI)
-                ↓ Cognito OAuth2
-            FastAPI (Bedrock AI)
+                ↓ Cognito JWT auth
+            FastAPI (OpenAI YAML generation)
                 ↓ GitHub PR
             gitops/sandbox/kafka/
                 ↓ ArgoCD sync
@@ -20,7 +20,7 @@ Developer → Kafka Portal (Streamlit UI)
 - VPC, EKS 1.32, node groups, IAM roles, OIDC
 - Strimzi Kafka Operator + Apache Kafka 3.6.0
 - AWS Cognito (hosted UI + JWT auth)
-- Amazon Bedrock (Claude 3.5 Sonnet via IRSA — no API key)
+- OpenAI API (`gpt-3.5-turbo` for YAML generation)
 - AWS Glue Schema Registry (Avro/JSON/Protobuf via IRSA)
 - ExternalDNS → Route53 private zone (`aws.internal`)
 - ArgoCD (GitOps controller)
@@ -33,7 +33,7 @@ Developer → Kafka Portal (Streamlit UI)
 ```
 .
 ├── terraform/
-│   ├── environments/sandbox/     # Terraform entrypoint — EKS, IAM, Cognito, ArgoCD, Bedrock
+│   ├── environments/sandbox/     # Terraform entrypoint — EKS, IAM, Cognito, ArgoCD
 │   └── modules/                  # vpc, eks, iam, iam-oidc
 │
 ├── helm/
@@ -41,8 +41,8 @@ Developer → Kafka Portal (Streamlit UI)
 │   └── kafka-portal/             # FastAPI + Streamlit portal
 │
 ├── portal/
-│   ├── app/                      # FastAPI — Bedrock AI, JWT auth, GitHub PR creation
-│   └── ui/                       # Streamlit — Cognito OAuth2 login, topic request form
+│   ├── app/                      # FastAPI — OpenAI YAML gen, JWT auth, GitHub PR creation
+│   └── ui/                       # Streamlit — Cognito login, topic request form
 │
 ├── gitops/sandbox/kafka/
 │   ├── topics/                   # KafkaTopic YAMLs (managed by ArgoCD)
@@ -83,7 +83,6 @@ terraform apply -auto-approve
 | EKS | `ltim-sandbox-eks`, Kubernetes 1.32, t3.medium nodes |
 | ArgoCD | Helm-deployed, internet-facing NLB |
 | Cognito | User Pool, hosted UI, 5 team groups, OAuth2 App Client |
-| Bedrock IRSA | `ltim-sandbox-kafka-portal-bedrock-role` → Claude models |
 | Glue Registry | `ltim-sandbox-kafka-registry` |
 | ExternalDNS | Route53 private zone `aws.internal` |
 | ECR | `kafka-portal-api`, `kafka-portal-ui` |
@@ -129,10 +128,11 @@ helm upgrade --install kafka-eks ./helm/kafka-eks \
 # Create the Kubernetes secret first
 kubectl create secret generic kafka-portal-secrets \
   --from-literal=GITHUB_TOKEN=ghp_... \
+  --from-literal=OPENAI_API_KEY=sk-... \
   --from-literal=COGNITO_REGION=eu-north-1 \
-  --from-literal=COGNITO_USER_POOL_ID=eu-north-1_lYnTusC49 \
-  --from-literal=COGNITO_CLIENT_ID=232lq00pndiakq3ldfvnqhf2ed \
-  --from-literal=COGNITO_CLIENT_SECRET=<secret> \
+  --from-literal=COGNITO_USER_POOL_ID=<pool-id> \
+  --from-literal=COGNITO_CLIENT_ID=<client-id> \
+  --from-literal=COGNITO_CLIENT_SECRET=<client-secret> \
   -n kafka-portal
 
 # Deploy
@@ -149,9 +149,8 @@ helm upgrade --install kafka-portal ./helm/kafka-portal \
 1. Developer logs in via **Cognito** (team-scoped groups)
 2. Fills in: topic name, partitions, retention, consumer teams, description
 3. **FastAPI** validates via inline OPA rules (naming: `<team>.<entity>.<event_type>`, partition quota, retention limit)
-4. **Amazon Bedrock** (Claude 3.5 Sonnet, eu-west-1) generates `KafkaTopic` + `KafkaUser` YAML
-5. Claude 3 Haiku self-reviews the YAML
-6. FastAPI opens a **GitHub PR** to `gitops/sandbox/kafka/`
+4. **OpenAI** (`gpt-3.5-turbo`) generates `KafkaTopic` + `KafkaUser` YAML and self-reviews it
+5. FastAPI opens a **GitHub PR** to `gitops/sandbox/kafka/`
 7. GitHub Actions validates (only KafkaTopic/KafkaUser allowed) and **auto-merges**
 8. **ArgoCD** detects the merge and applies the YAML to the cluster
 9. **Strimzi** creates the topic and user in Kafka
@@ -323,13 +322,6 @@ kubectl describe pod my-kafka-kafka-0 -n kafka
 kubectl logs my-kafka-kafka-0 -n kafka -c kafka
 ```
 
-**Portal can't call Bedrock:**
-```bash
-# Verify IRSA annotation
-kubectl get sa kafka-portal-api-sa -n kafka-portal -o yaml | grep role-arn
-# Enable model access: AWS Console → Bedrock → Model access → eu-west-1
-```
-
 **ArgoCD app out of sync:**
 ```bash
 kubectl annotate application kafka-topics-sandbox -n argocd \
@@ -355,6 +347,5 @@ kubectl get pods -n kube-system | grep aws-load-balancer
 - [Strimzi Documentation](https://strimzi.io/docs/)
 - [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
 - [AWS Glue Schema Registry](https://docs.aws.amazon.com/glue/latest/dg/schema-registry.html)
-- [Amazon Bedrock](https://docs.aws.amazon.com/bedrock/)
 - [ArgoCD Documentation](https://argo-cd.readthedocs.io/)
 - [AWS EKS Best Practices](https://aws.github.io/aws-eks-best-practices/)

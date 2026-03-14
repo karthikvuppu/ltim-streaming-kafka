@@ -1,5 +1,6 @@
-{{- if and .Values.fastapi.enabled .Values.fastapi.serviceAccount.create }}
-# Allows kafka-portal-api to read KafkaTopics, KafkaUsers and secrets in the kafka namespace
+{{- if .Values.fastapi.enabled }}
+{{- $saName := ternary .Values.fastapi.serviceAccount.name "default" .Values.fastapi.serviceAccount.create }}
+# Allows kafka-portal-api to read KafkaTopics, KafkaUsers, Kafkas and Secrets in the kafka namespace
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -24,6 +25,6 @@ roleRef:
   name: kafka-portal-api-reader
 subjects:
   - kind: ServiceAccount
-    name: {{ .Values.fastapi.serviceAccount.name }}
+    name: {{ $saName }}
     namespace: {{ .Release.Namespace }}
 {{- end }}
