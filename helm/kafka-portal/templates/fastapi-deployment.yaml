@@ -17,9 +17,7 @@ spec:
       labels:
         app: kafka-portal-api
     spec:
-      {{- if .Values.fastapi.serviceAccount.create }}
-      serviceAccountName: {{ .Values.fastapi.serviceAccount.name }}
-      {{- end }}
+      serviceAccountName: {{ ternary .Values.fastapi.serviceAccount.name "default" .Values.fastapi.serviceAccount.create }}
       containers:
         - name: api
           image: "{{ .Values.fastapi.image.repository }}:{{ .Values.fastapi.image.tag }}"
