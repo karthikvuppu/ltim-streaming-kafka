@@ -26,7 +26,7 @@ spec:
           imagePullPolicy: {{ .Values.fastapi.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.fastapi.port }}
-          # Non-sensitive config from values (Bedrock region, model IDs, etc.)
+          # Non-sensitive config from values
           env:
             {{- range $key, $val := .Values.fastapi.env }}
             - name: {{ $key }}

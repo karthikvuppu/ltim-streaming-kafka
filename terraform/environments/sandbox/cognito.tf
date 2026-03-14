@@ -57,15 +57,14 @@ resource "aws_cognito_user_pool_client" "kafka_portal" {
 
   supported_identity_providers = ["COGNITO"]
 
-  # Update these URLs after deploying the portal
+  # Callback URLs only matter for OAuth2 Authorization Code flow (not used —
+  # portal authenticates directly via USER_PASSWORD_AUTH / boto3)
   callback_urls = [
-    "http://localhost:8501",
-    "https://kafka-portal-sandbox.aws.internal"
+    "http://localhost:8501"
   ]
 
   logout_urls = [
-    "http://localhost:8501",
-    "https://kafka-portal-sandbox.aws.internal"
+    "http://localhost:8501"
   ]
 
   allowed_oauth_flows                  = ["code"]

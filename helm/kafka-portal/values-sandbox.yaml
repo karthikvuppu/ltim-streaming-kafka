@@ -1,13 +1,8 @@
 # Sandbox overrides
-# After terraform apply, fill in the Cognito values from:
-#   terraform -chdir=../eks-kafka/environments/sandbox output cognito_domain
-#   terraform -chdir=../eks-kafka/environments/sandbox output cognito_client_id
 
 fastapi:
   image:
     tag: "c6cb4d05"
-  serviceAccount:
-    roleArn: "arn:aws:iam::292481751409:role/ltim-sandbox-kafka-portal-bedrock-role"
 
 streamlit:
   image:

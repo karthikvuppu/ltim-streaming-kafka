@@ -18,19 +18,10 @@ fastapi:
   service:
     type: ClusterIP
     port: 8000
-  # IRSA ServiceAccount — gives the pod permission to call Bedrock (no API key needed)
-  # Set roleArn after: terraform -chdir=../eks-kafka/environments/sandbox apply
-  #   output: kafka_portal_bedrock_role_arn
   serviceAccount:
-    create: true
-    name: kafka-portal-api-sa
-    roleArn: ""   # set in values-sandbox.yaml
+    create: false
 
-  # Bedrock config (no secret needed — IAM via IRSA)
   env:
-    BEDROCK_REGION: "eu-west-1"
-    BEDROCK_MODEL: "eu.anthropic.claude-haiku-4-5-20251001-v1:0"
-    BEDROCK_REVIEW_MODEL: "eu.anthropic.claude-haiku-4-5-20251001-v1:0"
     KAFKA_CLUSTER_NAME: "my-kafka"
     GITHUB_REPO: "karthikvuppu/ltim-streaming-kafka"
 
