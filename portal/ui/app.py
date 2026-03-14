@@ -1,22 +1,24 @@
 """
 Kafka Self-Service Portal — Streamlit UI
-OAuth2 Authorization Code flow via Cognito hosted UI.
-Sends topic requests to the FastAPI backend.
+Native Cognito login form (USER_PASSWORD_AUTH via boto3).
+No OAuth2 redirect required — works over plain HTTP.
 """
 
 import os
+import hmac
+import hashlib
 import base64
-from urllib.parse import urlencode
 
+import boto3
 import requests
 import streamlit as st
+from botocore.exceptions import ClientError
 
-# ── Config from env vars (injected by Helm) ──────────────────────────────────
-COGNITO_DOMAIN  = os.environ.get("COGNITO_DOMAIN", "")        # e.g. ltim-sandbox-kafka-portal.auth.eu-north-1.amazoncognito.com
-CLIENT_ID       = os.environ.get("COGNITO_CLIENT_ID", "")
-CLIENT_SECRET   = os.environ.get("COGNITO_CLIENT_SECRET", "")
-REDIRECT_URI    = os.environ.get("REDIRECT_URI", "http://localhost:8501")
-API_URL         = os.environ.get("API_URL", "http://kafka-portal-api:8000")
+# ── Config from env vars ──────────────────────────────────────────────────────
+COGNITO_REGION    = os.environ.get("COGNITO_REGION", "eu-north-1")
+CLIENT_ID         = os.environ.get("COGNITO_CLIENT_ID", "")
+CLIENT_SECRET     = os.environ.get("COGNITO_CLIENT_SECRET", "")
+API_URL           = os.environ.get("API_URL", "http://kafka-portal-api:8000")
 
 ALLOWED_EVENT_TYPES = [
     "created", "updated", "deleted", "failed",
@@ -24,73 +26,102 @@ ALLOWED_EVENT_TYPES = [
 ]
 TEAMS = ["payments", "analytics", "engineering", "platform", "audit"]
 
+_cognito = boto3.client("cognito-idp", region_name=COGNITO_REGION)
+
 
 # ── Auth helpers ──────────────────────────────────────────────────────────────
 
-def _login_url() -> str:
-    params = {
-        "response_type": "code",
-        "client_id":     CLIENT_ID,
-        "redirect_uri":  REDIRECT_URI,
-        "scope":         "email openid profile",
-    }
-    return f"https://{COGNITO_DOMAIN}/oauth2/authorize?{urlencode(params)}"
+def _secret_hash(username: str) -> str:
+    msg = username + CLIENT_ID
+    digest = hmac.new(CLIENT_SECRET.encode(), msg.encode(), digestmod=hashlib.sha256).digest()
+    return base64.b64encode(digest).decode()
 
 
-def _exchange_code(code: str) -> dict:
-    creds = base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode()
-    resp = requests.post(
-        f"https://{COGNITO_DOMAIN}/oauth2/token",
-        headers={
-            "Content-Type":  "application/x-www-form-urlencoded",
-            "Authorization": f"Basic {creds}",
+def _login(email: str, password: str) -> dict:
+    return _cognito.initiate_auth(
+        AuthFlow="USER_PASSWORD_AUTH",
+        AuthParameters={
+            "USERNAME":    email,
+            "PASSWORD":    password,
+            "SECRET_HASH": _secret_hash(email),
         },
-        data={
-            "grant_type":   "authorization_code",
-            "code":         code,
-            "redirect_uri": REDIRECT_URI,
-        },
-        timeout=10,
-    )
-    return resp.json()
-
-
-# ── Page ──────────────────────────────────────────────────────────────────────
-
-def main():
-    st.set_page_config(
-        page_title="Kafka Self-Service Portal",
-        page_icon="📨",
-        layout="centered",
+        ClientId=CLIENT_ID,
     )
 
-    # ── Handle OAuth2 callback ────────────────────────────────────────────────
-    params = st.query_params
-    if "code" in params and "token" not in st.session_state:
-        tokens = _exchange_code(params["code"])
-        if "id_token" in tokens:
-            st.session_state["token"] = tokens["id_token"]
-            st.query_params.clear()
-            st.rerun()
-        else:
-            st.error(f"Login failed: {tokens.get('error_description', tokens)}")
-            return
 
-    # ── Not logged in ─────────────────────────────────────────────────────────
-    if "token" not in st.session_state:
-        st.title("Kafka Self-Service Portal")
-        st.markdown("Request new Kafka topics and users through a self-service workflow.")
-        st.markdown("---")
-        login_url = _login_url()
-        st.markdown(
-            f'<a href="{login_url}" target="_self">'
-            f'<button style="padding:10px 24px;font-size:16px;cursor:pointer;">Login with Cognito</button>'
-            f"</a>",
-            unsafe_allow_html=True,
-        )
+def _set_new_password(email: str, new_password: str, session: str) -> dict:
+    return _cognito.respond_to_auth_challenge(
+        ChallengeName="NEW_PASSWORD_REQUIRED",
+        ClientId=CLIENT_ID,
+        ChallengeResponses={
+            "USERNAME":     email,
+            "NEW_PASSWORD": new_password,
+            "SECRET_HASH":  _secret_hash(email),
+        },
+        Session=session,
+    )
+
+
+# ── Login page ────────────────────────────────────────────────────────────────
+
+def _login_page():
+    st.title("Kafka Self-Service Portal")
+    st.markdown("Request new Kafka topics through a self-service workflow.")
+    st.markdown("---")
+
+    # Handle NEW_PASSWORD_REQUIRED challenge
+    if "auth_session" in st.session_state:
+        st.subheader("Set a new password")
+        st.info("Your temporary password must be changed before you can continue.")
+        with st.form("new_password_form"):
+            new_pw  = st.text_input("New password", type="password")
+            new_pw2 = st.text_input("Confirm new password", type="password")
+            submitted = st.form_submit_button("Set Password")
+        if submitted:
+            if new_pw != new_pw2:
+                st.error("Passwords do not match.")
+                return
+            try:
+                resp = _set_new_password(
+                    st.session_state["auth_email"],
+                    new_pw,
+                    st.session_state["auth_session"],
+                )
+                st.session_state["token"] = resp["AuthenticationResult"]["IdToken"]
+                del st.session_state["auth_session"]
+                del st.session_state["auth_email"]
+                st.rerun()
+            except ClientError as e:
+                st.error(f"Failed: {e.response['Error']['Message']}")
         return
 
-    # ── Logged in ─────────────────────────────────────────────────────────────
+    # Normal login form
+    st.subheader("Login")
+    with st.form("login_form"):
+        email    = st.text_input("Email")
+        password = st.text_input("Password", type="password")
+        submitted = st.form_submit_button("Login", use_container_width=True)
+
+    if submitted:
+        if not email or not password:
+            st.error("Email and password are required.")
+            return
+        try:
+            resp = _login(email, password)
+            if resp.get("ChallengeName") == "NEW_PASSWORD_REQUIRED":
+                st.session_state["auth_session"] = resp["Session"]
+                st.session_state["auth_email"]   = email
+                st.rerun()
+            else:
+                st.session_state["token"] = resp["AuthenticationResult"]["IdToken"]
+                st.rerun()
+        except ClientError as e:
+            st.error(f"Login failed: {e.response['Error']['Message']}")
+
+
+# ── Main portal page ──────────────────────────────────────────────────────────
+
+def _portal_page():
     col_title, col_logout = st.columns([4, 1])
     with col_title:
         st.title("Kafka Self-Service Portal")
@@ -133,12 +164,10 @@ def main():
 
         submitted = st.form_submit_button("Submit Topic Request", use_container_width=True)
 
-    # ── Preview topic name ────────────────────────────────────────────────────
     if entity:
         topic_name = f"{team}.{entity.strip().lower().replace(' ', '-')}.{event_type}"
         st.info(f"Topic name will be: `{topic_name}`")
 
-    # ── Handle submission ─────────────────────────────────────────────────────
     if submitted:
         if not entity or not description:
             st.error("Entity and Description are required.")
@@ -171,12 +200,10 @@ def main():
             st.success("Topic request submitted!")
             st.markdown(f"**PR:** [{result['pr_url']}]({result['pr_url']})")
             st.caption("The PR will be auto-merged after YAML validation. ArgoCD will apply it within ~30 seconds.")
-
             with st.expander("KafkaTopic YAML"):
                 st.code(result["topic_yaml"], language="yaml")
             with st.expander("KafkaUser YAML"):
                 st.code(result["user_yaml"], language="yaml")
-
         elif resp.status_code == 400:
             st.error(f"Validation failed: {resp.json().get('detail')}")
         elif resp.status_code == 401:
@@ -185,6 +212,20 @@ def main():
             st.rerun()
         else:
             st.error(f"Error {resp.status_code}: {resp.json().get('detail', 'Unknown error')}")
+
+
+# ── Entry point ───────────────────────────────────────────────────────────────
+
+def main():
+    st.set_page_config(
+        page_title="Kafka Self-Service Portal",
+        page_icon="📨",
+        layout="centered",
+    )
+    if "token" not in st.session_state:
+        _login_page()
+    else:
+        _portal_page()
 
 
 if __name__ == "__main__":

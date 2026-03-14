@@ -21,6 +21,3 @@ streamlit:
       external-dns.alpha.kubernetes.io/hostname: "kafka-portal-sandbox.aws.internal"
   env:
     API_URL: "http://kafka-portal-api:8000"
-    REDIRECT_URI: "https://kafka-portal-sandbox.aws.internal"
-    # Set after Cognito is provisioned:
-    COGNITO_DOMAIN: "ltim-sandbox-kafka-portal.auth.eu-north-1.amazoncognito.com"
