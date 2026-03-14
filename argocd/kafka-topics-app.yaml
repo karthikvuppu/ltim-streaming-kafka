@@ -1,5 +1,6 @@
 # ArgoCD Application — watches gitops/sandbox/kafka/ for KafkaTopic + KafkaUser YAMLs
-# ArgoCD auto-syncs any YAML committed to this path into the kafka namespace
+# Manual sync: admin reviews in ArgoCD UI then clicks Sync after each PR merges.
+# GitHub webhook triggers instant OutOfSync detection on push to main.
 #
 # Apply with:
 #   kubectl apply -f argocd/kafka-topics-app.yaml -n argocd
@@ -18,15 +19,15 @@ spec:
     repoURL: https://github.com/karthikvuppu/ltim-streaming-kafka
     targetRevision: main
     path: gitops/sandbox/kafka
+    directory:
+      recurse: true   # scan topics/ and users/ subdirectories
 
   destination:
     server: https://kubernetes.default.svc
     namespace: kafka
 
   syncPolicy:
-    automated:
-      prune: true      # Delete resources removed from git
-      selfHeal: true   # Revert manual changes in cluster
+    # No automated sync — admin manually reviews and syncs via ArgoCD UI
     syncOptions:
       - CreateNamespace=true
       - ApplyOutOfSyncOnly=true

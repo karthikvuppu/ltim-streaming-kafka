@@ -79,6 +79,13 @@ resource "helm_release" "argocd" {
     value = "100m"
   }
 
+  # GitHub webhook secret — ArgoCD verifies push events from GitHub
+  # Matches the secret configured in GitHub repo webhook settings
+  set {
+    name  = "configs.secret.githubSecret"
+    value = "6f1ef1f99dbc09de290676e4dcad3c9e48865caa"
+  }
+
   depends_on = [
     kubernetes_namespace.argocd,
     module.eks,

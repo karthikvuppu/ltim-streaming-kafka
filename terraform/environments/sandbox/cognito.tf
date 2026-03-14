@@ -98,3 +98,26 @@ resource "aws_cognito_user_group" "teams" {
   user_pool_id = aws_cognito_user_pool.kafka_portal.id
   description  = "Kafka team: ${each.value}"
 }
+
+# Portal users with team assignments
+# custom:team maps to Kafka producer ACL (shown in My Topics tab)
+resource "aws_cognito_user" "portal_users" {
+  for_each = {
+    "v.karthik@ltimindtree.com"         = "payments"
+    "leelakrishna.yadav@ltimindtree.com" = "platform"
+  }
+
+  user_pool_id = aws_cognito_user_pool.kafka_portal.id
+  username     = each.key
+
+  attributes = {
+    email          = each.key
+    email_verified = "true"
+    "custom:team"  = each.value
+  }
+
+  # Suppress changes to password — set manually via AWS console or CLI
+  lifecycle {
+    ignore_changes = [temporary_password, password]
+  }
+}
