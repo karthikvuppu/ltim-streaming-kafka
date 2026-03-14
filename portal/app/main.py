@@ -88,14 +88,15 @@ async def request_topic(
 
 
 @app.get("/topics")
-def list_topics(user: dict = Depends(verify_token)):
+def list_topics(user: dict = Depends(verify_token), team: Optional[str] = None):
     """
     Return all KafkaTopics for the user's team with status + connection details.
+    team query param overrides the token's team claim.
     """
     if not _k8s_ready:
         raise HTTPException(status_code=503, detail="Kubernetes client not available")
 
-    team = user.get("team") or user.get("email", "").split("@")[0]
+    team = team or user.get("team") or ""
 
     custom_api = k8s_client.CustomObjectsApi()
     core_api   = k8s_client.CoreV1Api()

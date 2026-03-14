@@ -124,10 +124,13 @@ def _login_page():
 def _my_topics_page():
     st.subheader("My Topics")
 
+    team_filter = st.selectbox("Filter by Team", TEAMS, key="topics_team_filter")
+
     with st.spinner("Fetching topics…"):
         try:
             resp = requests.get(
                 f"{API_URL}/topics",
+                params={"team": team_filter},
                 headers={"Authorization": f"Bearer {st.session_state['token']}"},
                 timeout=15,
             )
