@@ -119,6 +119,66 @@ def _login_page():
             st.error(f"Login failed: {e.response['Error']['Message']}")
 
 
+# ── My Topics page ────────────────────────────────────────────────────────────
+
+def _my_topics_page():
+    st.subheader("My Topics")
+
+    with st.spinner("Fetching topics…"):
+        try:
+            resp = requests.get(
+                f"{API_URL}/topics",
+                headers={"Authorization": f"Bearer {st.session_state['token']}"},
+                timeout=15,
+            )
+        except requests.exceptions.ConnectionError:
+            st.error("Cannot reach the API.")
+            return
+
+    try:
+        body = resp.json()
+    except Exception:
+        st.error(f"Unexpected response: {resp.text}")
+        return
+
+    if resp.status_code == 401:
+        st.warning("Session expired. Please login again.")
+        del st.session_state["token"]
+        st.rerun()
+        return
+    if resp.status_code != 200:
+        st.error(f"Error {resp.status_code}: {body.get('detail', resp.text)}")
+        return
+
+    topics = body.get("topics", [])
+    team   = body.get("team", "")
+
+    if not topics:
+        st.info(f"No topics found for team **{team}** yet. Request one in the 'Request Topic' tab.")
+        return
+
+    for t in topics:
+        status_icon = "✅" if t["ready"] else "⏳"
+        status_text = "READY" if t["ready"] else "Pending (ArgoCD sync needed)"
+        with st.expander(f"{status_icon} {t['topic_name']}  —  {status_text}"):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("**Topic Details**")
+                st.write(f"- **Partitions:** {t['partitions']}")
+                st.write(f"- **Retention:** {t['retention']}")
+                st.write(f"- **Requested by:** {t['requested_by']}")
+            with col2:
+                st.markdown("**Connection Details**")
+                st.write(f"- **Username:** `{t['username']}`")
+                if t["password"]:
+                    st.write(f"- **Password:** `{t['password']}`")
+                else:
+                    st.write("- **Password:** *(not ready yet)*")
+
+            st.markdown("**Bootstrap Servers**")
+            st.code(f"Internal (within cluster): {t['bootstrap_internal']}\nExternal (from internet):  {t['bootstrap_external']}", language="bash")
+
+
 # ── Main portal page ──────────────────────────────────────────────────────────
 
 def _portal_page():
@@ -131,91 +191,97 @@ def _portal_page():
             st.rerun()
 
     st.markdown("---")
-    st.subheader("Request a New Kafka Topic")
+    tab1, tab2 = st.tabs(["Request Topic", "My Topics"])
 
-    with st.form("topic_request", clear_on_submit=False):
-        col1, col2 = st.columns(2)
+    with tab2:
+        _my_topics_page()
 
-        with col1:
-            team = st.selectbox("Your Team", TEAMS)
-            entity = st.text_input(
-                "Entity",
-                placeholder="transaction, order, user, payment …",
-                help="The business entity this topic is about",
-            )
-            event_type = st.selectbox("Event Type", ALLOWED_EVENT_TYPES)
+    with tab1:
+        st.subheader("Request a New Kafka Topic")
 
-        with col2:
-            partitions = st.number_input("Partitions", min_value=1, max_value=30, value=3)
-            retention_hours = st.number_input(
-                "Retention (hours)", min_value=1, max_value=720, value=48,
-                help="How long messages are kept. Max 720h (30 days) in sandbox.",
-            )
-            consumer_teams = st.multiselect(
-                "Consumer Teams",
-                TEAMS,
-                help="Which teams will consume from this topic",
-            )
+        with st.form("topic_request", clear_on_submit=False):
+            col1, col2 = st.columns(2)
 
-        description = st.text_area(
-            "Description",
-            placeholder="Describe what events this topic will carry and who will use them.",
-        )
-
-        submitted = st.form_submit_button("Submit Topic Request", use_container_width=True)
-
-    if entity:
-        topic_name = f"{team}.{entity.strip().lower().replace(' ', '-')}.{event_type}"
-        st.info(f"Topic name will be: `{topic_name}`")
-
-    if submitted:
-        if not entity or not description:
-            st.error("Entity and Description are required.")
-            st.stop()
-
-        payload = {
-            "team":            team,
-            "entity":          entity.strip().lower().replace(" ", "-"),
-            "event_type":      event_type,
-            "partitions":      int(partitions),
-            "retention_hours": int(retention_hours),
-            "description":     description,
-            "consumer_teams":  consumer_teams,
-        }
-
-        with st.spinner("Generating YAML and creating GitHub PR …"):
-            try:
-                resp = requests.post(
-                    f"{API_URL}/request-topic",
-                    json=payload,
-                    headers={"Authorization": f"Bearer {st.session_state['token']}"},
-                    timeout=60,
+            with col1:
+                team = st.selectbox("Your Team", TEAMS)
+                entity = st.text_input(
+                    "Entity",
+                    placeholder="transaction, order, user, payment …",
+                    help="The business entity this topic is about",
                 )
-            except requests.exceptions.ConnectionError:
-                st.error("Cannot reach the API. Is the kafka-portal-api service running?")
+                event_type = st.selectbox("Event Type", ALLOWED_EVENT_TYPES)
+
+            with col2:
+                partitions = st.number_input("Partitions", min_value=1, max_value=30, value=3)
+                retention_hours = st.number_input(
+                    "Retention (hours)", min_value=1, max_value=720, value=48,
+                    help="How long messages are kept. Max 720h (30 days) in sandbox.",
+                )
+                consumer_teams = st.multiselect(
+                    "Consumer Teams",
+                    TEAMS,
+                    help="Which teams will consume from this topic",
+                )
+
+            description = st.text_area(
+                "Description",
+                placeholder="Describe what events this topic will carry and who will use them.",
+            )
+
+            submitted = st.form_submit_button("Submit Topic Request", use_container_width=True)
+
+        if entity:
+            topic_name = f"{team}.{entity.strip().lower().replace(' ', '-')}.{event_type}"
+            st.info(f"Topic name will be: `{topic_name}`")
+
+        if submitted:
+            if not entity or not description:
+                st.error("Entity and Description are required.")
                 st.stop()
 
-        try:
-            body = resp.json()
-        except Exception:
-            body = {"detail": resp.text or "No response body"}
+            payload = {
+                "team":            team,
+                "entity":          entity.strip().lower().replace(" ", "-"),
+                "event_type":      event_type,
+                "partitions":      int(partitions),
+                "retention_hours": int(retention_hours),
+                "description":     description,
+                "consumer_teams":  consumer_teams,
+            }
 
-        if resp.status_code == 200:
-            st.success("Topic request submitted!")
-            st.markdown(f"**PR:** [{body['pr_url']}]({body['pr_url']})")
-            st.caption("The PR will be auto-merged after YAML validation. ArgoCD will apply it within ~30 seconds.")
-            with st.expander("KafkaTopic YAML"):
-                st.code(body["topic_yaml"], language="yaml")
-            with st.expander("KafkaUser YAML"):
-                st.code(body["user_yaml"], language="yaml")
-        elif resp.status_code == 400:
-            st.error(f"Validation failed: {body.get('detail')}")
-        elif resp.status_code == 401:
-            st.warning("Session expired. Please login again.")
-            del st.session_state["token"]
-            st.rerun()
-        else:
-            st.error(f"Error {resp.status_code}: {body.get('detail', resp.text)}")
+            with st.spinner("Generating YAML and creating GitHub PR …"):
+                try:
+                    resp = requests.post(
+                        f"{API_URL}/request-topic",
+                        json=payload,
+                        headers={"Authorization": f"Bearer {st.session_state['token']}"},
+                        timeout=60,
+                    )
+                except requests.exceptions.ConnectionError:
+                    st.error("Cannot reach the API. Is the kafka-portal-api service running?")
+                    st.stop()
+
+            try:
+                body = resp.json()
+            except Exception:
+                body = {"detail": resp.text or "No response body"}
+
+            if resp.status_code == 200:
+                st.success("Topic request submitted!")
+                st.markdown(f"**PR:** [{body['pr_url']}]({body['pr_url']})")
+                st.caption("The PR will be auto-merged after YAML validation. ArgoCD will apply it within ~30 seconds.")
+                with st.expander("KafkaTopic YAML"):
+                    st.code(body["topic_yaml"], language="yaml")
+                with st.expander("KafkaUser YAML"):
+                    st.code(body["user_yaml"], language="yaml")
+            elif resp.status_code == 400:
+                st.error(f"Validation failed: {body.get('detail')}")
+            elif resp.status_code == 401:
+                st.warning("Session expired. Please login again.")
+                del st.session_state["token"]
+                st.rerun()
+            else:
+                st.error(f"Error {resp.status_code}: {body.get('detail', resp.text)}")
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
