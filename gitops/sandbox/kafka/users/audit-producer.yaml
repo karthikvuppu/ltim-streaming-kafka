@@ -1,0 +1,20 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: audit-producer
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: my-kafka
+spec:
+  authentication:
+    type: scram-sha-512
+  authorization:
+    type: simple
+    acls:
+    - resource:
+        type: topic
+        name: audit.demotest.created
+        patternType: literal
+      operations:
+      - Write
+      - Describe
