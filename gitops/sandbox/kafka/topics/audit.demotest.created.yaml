@@ -1,0 +1,17 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: audit.demotest.created
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: my-kafka
+  annotations:
+    requested-by: v.karthik@ltimindtree.com
+    description: 'creating topic for audit use '
+spec:
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 172800000
+    cleanup.policy: delete
+    min.insync.replicas: '1'
