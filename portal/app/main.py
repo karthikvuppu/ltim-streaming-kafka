@@ -132,8 +132,11 @@ def list_topics(user: dict = Depends(verify_token), lob: Optional[str] = None):
     results = []
     for item in all_topics.get("items", []):
         topic_name = item["metadata"]["name"]
-        # Filter: only show topics belonging to this LOB
+        # Filter: only show topics belonging to this LOB AND created by this user
         if not topic_name.startswith(f"{lob}."):
+            continue
+        requested_by_annotation = item.get("metadata", {}).get("annotations", {}).get("requested-by", "")
+        if requested_by_annotation != user["email"]:
             continue
 
         conditions = item.get("status", {}).get("conditions", [])
