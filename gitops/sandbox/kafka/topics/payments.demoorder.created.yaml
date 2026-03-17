@@ -1,0 +1,17 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: payments.demoorder.created
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: my-kafka
+  annotations:
+    requested-by: v.karthik@ltimindtree.com
+    description: Demo topic for management presentation end to end test
+spec:
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 86400000
+    cleanup.policy: delete
+    min.insync.replicas: '1'
