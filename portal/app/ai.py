@@ -53,11 +53,11 @@ spec:
     cleanup.policy: delete
     min.insync.replicas: "1"
 
---- MANIFEST 2: KafkaUser (producer for team {body.team}) ---
+--- MANIFEST 2: KafkaUser (producer for LOB {body.lob}) ---
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaUser
 metadata:
-  name: {body.team}-producer
+  name: {body.lob}-producer
   namespace: kafka
   labels:
     strimzi.io/cluster: {KAFKA_CLUSTER_NAME}

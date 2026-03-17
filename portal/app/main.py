@@ -1,7 +1,7 @@
 """
 Kafka Self-Service Portal — FastAPI backend
 POST /request-topic  → validate → generate YAML → open GitHub PR
-GET  /topics         → list topics for team with status + connection details
+GET  /topics         → list topics for lob with status + connection details
 GET  /health         → liveness check
 """
 
@@ -34,13 +34,13 @@ app = FastAPI(title="Kafka Self-Service Portal", version="1.0.0")
 
 
 class TopicRequest(BaseModel):
-    team:            str       = Field(..., example="payments")
+    lob:             str       = Field(..., example="payments")
     entity:          str       = Field(..., example="transaction")
     event_type:      str       = Field(..., example="created")
     partitions:      int       = Field(..., ge=1, le=30)
     retention_hours: int       = Field(..., ge=1, le=720)
     description:     str       = Field(..., min_length=10)
-    consumer_teams:  list[str] = Field(default_factory=list)
+    consumer_lobs:   list[str] = Field(default_factory=list)
 
 
 class TopicResponse(BaseModel):
@@ -55,14 +55,14 @@ async def request_topic(
     body: TopicRequest,
     user: dict = Depends(verify_token),
 ):
-    topic_name = f"{body.team}.{body.entity}.{body.event_type}"
+    topic_name = f"{body.lob}.{body.entity}.{body.event_type}"
 
     # Validate naming + quotas
     validation = validate_request(
         topic_name=topic_name,
         partitions=body.partitions,
         retention_hours=body.retention_hours,
-        team=body.team,
+        lob=body.lob,
     )
     if not validation["allow"]:
         raise HTTPException(status_code=400, detail=validation["reason"])
@@ -88,15 +88,15 @@ async def request_topic(
 
 
 @app.get("/topics")
-def list_topics(user: dict = Depends(verify_token), team: Optional[str] = None):
+def list_topics(user: dict = Depends(verify_token), lob: Optional[str] = None):
     """
-    Return all KafkaTopics for the user's team with status + connection details.
-    team query param overrides the token's team claim.
+    Return all KafkaTopics for the user's LOB with status + connection details.
+    lob query param overrides the token's lob claim.
     """
     if not _k8s_ready:
         raise HTTPException(status_code=503, detail="Kubernetes client not available")
 
-    team = team or user.get("team") or ""
+    lob = lob or user.get("lob") or ""
 
     custom_api = k8s_client.CustomObjectsApi()
     core_api   = k8s_client.CoreV1Api()
@@ -132,8 +132,8 @@ def list_topics(user: dict = Depends(verify_token), team: Optional[str] = None):
     results = []
     for item in all_topics.get("items", []):
         topic_name = item["metadata"]["name"]
-        # Filter: only show topics belonging to this team
-        if not topic_name.startswith(f"{team}."):
+        # Filter: only show topics belonging to this LOB
+        if not topic_name.startswith(f"{lob}."):
             continue
 
         conditions = item.get("status", {}).get("conditions", [])
@@ -147,7 +147,7 @@ def list_topics(user: dict = Depends(verify_token), team: Optional[str] = None):
         requested_by = item.get("metadata", {}).get("annotations", {}).get("requested-by", "-")
 
         # Get SCRAM password from Kubernetes secret
-        secret_name = f"{team}-producer"
+        secret_name = f"{lob}-producer"
         username    = secret_name
         password    = ""
         try:
@@ -171,7 +171,7 @@ def list_topics(user: dict = Depends(verify_token), team: Optional[str] = None):
             "password":           password,
         })
 
-    return {"topics": results, "team": team}
+    return {"topics": results, "lob": lob}
 
 
 @app.get("/health")

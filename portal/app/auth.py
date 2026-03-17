@@ -30,7 +30,7 @@ def _get_jwks() -> dict:
 def verify_token(authorization: str = Header(...)) -> dict:
     """
     FastAPI dependency — call with Depends(verify_token).
-    Returns: {"email": str, "sub": str, "groups": list[str], "team": str}
+    Returns: {"email": str, "sub": str, "groups": list[str], "lob": str}
     """
     if not authorization.startswith("Bearer "):
         raise HTTPException(401, detail="Authorization header must be 'Bearer <token>'")
@@ -55,5 +55,5 @@ def verify_token(authorization: str = Header(...)) -> dict:
         "email":  payload.get("email", ""),
         "sub":    payload.get("sub", ""),
         "groups": payload.get("cognito:groups", []),
-        "team":   payload.get("custom:team", ""),
+        "lob":    payload.get("custom:team", ""),
     }

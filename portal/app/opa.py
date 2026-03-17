@@ -11,7 +11,7 @@ ALLOWED_EVENT_TYPES = {
     "approved", "rejected", "submitted", "processed",
 }
 
-# Max partitions per team (sandbox defaults)
+# Max partitions per LOB (sandbox defaults)
 PARTITION_QUOTA: dict[str, int] = {
     "default":     10,
     "payments":    20,
@@ -24,18 +24,18 @@ PARTITION_QUOTA: dict[str, int] = {
 MAX_RETENTION_HOURS = 720  # 30 days hard cap for sandbox
 
 
-def validate_request(topic_name: str, partitions: int, retention_hours: int, team: str) -> dict:
+def validate_request(topic_name: str, partitions: int, retention_hours: int, lob: str) -> dict:
     parts = topic_name.split(".")
 
-    # Rule 1: must be <team>.<entity>.<event_type>
+    # Rule 1: must be <lob>.<entity>.<event_type>
     if len(parts) != 3:
-        return {"allow": False, "reason": "Topic name must follow <team>.<entity>.<event_type>"}
+        return {"allow": False, "reason": "Topic name must follow <lob>.<entity>.<event_type>"}
 
-    req_team, entity, event_type = parts
+    req_lob, entity, event_type = parts
 
-    # Rule 2: team in topic must match requesting team
-    if req_team != team:
-        return {"allow": False, "reason": f"Topic team '{req_team}' must match your team '{team}'"}
+    # Rule 2: lob in topic must match requesting LOB
+    if req_lob != lob:
+        return {"allow": False, "reason": f"Topic LOB '{req_lob}' must match your LOB '{lob}'"}
 
     # Rule 3: lowercase + safe characters only
     if not re.fullmatch(r"[a-z0-9.\-]+", topic_name):
@@ -52,10 +52,10 @@ def validate_request(topic_name: str, partitions: int, retention_hours: int, tea
             "reason": f"Event type '{event_type}' not allowed. Use one of: {sorted(ALLOWED_EVENT_TYPES)}",
         }
 
-    # Rule 6: partition quota per team
-    max_partitions = PARTITION_QUOTA.get(team, PARTITION_QUOTA["default"])
+    # Rule 6: partition quota per LOB
+    max_partitions = PARTITION_QUOTA.get(lob, PARTITION_QUOTA["default"])
     if partitions > max_partitions:
-        return {"allow": False, "reason": f"Team '{team}' max partitions is {max_partitions}, requested {partitions}"}
+        return {"allow": False, "reason": f"LOB '{lob}' max partitions is {max_partitions}, requested {partitions}"}
 
     # Rule 7: retention cap
     if retention_hours > MAX_RETENTION_HOURS:

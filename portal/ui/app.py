@@ -24,7 +24,7 @@ ALLOWED_EVENT_TYPES = [
     "created", "updated", "deleted", "failed",
     "approved", "rejected", "submitted", "processed",
 ]
-TEAMS = ["payments", "analytics", "engineering", "platform", "audit"]
+LOBS = ["payments", "analytics", "engineering", "platform", "audit"]
 
 _cognito = boto3.client("cognito-idp", region_name=COGNITO_REGION)
 
@@ -124,13 +124,13 @@ def _login_page():
 def _my_topics_page():
     st.subheader("My Topics")
 
-    team_filter = st.selectbox("Filter by Team", TEAMS, key="topics_team_filter")
+    lob_filter = st.selectbox("Filter by LOB", LOBS, key="topics_lob_filter")
 
     with st.spinner("Fetching topics…"):
         try:
             resp = requests.get(
                 f"{API_URL}/topics",
-                params={"team": team_filter},
+                params={"lob": lob_filter},
                 headers={"Authorization": f"Bearer {st.session_state['token']}"},
                 timeout=15,
             )
@@ -154,10 +154,10 @@ def _my_topics_page():
         return
 
     topics = body.get("topics", [])
-    team   = body.get("team", "")
+    lob    = body.get("lob", "")
 
     if not topics:
-        st.info(f"No topics found for team **{team}** yet. Request one in the 'Request Topic' tab.")
+        st.info(f"No topics found for LOB **{lob}** yet. Request one in the 'Request Topic' tab.")
         return
 
     for t in topics:
@@ -206,7 +206,7 @@ def _portal_page():
             col1, col2 = st.columns(2)
 
             with col1:
-                team = st.selectbox("Your Team", TEAMS)
+                lob = st.selectbox("Your LOB", LOBS)
                 entity = st.text_input(
                     "Entity",
                     placeholder="transaction, order, user, payment …",
@@ -220,10 +220,10 @@ def _portal_page():
                     "Retention (hours)", min_value=1, max_value=720, value=48,
                     help="How long messages are kept. Max 720h (30 days) in sandbox.",
                 )
-                consumer_teams = st.multiselect(
-                    "Consumer Teams",
-                    TEAMS,
-                    help="Which teams will consume from this topic",
+                consumer_lobs = st.multiselect(
+                    "Consumer LOBs",
+                    LOBS,
+                    help="Which LOBs will consume from this topic",
                 )
 
             description = st.text_area(
@@ -234,7 +234,7 @@ def _portal_page():
             submitted = st.form_submit_button("Submit Topic Request", use_container_width=True)
 
         if entity:
-            topic_name = f"{team}.{entity.strip().lower().replace(' ', '-')}.{event_type}"
+            topic_name = f"{lob}.{entity.strip().lower().replace(' ', '-')}.{event_type}"
             st.info(f"Topic name will be: `{topic_name}`")
 
         if submitted:
@@ -243,13 +243,13 @@ def _portal_page():
                 st.stop()
 
             payload = {
-                "team":            team,
+                "lob":             lob,
                 "entity":          entity.strip().lower().replace(" ", "-"),
                 "event_type":      event_type,
                 "partitions":      int(partitions),
                 "retention_hours": int(retention_hours),
                 "description":     description,
-                "consumer_teams":  consumer_teams,
+                "consumer_lobs":   consumer_lobs,
             }
 
             with st.spinner("Generating YAML and creating GitHub PR …"):
