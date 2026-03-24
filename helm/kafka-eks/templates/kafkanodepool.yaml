@@ -1,0 +1,22 @@
+{{- range .Values.nodePools }}
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    strimzi.io/cluster: {{ $.Values.kafka.name }}
+    {{- include "kafka-eks.labels" $ | nindent 4 }}
+spec:
+  replicas: {{ .replicas }}
+  roles:
+    {{- toYaml .roles | nindent 4 }}
+  storage:
+    {{- toYaml .storage | nindent 4 }}
+  resources:
+    {{- toYaml .resources | nindent 4 }}
+  jvmOptions:
+    -Xms: {{ .jvmOptions.xms }}
+    -Xmx: {{ .jvmOptions.xmx }}
+{{- end }}

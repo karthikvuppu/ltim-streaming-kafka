@@ -1,0 +1,43 @@
+# ArgoCD Application — auto-deploys kafka-portal Helm chart
+# Watches helm/kafka-portal/ and values-sandbox.yaml on main.
+# CI pipeline (build-push.yml) updates image tags in values-sandbox.yaml on every push,
+# ArgoCD detects the diff and syncs automatically within ~3 minutes.
+#
+# Apply with:
+#   kubectl apply -f argocd/kafka-portal-app.yaml -n argocd
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kafka-portal-sandbox
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/karthikvuppu/ltim-streaming-kafka
+    targetRevision: main
+    path: helm/kafka-portal
+    helm:
+      valueFiles:
+        - values-sandbox.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kafka
+
+  syncPolicy:
+    automated:
+      prune: true       # remove resources deleted from Helm chart
+      selfHeal: true    # re-sync if someone manually changes a resource
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 2m

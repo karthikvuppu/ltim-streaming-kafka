@@ -1,4 +1,4 @@
-{{- if or .Values.kafka.metrics.enabled .Values.zookeeper.metrics.enabled }}
+{{- if .Values.kafka.metrics.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -89,11 +89,4 @@ data:
       labels:
        quantile: "0.$4"
 
-  zookeeper-metrics-config.yml: |
-    lowercaseOutputName: true
-    rules:
-    - pattern: "org.apache.ZooKeeperService<name0=(.+)><>(.+)"
-      name: "zookeeper_$2"
-      labels:
-        server: "$1"
 {{- end }}

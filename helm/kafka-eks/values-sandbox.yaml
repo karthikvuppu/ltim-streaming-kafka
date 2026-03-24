@@ -2,11 +2,6 @@
 # Testing and experimentation environment with moderate resources
 
 kafka:
-  replicas: 1
-
-  storage:
-    size: 10Gi
-
   resources:
     requests:
       memory: 1Gi
@@ -68,23 +63,31 @@ kafka:
       enabled: false
       port: 9093
 
-zookeeper:
-  replicas: 1
-
-  storage:
-    size: 5Gi
-
-  resources:
-    requests:
-      memory: 512Mi
-      cpu: 250m
-    limits:
-      memory: 1Gi
-      cpu: 500m
-
-  jvmOptions:
-    xms: 256m
-    xmx: 512m
+# Single combined node (controller + broker) for sandbox
+nodePools:
+  - name: combined
+    roles:
+      - controller
+      - broker
+    replicas: 1
+    storage:
+      type: jbod
+      volumes:
+        - id: 0
+          type: persistent-claim
+          size: 10Gi
+          deleteClaim: false
+          class: gp2
+    resources:
+      requests:
+        memory: 1Gi
+        cpu: 500m
+      limits:
+        memory: 2Gi
+        cpu: 1000m
+    jvmOptions:
+      xms: 512m
+      xmx: 1024m
 
 # Enable monitoring for testing
 monitoring:

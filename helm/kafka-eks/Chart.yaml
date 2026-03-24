@@ -3,10 +3,10 @@ name: kafka-eks
 description: Production-ready Apache Kafka deployment on EKS using Strimzi
 type: application
 version: 1.0.0
-appVersion: "3.6.0"
+appVersion: "3.8.0"
 keywords:
   - kafka
-  - zookeeper
+  - kraft
   - strimzi
   - eks
   - streaming
@@ -17,6 +17,6 @@ maintainers:
   - name: Kafka on EKS Team
 dependencies:
   - name: strimzi-kafka-operator
-    version: "0.39.0"
+    version: "0.44.0"
     repository: "https://strimzi.io/charts/"
     condition: strimzi.enabled

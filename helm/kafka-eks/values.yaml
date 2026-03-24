@@ -12,10 +12,7 @@ kafka:
   name: my-kafka
 
   # Kafka version
-  version: 3.6.0
-
-  # Number of Kafka brokers
-  replicas: 3
+  version: 3.8.0
 
   # Pod Security Context (enable in production)
   podSecurityContext:
@@ -66,7 +63,7 @@ kafka:
     transaction.state.log.min.isr: 2
     default.replication.factor: 3
     min.insync.replicas: 2
-    inter.broker.protocol.version: "3.6"
+    inter.broker.protocol.version: "3.8"
     log.retention.hours: 168  # 7 days
     log.segment.bytes: 1073741824  # 1GB
     num.network.threads: 3
@@ -75,13 +72,6 @@ kafka:
     socket.receive.buffer.bytes: 102400
     socket.request.max.bytes: 104857600
     auto.create.topics.enable: true  # Disable in production (set to false)
-
-  # Storage configuration
-  storage:
-    type: jbod
-    class: gp2
-    size: 10Gi
-    deleteClaim: false
 
   # Resource limits and requests
   resources:
@@ -118,52 +108,54 @@ kafka:
   metrics:
     enabled: true
 
-# Zookeeper Configuration
-zookeeper:
-  # Number of Zookeeper nodes (must be odd)
-  replicas: 3
+# KRaft metadata version (must match Kafka version)
+kraft:
+  metadataVersion: "3.8-IV0"
 
-  # TLS configuration (enable in production)
-  tls:
-    enabled: false
-
-  # Pod Security Context (enable in production)
-  podSecurityContext:
-    enabled: false
-    runAsNonRoot: true
-    runAsUser: 1000
-    fsGroup: 0
-    seccompProfile:
-      type: RuntimeDefault
-
-  # Storage configuration
-  storage:
-    type: persistent-claim
-    class: gp2
-    size: 5Gi
-    deleteClaim: false
-
-  # Resource limits and requests
-  resources:
-    requests:
-      memory: 1Gi
-      cpu: 250m
-    limits:
-      memory: 2Gi
-      cpu: 1000m
-
-  # JVM Options
-  jvmOptions:
-    xms: 512m
-    xmx: 1024m
-
-  # Logging
-  logging:
-    level: INFO
-
-  # Metrics
-  metrics:
-    enabled: true
+# KafkaNodePool configuration
+# Production default: separate controller and broker pools
+nodePools:
+  - name: controller
+    roles:
+      - controller
+    replicas: 3
+    storage:
+      type: persistent-claim
+      size: 10Gi
+      deleteClaim: false
+      class: gp2
+    resources:
+      requests:
+        memory: 1Gi
+        cpu: 250m
+      limits:
+        memory: 2Gi
+        cpu: 1000m
+    jvmOptions:
+      xms: 512m
+      xmx: 1024m
+  - name: broker
+    roles:
+      - broker
+    replicas: 3
+    storage:
+      type: jbod
+      volumes:
+        - id: 0
+          type: persistent-claim
+          size: 10Gi
+          deleteClaim: false
+          class: gp2
+    resources:
+      requests:
+        memory: 2Gi
+        cpu: 500m
+      limits:
+        memory: 4Gi
+        cpu: 2000m
+    jvmOptions:
+      xms: 1024m
+      xmx: 2048m
 
 # Entity Operator (Topic and User management)
 entityOperator:
