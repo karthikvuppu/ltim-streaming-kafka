@@ -13,7 +13,7 @@ spec:
     acls:
     - resource:
         type: topic
-        name: engineering.karthik.updated
+        name: engineering.order.created
         patternType: literal
       operations:
       - Write
