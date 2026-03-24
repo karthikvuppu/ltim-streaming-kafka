@@ -2,11 +2,11 @@
 
 fastapi:
   image:
-    tag: "6b83ae68"
+    tag: "bf1c5731"
 
 streamlit:
   image:
-    tag: "6b83ae68"
+    tag: "bf1c5731"
   service:
     type: LoadBalancer
     port: 8501
