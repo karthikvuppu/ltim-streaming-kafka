@@ -90,6 +90,8 @@ kafka:
   # Logging
   logging:
     level: INFO
+    # Suppress ZooKeeper client logger — not used in KRaft mode
+    zookeeperLogLevel: "OFF"
     # Audit logging configuration (enable in production)
     auditLogging:
       enabled: false

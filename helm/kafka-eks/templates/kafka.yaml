@@ -94,6 +94,7 @@ spec:
       type: inline
       loggers:
         kafka.root.logger.level: {{ .Values.kafka.logging.level | quote }}
+        log4j.logger.org.apache.zookeeper: {{ .Values.kafka.logging.zookeeperLogLevel | quote }}
         {{- if .Values.kafka.logging.auditLogging.enabled }}
         {{- range $key, $value := .Values.kafka.logging.auditLogging.loggers }}
         {{ $key }}: {{ $value | quote }}
