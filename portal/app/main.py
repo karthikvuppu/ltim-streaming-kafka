@@ -57,6 +57,23 @@ async def request_topic(
 ):
     topic_name = f"{body.lob}.{body.entity}.{body.event_type}"
 
+    # Check topic doesn't already exist in Kubernetes
+    if _k8s_ready:
+        try:
+            custom_api = k8s_client.CustomObjectsApi()
+            custom_api.get_namespaced_custom_object(
+                group="kafka.strimzi.io",
+                version="v1beta2",
+                namespace=KAFKA_NAMESPACE,
+                plural="kafkatopics",
+                name=topic_name,
+            )
+            raise HTTPException(status_code=400, detail=f"Topic '{topic_name}' already exists.")
+        except HTTPException:
+            raise
+        except Exception:
+            pass  # topic doesn't exist, proceed
+
     # Validate naming + quotas
     validation = validate_request(
         topic_name=topic_name,
