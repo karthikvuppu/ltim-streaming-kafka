@@ -77,7 +77,7 @@ nodePools:
           type: persistent-claim
           size: 10Gi
           deleteClaim: false
-          class: kafka-gp2-csi
+          class: gp2
     resources:
       requests:
         memory: 1Gi
@@ -91,7 +91,7 @@ nodePools:
 
 storageClass:
   enabled: true
-  name: kafka-gp2-csi
+  name: gp2
   provisioner: ebs.csi.aws.com
   type: gp2
   encrypted: false
