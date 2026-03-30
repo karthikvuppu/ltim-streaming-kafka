@@ -1,0 +1,17 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: payments.karthik.created
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: my-kafka
+  annotations:
+    requested-by: v.karthik@ltimindtree.com
+    description: 'hi my topic '
+spec:
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 172800000
+    cleanup.policy: delete
+    min.insync.replicas: '1'
