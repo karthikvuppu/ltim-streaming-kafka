@@ -77,7 +77,7 @@ nodePools:
           type: persistent-claim
           size: 10Gi
           deleteClaim: false
-          class: gp2
+          class: kafka-gp2-csi
     resources:
       requests:
         memory: 1Gi
@@ -88,6 +88,16 @@ nodePools:
     jvmOptions:
       xms: 512m
       xmx: 1024m
+
+storageClass:
+  enabled: true
+  name: kafka-gp2-csi
+  provisioner: ebs.csi.aws.com
+  type: gp2
+  encrypted: false
+  volumeBindingMode: WaitForFirstConsumer
+  allowVolumeExpansion: true
+  reclaimPolicy: Retain
 
 # Enable monitoring for testing
 monitoring:
