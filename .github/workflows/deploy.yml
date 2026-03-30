@@ -313,9 +313,6 @@ jobs:
               server: https://kubernetes.default.svc
               namespace: ${{ env.KAFKA_NAMESPACE }}
             syncPolicy:
-              automated:
-                prune: true
-                selfHeal: true
               syncOptions: [CreateNamespace=true]
           ---
           apiVersion: argoproj.io/v1alpha1
