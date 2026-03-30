@@ -95,6 +95,8 @@ storageClass:
   provisioner: ebs.csi.aws.com
   type: gp2
   encrypted: false
+  iops: ""
+  throughput: ""
   volumeBindingMode: WaitForFirstConsumer
   allowVolumeExpansion: true
   reclaimPolicy: Retain
