@@ -301,6 +301,26 @@ jobs:
           apiVersion: argoproj.io/v1alpha1
           kind: Application
           metadata:
+            name: kafka-topics
+            namespace: argocd
+          spec:
+            project: default
+            source:
+              repoURL: https://github.com/${{ github.repository }}
+              targetRevision: main
+              path: gitops/${{ inputs.environment }}/kafka
+            destination:
+              server: https://kubernetes.default.svc
+              namespace: ${{ env.KAFKA_NAMESPACE }}
+            syncPolicy:
+              automated:
+                prune: true
+                selfHeal: true
+              syncOptions: [CreateNamespace=true]
+          ---
+          apiVersion: argoproj.io/v1alpha1
+          kind: Application
+          metadata:
             name: kafka-portal
             namespace: argocd
           spec:
