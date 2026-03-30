@@ -13,7 +13,7 @@ spec:
     acls:
     - resource:
         type: topic
-        name: payments.e2etest.created
+        name: payments.transaction2.created
         patternType: literal
       operations:
       - Write
