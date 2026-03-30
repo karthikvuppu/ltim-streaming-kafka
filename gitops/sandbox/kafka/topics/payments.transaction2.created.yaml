@@ -7,9 +7,9 @@ metadata:
     strimzi.io/cluster: my-kafka
   annotations:
     requested-by: leelakrishna.yadav@ltimindtree.com
-    description: creating topic for analyzing
+    description: creating topic2
 spec:
-  partitions: 2
+  partitions: 3
   replicas: 1
   config:
     retention.ms: 172800000
