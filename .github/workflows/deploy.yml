@@ -1,0 +1,383 @@
+# Full stack deployment — EKS + Kafka + Portal + ArgoCD
+#
+# Provisions everything from scratch:
+#   1. Terraform  → VPC, EKS, Cognito, ECR, Glue Schema Registry
+#   2. Kafka      → Strimzi operator + Kafka broker (Helm)
+#   3. Portal     → FastAPI + Streamlit (Helm)
+#   4. GitOps     → ArgoCD apps + GitHub webhook
+#
+# Trigger: manual (workflow_dispatch) from GitHub Actions UI
+#
+# Required GitHub Secrets:
+#   AWS_ACCESS_KEY_ID        — IAM user with EKS/ECR/Cognito permissions
+#   AWS_SECRET_ACCESS_KEY    — matching secret key
+#   OPENAI_API_KEY           — OpenAI API key for portal AI features
+#   DEPLOY_GITHUB_PAT        — PAT with repo + webhook scope (for webhook update)
+
+name: Deploy Full Stack
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'sandbox'
+        type: choice
+        options:
+          - sandbox
+      destroy:
+        description: 'Destroy infrastructure instead of deploying'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  AWS_REGION:       eu-north-1
+  CLUSTER_NAME:     ltim-sandbox-eks
+  TF_DIR:           terraform/environments/sandbox
+  KAFKA_NAMESPACE:  kafka
+  PORTAL_NAMESPACE: kafka-portal
+
+jobs:
+  # ─────────────────────────────────────────────────────────────
+  # Job 1: Terraform — provision AWS infrastructure
+  # ─────────────────────────────────────────────────────────────
+  terraform:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+
+    outputs:
+      cognito_user_pool_id:  ${{ steps.tf-outputs.outputs.cognito_user_pool_id }}
+      cognito_client_id:     ${{ steps.tf-outputs.outputs.cognito_client_id }}
+      cognito_client_secret: ${{ steps.tf-outputs.outputs.cognito_client_secret }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.8.3"
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform init -backend-config=vars/backend.hcl
+
+      - name: Terraform Destroy
+        if: ${{ inputs.destroy == true }}
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform destroy -auto-approve
+        continue-on-error: true
+
+      - name: Terraform Apply
+        if: ${{ inputs.destroy != true }}
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform apply -auto-approve
+
+      - name: Extract Terraform outputs
+        if: ${{ inputs.destroy != true }}
+        id: tf-outputs
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          echo "cognito_user_pool_id=$(terraform output -raw cognito_user_pool_id)"   >> $GITHUB_OUTPUT
+          echo "cognito_client_id=$(terraform output -raw cognito_client_id)"         >> $GITHUB_OUTPUT
+          echo "cognito_client_secret=$(terraform output -raw cognito_client_secret)" >> $GITHUB_OUTPUT
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 2: Deploy Kafka — Strimzi + broker
+  # ─────────────────────────────────────────────────────────────
+  deploy-kafka:
+    name: Deploy Kafka
+    runs-on: ubuntu-latest
+    needs: terraform
+    if: ${{ inputs.destroy != true }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Wait for nodes to be Ready
+        run: kubectl wait node --all --for=condition=Ready --timeout=300s
+
+      - name: Add Strimzi Helm repo
+        run: |
+          helm repo add strimzi https://strimzi.io/charts/
+          helm repo update
+
+      - name: Deploy kafka-eks Helm chart
+        run: |
+          if helm list -n ${{ env.KAFKA_NAMESPACE }} | grep -q "^kafka-eks"; then
+            helm upgrade kafka-eks ./helm/kafka-eks \
+              --namespace ${{ env.KAFKA_NAMESPACE }} \
+              --values ./helm/kafka-eks/values-${{ inputs.environment }}.yaml \
+              --timeout 15m --wait
+          else
+            helm install kafka-eks ./helm/kafka-eks \
+              --namespace ${{ env.KAFKA_NAMESPACE }} \
+              --create-namespace \
+              --values ./helm/kafka-eks/values-${{ inputs.environment }}.yaml \
+              --timeout 15m --wait
+          fi
+
+      - name: Seed Kafka broker PVC
+        # Strimzi reconciliation gets stuck in rolling-restart loop before
+        # creating the PVC on first deploy. Seed it manually to unblock.
+        run: |
+          if ! kubectl get pvc data-0-my-kafka-combined-0 -n ${{ env.KAFKA_NAMESPACE }} &>/dev/null; then
+            echo "PVC missing — creating to unblock Strimzi..."
+            kubectl apply -f - <<EOF
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: data-0-my-kafka-combined-0
+            namespace: ${{ env.KAFKA_NAMESPACE }}
+            labels:
+              strimzi.io/cluster: my-kafka
+              strimzi.io/controller-name: my-kafka-combined
+              strimzi.io/kind: Kafka
+              strimzi.io/name: my-kafka-combined-0
+              strimzi.io/pool-name: combined
+          spec:
+            accessModes: [ReadWriteOnce]
+            resources:
+              requests:
+                storage: 10Gi
+            storageClassName: gp2
+          EOF
+          else
+            echo "PVC already exists — skipping"
+          fi
+
+      - name: Wait for Kafka cluster to be Ready
+        run: |
+          echo "Waiting for Kafka cluster to become Ready..."
+          for i in $(seq 1 40); do
+            STATUS=$(kubectl get kafka my-kafka -n ${{ env.KAFKA_NAMESPACE }} \
+              -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "")
+            echo "$(date '+%H:%M:%S') Kafka Ready: $STATUS"
+            if [ "$STATUS" = "True" ]; then
+              echo "Kafka is Ready!"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "Timed out waiting for Kafka"
+          kubectl get kafka,pods -n ${{ env.KAFKA_NAMESPACE }}
+          exit 1
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 3: Deploy Portal — FastAPI + Streamlit
+  # ─────────────────────────────────────────────────────────────
+  deploy-portal:
+    name: Deploy Portal
+    runs-on: ubuntu-latest
+    needs: [terraform, deploy-kafka]
+    if: ${{ inputs.destroy != true }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Create portal namespace
+        run: kubectl create namespace ${{ env.PORTAL_NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Create kafka-portal-secrets
+        env:
+          COGNITO_USER_POOL_ID:  ${{ needs.terraform.outputs.cognito_user_pool_id }}
+          COGNITO_CLIENT_ID:     ${{ needs.terraform.outputs.cognito_client_id }}
+          COGNITO_CLIENT_SECRET: ${{ needs.terraform.outputs.cognito_client_secret }}
+        run: |
+          kubectl create secret generic kafka-portal-secrets \
+            --from-literal=GITHUB_TOKEN="${{ secrets.DEPLOY_GITHUB_PAT }}" \
+            --from-literal=OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
+            --from-literal=COGNITO_REGION="${{ env.AWS_REGION }}" \
+            --from-literal=COGNITO_USER_POOL_ID="$COGNITO_USER_POOL_ID" \
+            --from-literal=COGNITO_CLIENT_ID="$COGNITO_CLIENT_ID" \
+            --from-literal=COGNITO_CLIENT_SECRET="$COGNITO_CLIENT_SECRET" \
+            --namespace ${{ env.PORTAL_NAMESPACE }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Set Cognito user passwords
+        env:
+          COGNITO_USER_POOL_ID: ${{ needs.terraform.outputs.cognito_user_pool_id }}
+        run: |
+          for EMAIL in "v.karthik@ltimindtree.com" "leelakrishna.yadav@ltimindtree.com"; do
+            aws cognito-idp admin-set-user-password \
+              --user-pool-id "$COGNITO_USER_POOL_ID" \
+              --username "$EMAIL" \
+              --password "Kafka@1234" \
+              --permanent \
+              --region ${{ env.AWS_REGION }} || true
+          done
+
+      - name: Deploy kafka-portal Helm chart
+        run: |
+          if helm list -n ${{ env.PORTAL_NAMESPACE }} | grep -q "^kafka-portal"; then
+            helm upgrade kafka-portal ./helm/kafka-portal \
+              --namespace ${{ env.PORTAL_NAMESPACE }} \
+              --values ./helm/kafka-portal/values-${{ inputs.environment }}.yaml \
+              --timeout 5m --wait
+          else
+            helm install kafka-portal ./helm/kafka-portal \
+              --namespace ${{ env.PORTAL_NAMESPACE }} \
+              --values ./helm/kafka-portal/values-${{ inputs.environment }}.yaml \
+              --timeout 5m --wait
+          fi
+
+  # ─────────────────────────────────────────────────────────────
+  # Job 4: Configure GitOps — ArgoCD apps + GitHub webhook
+  # ─────────────────────────────────────────────────────────────
+  configure-gitops:
+    name: Configure GitOps
+    runs-on: ubuntu-latest
+    needs: [deploy-kafka, deploy-portal]
+    if: ${{ inputs.destroy != true }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Register ArgoCD applications
+        run: |
+          kubectl apply -f - <<EOF
+          apiVersion: argoproj.io/v1alpha1
+          kind: Application
+          metadata:
+            name: kafka-eks
+            namespace: argocd
+          spec:
+            project: default
+            source:
+              repoURL: https://github.com/${{ github.repository }}
+              targetRevision: main
+              path: helm/kafka-eks
+              helm:
+                valueFiles: [values-${{ inputs.environment }}.yaml]
+            destination:
+              server: https://kubernetes.default.svc
+              namespace: ${{ env.KAFKA_NAMESPACE }}
+            syncPolicy:
+              automated:
+                prune: true
+                selfHeal: true
+              syncOptions: [CreateNamespace=true]
+          ---
+          apiVersion: argoproj.io/v1alpha1
+          kind: Application
+          metadata:
+            name: kafka-portal
+            namespace: argocd
+          spec:
+            project: default
+            source:
+              repoURL: https://github.com/${{ github.repository }}
+              targetRevision: main
+              path: helm/kafka-portal
+              helm:
+                valueFiles: [values-${{ inputs.environment }}.yaml]
+            destination:
+              server: https://kubernetes.default.svc
+              namespace: ${{ env.PORTAL_NAMESPACE }}
+            syncPolicy:
+              automated:
+                prune: true
+                selfHeal: true
+              syncOptions: [CreateNamespace=true]
+          EOF
+
+      - name: Update GitHub webhook to new ArgoCD LB
+        env:
+          GH_TOKEN: ${{ secrets.DEPLOY_GITHUB_PAT }}
+        run: |
+          # Get current ArgoCD LB hostname
+          ARGOCD_LB=$(kubectl get svc argocd-server -n argocd \
+            -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "ArgoCD LB: $ARGOCD_LB"
+
+          WEBHOOK_URL="http://${ARGOCD_LB}/api/webhook"
+
+          # Get existing webhook ID
+          HOOK_ID=$(gh api repos/${{ github.repository }}/hooks \
+            --jq '.[0].id' 2>/dev/null || echo "")
+
+          if [ -n "$HOOK_ID" ]; then
+            gh api repos/${{ github.repository }}/hooks/${HOOK_ID} \
+              --method PATCH \
+              --field config[url]="$WEBHOOK_URL" \
+              --field config[content_type]="json" \
+              --field config[secret]="6f1ef1f99dbc09de290676e4dcad3c9e48865caa" \
+              --field active=true
+            echo "Webhook updated to $WEBHOOK_URL"
+          else
+            gh api repos/${{ github.repository }}/hooks \
+              --method POST \
+              --field name="web" \
+              --field config[url]="$WEBHOOK_URL" \
+              --field config[content_type]="json" \
+              --field config[secret]="6f1ef1f99dbc09de290676e4dcad3c9e48865caa" \
+              --field active=true \
+              --field 'events[]=push'
+            echo "Webhook created at $WEBHOOK_URL"
+          fi
+
+      - name: Print deployment summary
+        run: |
+          echo "=================================================="
+          echo "Deployment Complete"
+          echo "=================================================="
+          echo ""
+          echo "Kafka UI:"
+          kubectl get svc kafka-ui-external -n ${{ env.KAFKA_NAMESPACE }} \
+            -o jsonpath='  http://{.status.loadBalancer.ingress[0].hostname}:8080{"\n"}' 2>/dev/null || true
+
+          echo "Self-Service Portal:"
+          kubectl get svc kafka-portal-ui -n ${{ env.PORTAL_NAMESPACE }} \
+            -o jsonpath='  http://{.status.loadBalancer.ingress[0].hostname}:8501{"\n"}' 2>/dev/null || true
+
+          echo "ArgoCD:"
+          kubectl get svc argocd-server -n argocd \
+            -o jsonpath='  http://{.status.loadBalancer.ingress[0].hostname}{"\n"}' 2>/dev/null || true
+
+          echo ""
+          echo "ArgoCD password:"
+          kubectl get secret argocd-initial-admin-secret -n argocd \
+            -o jsonpath='{.data.password}' | base64 -d && echo
+          echo ""
+          echo "Portal logins: v.karthik@ltimindtree.com / Kafka@1234"
+          echo "             : leelakrishna.yadav@ltimindtree.com / Kafka@1234"
