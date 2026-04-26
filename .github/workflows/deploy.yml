@@ -447,18 +447,18 @@ jobs:
           if [ -n "$HOOK_ID" ]; then
             gh api repos/${{ github.repository }}/hooks/${HOOK_ID} \
               --method PATCH \
-              --field config[url]="$WEBHOOK_URL" \
-              --field config[content_type]="json" \
-              --field config[secret]="6f1ef1f99dbc09de290676e4dcad3c9e48865caa" \
+              --field "config[url]=$WEBHOOK_URL" \
+              --field "config[content_type]=json" \
+              --field "config[secret]=6f1ef1f99dbc09de290676e4dcad3c9e48865caa" \
               --field active=true
             echo "Webhook updated to $WEBHOOK_URL"
           else
             gh api repos/${{ github.repository }}/hooks \
               --method POST \
-              --field name="web" \
-              --field config[url]="$WEBHOOK_URL" \
-              --field config[content_type]="json" \
-              --field config[secret]="6f1ef1f99dbc09de290676e4dcad3c9e48865caa" \
+              --field name=web \
+              --field "config[url]=$WEBHOOK_URL" \
+              --field "config[content_type]=json" \
+              --field "config[secret]=6f1ef1f99dbc09de290676e4dcad3c9e48865caa" \
               --field active=true \
               --field 'events[]=push'
             echo "Webhook created at $WEBHOOK_URL"
