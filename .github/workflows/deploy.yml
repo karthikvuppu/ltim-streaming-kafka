@@ -122,18 +122,22 @@ jobs:
           helm repo add strimzi https://strimzi.io/charts/
           helm repo update
 
-      - name: Adopt pre-existing gp2 StorageClass into Helm release
-        # EKS may ship a default gp2 StorageClass; stamp Helm metadata so
-        # the kafka-eks chart can adopt it instead of failing with
-        # "exists and cannot be imported into the current release".
+      - name: Remove default gp2 StorageClass if not Helm-managed
+        # EKS ships a default gp2 SC with the legacy in-tree provisioner.
+        # The kafka-eks chart needs ebs.csi.aws.com, but provisioner is
+        # immutable on existing SCs. Delete it so the chart can recreate
+        # it with the right settings. Skipped if already Helm-managed
+        # (happens on subsequent deploys).
         run: |
           if kubectl get storageclass gp2 &>/dev/null; then
-            kubectl annotate storageclass gp2 \
-              meta.helm.sh/release-name=kafka-eks --overwrite
-            kubectl annotate storageclass gp2 \
-              meta.helm.sh/release-namespace=${{ env.KAFKA_NAMESPACE }} --overwrite
-            kubectl label storageclass gp2 \
-              app.kubernetes.io/managed-by=Helm --overwrite
+            OWNER=$(kubectl get storageclass gp2 \
+              -o jsonpath='{.metadata.labels.app\.kubernetes\.io/managed-by}')
+            if [ "$OWNER" != "Helm" ]; then
+              echo "Deleting default gp2 SC (not Helm-managed)"
+              kubectl delete storageclass gp2
+            else
+              echo "gp2 SC is already Helm-managed — leaving it"
+            fi
           fi
 
       - name: Deploy kafka-eks Helm chart
