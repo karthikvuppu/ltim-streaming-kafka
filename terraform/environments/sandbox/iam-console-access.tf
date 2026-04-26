@@ -59,14 +59,8 @@ resource "aws_iam_policy" "eks_console_access" {
   tags = local.common_tags
 }
 
-# Attach the policy to terraformrole
-resource "aws_iam_role_policy_attachment" "terraformrole_console_access" {
-  role       = "terraformrole"
-  policy_arn = aws_iam_policy.eks_console_access.arn
-}
-
-# Attach the policy to terraformuser
-resource "aws_iam_user_policy_attachment" "terraformuser_console_access" {
-  user       = "terraformuser"
+# Attach the policy to the IAM user driving deploys (account 058006294933)
+resource "aws_iam_user_policy_attachment" "test_console_access" {
+  user       = "test"
   policy_arn = aws_iam_policy.eks_console_access.arn
 }
