@@ -142,6 +142,17 @@ jobs:
 
       - name: Deploy kafka-eks Helm chart
         run: |
+          # Clean up any previous failed/partial install so reruns succeed
+          STATUS=$(helm status kafka-eks -n ${{ env.KAFKA_NAMESPACE }} \
+            -o json 2>/dev/null | python3 -c \
+            "import json,sys; print(json.load(sys.stdin).get('info',{}).get('status','missing'))" \
+            2>/dev/null || echo "missing")
+          echo "Current kafka-eks release status: $STATUS"
+          if [ "$STATUS" = "failed" ] || [ "$STATUS" = "pending-install" ] || [ "$STATUS" = "pending-upgrade" ]; then
+            echo "Uninstalling previous failed release"
+            helm uninstall kafka-eks -n ${{ env.KAFKA_NAMESPACE }} --wait || true
+          fi
+
           if helm list -n ${{ env.KAFKA_NAMESPACE }} | grep -q "^kafka-eks"; then
             helm upgrade kafka-eks ./helm/kafka-eks \
               --namespace ${{ env.KAFKA_NAMESPACE }} \
