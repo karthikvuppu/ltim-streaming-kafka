@@ -184,12 +184,52 @@ jobs:
           exit 1
 
   # ─────────────────────────────────────────────────────────────
+  # Job 2b: Build & push portal images to ECR (created by terraform)
+  # ─────────────────────────────────────────────────────────────
+  build-images:
+    name: Build Portal Images
+    runs-on: ubuntu-latest
+    needs: terraform
+    if: ${{ inputs.destroy != true }}
+
+    env:
+      API_REPO: 058006294933.dkr.ecr.eu-north-1.amazonaws.com/kafka-portal-api
+      UI_REPO:  058006294933.dkr.ecr.eu-north-1.amazonaws.com/kafka-portal-ui
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push FastAPI image
+        run: |
+          TAG=${GITHUB_SHA::8}
+          docker build -t $API_REPO:$TAG -t $API_REPO:latest portal/app
+          docker push $API_REPO:$TAG
+          docker push $API_REPO:latest
+
+      - name: Build and push Streamlit image
+        run: |
+          TAG=${GITHUB_SHA::8}
+          docker build -t $UI_REPO:$TAG -t $UI_REPO:latest portal/ui
+          docker push $UI_REPO:$TAG
+          docker push $UI_REPO:latest
+
+  # ─────────────────────────────────────────────────────────────
   # Job 3: Deploy Portal — FastAPI + Streamlit
   # ─────────────────────────────────────────────────────────────
   deploy-portal:
     name: Deploy Portal
     runs-on: ubuntu-latest
-    needs: [terraform, deploy-kafka]
+    needs: [terraform, deploy-kafka, build-images]
     if: ${{ inputs.destroy != true }}
 
     steps:

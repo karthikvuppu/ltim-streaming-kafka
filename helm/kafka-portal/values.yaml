@@ -3,7 +3,7 @@
 fastapi:
   enabled: true
   image:
-    repository: "292481751409.dkr.ecr.eu-north-1.amazonaws.com/kafka-portal-api"
+    repository: "058006294933.dkr.ecr.eu-north-1.amazonaws.com/kafka-portal-api"
     tag: "latest"
     pullPolicy: Always
   replicas: 1
@@ -40,7 +40,7 @@ fastapi:
 streamlit:
   enabled: true
   image:
-    repository: "292481751409.dkr.ecr.eu-north-1.amazonaws.com/kafka-portal-ui"
+    repository: "058006294933.dkr.ecr.eu-north-1.amazonaws.com/kafka-portal-ui"
     tag: "latest"
     pullPolicy: Always
   replicas: 1

@@ -19,9 +19,9 @@ on:
 
 env:
   AWS_REGION:    eu-north-1
-  AWS_ACCOUNT:   292481751409
-  API_REPO:      292481751409.dkr.ecr.eu-north-1.amazonaws.com/kafka-portal-api
-  UI_REPO:       292481751409.dkr.ecr.eu-north-1.amazonaws.com/kafka-portal-ui
+  AWS_ACCOUNT:   058006294933
+  API_REPO:      058006294933.dkr.ecr.eu-north-1.amazonaws.com/kafka-portal-api
+  UI_REPO:       058006294933.dkr.ecr.eu-north-1.amazonaws.com/kafka-portal-ui
 
 jobs:
   build-api:

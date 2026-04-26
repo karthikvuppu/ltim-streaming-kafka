@@ -133,7 +133,7 @@ glueSchemaRegistry:
   compatibility: BACKWARD
   autoRegistration: true
   serviceAccount:
-    roleArn: "arn:aws:iam::292481751409:role/ltim-sandbox-kafka-schema-registry-role"
+    roleArn: "arn:aws:iam::058006294933:role/ltim-sandbox-kafka-schema-registry-role"
 
 # Enable example topics for sandbox testing
 topics:

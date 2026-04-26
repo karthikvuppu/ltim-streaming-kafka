@@ -6,7 +6,7 @@ vpc_cidr             = "10.0.0.0/16"
 private_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
 public_subnet_cidrs  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
 enable_nat_gateway   = true
-single_nat_gateway   = false
+single_nat_gateway   = true
 
 # EKS Cluster Configuration
 cluster_version                      = "1.32"
@@ -67,28 +67,16 @@ common_tags = {
 # These users and roles will have full admin access to the EKS cluster
 aws_auth_users = [
   {
-    userarn  = "arn:aws:iam::292481751409:user/terraformuser"
-    username = "terraformuser"
-    groups   = ["system:masters"]
-  },
-  {
-    userarn  = "arn:aws:iam::292481751409:user/karthikvuppu"
-    username = "karthikvuppu"
+    userarn  = "arn:aws:iam::058006294933:user/test"
+    username = "test"
     groups   = ["system:masters"]
   },
   # WARNING: Root account mapping is NOT RECOMMENDED for security reasons
-  # This may not work as expected for console access
   {
-    userarn  = "arn:aws:iam::292481751409:root"
+    userarn  = "arn:aws:iam::058006294933:root"
     username = "root-account"
     groups   = ["system:masters"]
   }
 ]
 
-aws_auth_roles = [
-  {
-    rolearn  = "arn:aws:iam::292481751409:role/terraformrole"
-    username = "terraformrole"
-    groups   = ["system:masters"]
-  }
-]
+aws_auth_roles = []
