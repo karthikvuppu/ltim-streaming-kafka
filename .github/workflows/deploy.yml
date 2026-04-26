@@ -122,6 +122,20 @@ jobs:
           helm repo add strimzi https://strimzi.io/charts/
           helm repo update
 
+      - name: Adopt pre-existing gp2 StorageClass into Helm release
+        # EKS may ship a default gp2 StorageClass; stamp Helm metadata so
+        # the kafka-eks chart can adopt it instead of failing with
+        # "exists and cannot be imported into the current release".
+        run: |
+          if kubectl get storageclass gp2 &>/dev/null; then
+            kubectl annotate storageclass gp2 \
+              meta.helm.sh/release-name=kafka-eks --overwrite
+            kubectl annotate storageclass gp2 \
+              meta.helm.sh/release-namespace=${{ env.KAFKA_NAMESPACE }} --overwrite
+            kubectl label storageclass gp2 \
+              app.kubernetes.io/managed-by=Helm --overwrite
+          fi
+
       - name: Deploy kafka-eks Helm chart
         run: |
           if helm list -n ${{ env.KAFKA_NAMESPACE }} | grep -q "^kafka-eks"; then
