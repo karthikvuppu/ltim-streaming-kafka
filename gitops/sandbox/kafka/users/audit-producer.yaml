@@ -13,7 +13,7 @@ spec:
     acls:
     - resource:
         type: topic
-        name: audit.user.processed
+        name: audit.user.approved
         patternType: literal
       operations:
       - Write
