@@ -406,8 +406,6 @@ jobs:
               server: https://kubernetes.default.svc
               namespace: ${{ env.KAFKA_NAMESPACE }}
             syncPolicy:
-              automated:
-                selfHeal: true
               syncOptions: [CreateNamespace=true]
           ---
           apiVersion: argoproj.io/v1alpha1
