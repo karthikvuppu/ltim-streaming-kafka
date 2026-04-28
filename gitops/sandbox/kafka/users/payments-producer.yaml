@@ -13,7 +13,7 @@ spec:
     acls:
     - resource:
         type: topic
-        name: payments.karthik.approved
+        name: payments.transaction2.updated
         patternType: literal
       operations:
       - Write
