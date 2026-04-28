@@ -400,10 +400,14 @@ jobs:
               repoURL: https://github.com/${{ github.repository }}
               targetRevision: main
               path: gitops/${{ inputs.environment }}/kafka
+              directory:
+                recurse: true
             destination:
               server: https://kubernetes.default.svc
               namespace: ${{ env.KAFKA_NAMESPACE }}
             syncPolicy:
+              automated:
+                selfHeal: true
               syncOptions: [CreateNamespace=true]
           ---
           apiVersion: argoproj.io/v1alpha1
