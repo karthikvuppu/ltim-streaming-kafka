@@ -86,6 +86,17 @@ resource "helm_release" "argocd" {
     value = "6f1ef1f99dbc09de290676e4dcad3c9e48865caa"
   }
 
+  # Annotation-based resource tracking — Strimzi inherits the Kafka CR's
+  # labels (incl. argocd.argoproj.io/instance) onto its dynamically-created
+  # PVCs. With default label tracking, ArgoCD claims ownership of those
+  # PVCs and tries to prune them on sync, which would destroy Kafka data.
+  # Annotation tracking avoids this — Strimzi does not propagate
+  # annotations onto PVCs.
+  set {
+    name  = "configs.cm.application\\.resourceTrackingMethod"
+    value = "annotation"
+  }
+
   depends_on = [
     kubernetes_namespace.argocd,
     module.eks,
