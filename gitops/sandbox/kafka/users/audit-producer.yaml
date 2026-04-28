@@ -13,7 +13,7 @@ spec:
     acls:
     - resource:
         type: topic
-        name: audit.transaction2.created
+        name: audit.transaction0.created
         patternType: literal
       operations:
       - Write
