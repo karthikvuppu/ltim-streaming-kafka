@@ -13,7 +13,7 @@ spec:
     acls:
     - resource:
         type: topic
-        name: payments.transaction2.updated
+        name: payments.rollback.failed
         patternType: literal
       operations:
       - Write
