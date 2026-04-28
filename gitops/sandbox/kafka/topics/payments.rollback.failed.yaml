@@ -1,0 +1,17 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: payments.rollback.failed
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: my-kafka
+  annotations:
+    requested-by: leelakrishna.yadav@ltimindtree.com
+    description: create topic for rollback transactions which got failed
+spec:
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 172800000
+    cleanup.policy: delete
+    min.insync.replicas: '1'
