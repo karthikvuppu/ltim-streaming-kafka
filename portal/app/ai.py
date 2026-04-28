@@ -15,11 +15,13 @@ KAFKA_CLUSTER_NAME = os.environ.get("KAFKA_CLUSTER_NAME", "my-kafka")
 _client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 
-def _invoke(model_id: str, prompt: str) -> str:
+def _invoke(model_id: str, prompt: str, phase: str = "generate") -> str:
     response = _client.chat.completions.create(
         model=model_id,
         temperature=0,
         max_tokens=2048,
+        store=True,
+        metadata={"app": "kafka-portal", "env": "sandbox", "phase": phase},
         messages=[{"role": "user", "content": prompt}],
     )
     return response.choices[0].message.content.strip()
@@ -78,7 +80,7 @@ spec:
 Return ONLY the two YAML documents separated by ---
 No markdown code blocks. No explanation. No extra text."""
 
-    raw = _invoke(GENERATE_MODEL, prompt)
+    raw = _invoke(GENERATE_MODEL, prompt, phase="generate")
     raw = raw.replace("```yaml", "").replace("```", "").strip()
 
     review_prompt = f"""Review these two Kubernetes YAML manifests for Strimzi Kafka.
@@ -97,7 +99,7 @@ Reply with only one of:
 ---
 {raw}"""
 
-    verdict = _invoke(REVIEW_MODEL, review_prompt)
+    verdict = _invoke(REVIEW_MODEL, review_prompt, phase="review")
     if verdict.upper().startswith("INVALID"):
         raise ValueError(f"Self-review failed: {verdict}")
 
