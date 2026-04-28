@@ -1,0 +1,17 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: engineering.leele.created
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: my-kafka
+  annotations:
+    requested-by: v.karthik@ltimindtree.com
+    description: create topioc
+spec:
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 172800000
+    cleanup.policy: delete
+    min.insync.replicas: '1'
