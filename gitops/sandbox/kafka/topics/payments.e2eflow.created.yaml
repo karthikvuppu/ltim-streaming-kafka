@@ -1,0 +1,18 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: payments.e2eflow.created
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: my-kafka
+  annotations:
+    requested-by: v.karthik@ltimindtree.com
+    description: End-to-end claude test exercising OPA, OpenAI YAML, GitHub PR, auto-merge,
+      ArgoCD, Strimzi
+spec:
+  partitions: 2
+  replicas: 1
+  config:
+    retention.ms: 172800000
+    cleanup.policy: delete
+    min.insync.replicas: '1'
