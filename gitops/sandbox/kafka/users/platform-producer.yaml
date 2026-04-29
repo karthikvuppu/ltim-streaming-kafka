@@ -13,7 +13,7 @@ spec:
     acls:
     - resource:
         type: topic
-        name: platform.karthikdemo1.created
+        name: platform.demoapril.updated
         patternType: literal
       operations:
       - Write
